@@ -71,7 +71,7 @@ management:
     web:
       exposure:
         include: health, info
-  health:
-    components:
-      circuitbreaker:
-        enabled: true
+#  health:
+#    components:
+#      circuitbreaker:
+#        enabled: true
