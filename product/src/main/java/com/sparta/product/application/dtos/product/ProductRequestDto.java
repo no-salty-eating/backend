@@ -2,23 +2,15 @@ package com.sparta.product.application.dtos.product;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import com.sparta.product.application.dtos.productCategory.ProductCategoryRequestDto;
 
-import java.math.BigInteger;
+import java.util.List;
 
-@Getter
-@Builder
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ProductRequestDto {
-
-    @JsonProperty("category_id")
-    private Long categoryId;
-
-    @JsonProperty("product_name")
-    private String name;
-
-    private BigInteger price;
-    private BigInteger stock;
+public record ProductRequestDto(@JsonProperty("product_category_list") List<ProductCategoryRequestDto> productCategoryRequestDto,
+                                @JsonProperty("user_id") Long userId,
+                                @JsonProperty("product_name") String name,
+                                Integer price,
+                                Integer stock) {
 }

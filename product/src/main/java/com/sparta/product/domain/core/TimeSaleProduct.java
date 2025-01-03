@@ -3,13 +3,15 @@ package com.sparta.product.domain.core;
 import com.sparta.product.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
-@Builder
+@DynamicUpdate
+@Table(name = "TB_TIMESALE_PRODUCT")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TimeSaleProduct extends BaseEntity {
@@ -19,12 +21,12 @@ public class TimeSaleProduct extends BaseEntity {
     private Long id;
 
     @Column(name = "discount_rate")
-    private int discountRate;
+    private Integer discountRate;
 
     @Column(name = "discount_price")
-    private int discountPrice;
+    private Integer discountPrice;
 
-    private int quantity;
+    private Integer quantity;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "timesale_start_time")
@@ -35,7 +37,7 @@ public class TimeSaleProduct extends BaseEntity {
     private LocalDateTime timeSaleEndTime;
 
     @Column(name = "is_sold_out")
-    private boolean isSoldOut;
+    private Boolean isSoldOut;
 
     @OneToMany(mappedBy = "timeSaleProduct", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<TimeSaleSoldOut> timeSaleSoldOutList;
@@ -43,4 +45,13 @@ public class TimeSaleProduct extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
+
+    public void addTimeSaleSoldOutList(TimeSaleSoldOut timeSaleSoldOut) {
+        timeSaleSoldOutList.add(timeSaleSoldOut);
+        timeSaleSoldOut.updateTimeSaleProduct(this);
+    }
+
+    public void updateProduct(Product product) {
+        this.product = product;
+    }
 }
