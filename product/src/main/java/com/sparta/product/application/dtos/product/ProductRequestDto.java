@@ -10,7 +10,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ProductRequestDto(@JsonProperty("product_category_list") List<ProductCategoryRequestDto> productCategoryRequestDto,
                                 @JsonProperty("user_id") Long userId,
-                                @JsonProperty("product_name") String name,
+                                @JsonProperty("product_name") String productName,
                                 Integer price,
                                 Integer stock) {
 }

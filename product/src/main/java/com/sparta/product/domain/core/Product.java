@@ -43,7 +43,7 @@ public class Product extends BaseEntity {
 
     public static Product createFrom(ProductRequestDto productRequestDto) {
         return new Product(
-                productRequestDto.name(),
+                productRequestDto.productName(),
                 productRequestDto.price(),
                 productRequestDto.stock(),
                 new ArrayList<>()
