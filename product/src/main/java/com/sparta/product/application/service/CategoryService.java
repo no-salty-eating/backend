@@ -9,6 +9,7 @@ import com.sparta.product.domain.core.Category;
 import com.sparta.product.domain.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +26,7 @@ public class CategoryService {
         checkIsExistCategory(categoryRequestDto);
 
         categoryRepository.save(Category.createFrom(categoryRequestDto));
-        return new Response<>(201, "카테고리 등록 완료", null);
+        return new Response<>(HttpStatus.CREATED.value(), "카테고리 등록 완료", null);
     }
 
     private void checkIsExistCategory(CategoryRequestDto categoryRequestDto) {
