@@ -1,16 +1,13 @@
-package com.sparta.product.application.exception;
+package com.sparta.product.application.exception.product;
 
+import com.sparta.product.application.exception.common.Error;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Getter
+@RequiredArgsConstructor
 public class ProductException extends RuntimeException {
-
     private final Error error;
     private final HttpStatus httpStatus;
-
-    public ProductException(Error error, HttpStatus httpStatus) {
-        this.error = error;
-        this.httpStatus = httpStatus;
-    }
 }

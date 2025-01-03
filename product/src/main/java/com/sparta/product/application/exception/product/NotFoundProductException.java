@@ -1,5 +1,6 @@
-package com.sparta.product.application.exception;
+package com.sparta.product.application.exception.product;
 
+import com.sparta.product.application.exception.common.Error;
 import org.springframework.http.HttpStatus;
 
 public class NotFoundProductException extends ProductException{
