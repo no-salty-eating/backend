@@ -1,4 +1,4 @@
-package com.sparta.product.presentation.exception;
+package com.sparta.product.application.exception.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +21,7 @@ public enum Error {
     NOT_FOUND_PRODUCT(2000, "해당 상품을 찾을 수 없습니다."),
     IS_NOT_SALE_PRODUCT(2001, "판매 중인 상품이 아닙니다."),
     NOT_CORRECT_CATEGORY(2002, "정확한 카테고리를 입력해주세요."),
+    ALREADY_EXIST_CATEGORY(2003, "이미 존재하는 카테고리입니다."),
 
     NOT_FOUND_ORDER(3000, "해당 주문을 찾을 수 없습니다."),
     OUT_OF_STOCK(3001, "재고가 부족합니다."),
@@ -29,6 +30,7 @@ public enum Error {
     ORDER_BEEN_CANCELED(3004, "주문이 취소되었습니다."),
     BEFORE_PURCHASE_TIME(3005, "구매 가능 시간이 아닙니다."),
 
+    FORBIDDEN(9998, "접근 권한이 없습니다."),
     INTERNAL_SERVER_ERROR(9999, "서버 오류입니다."),
     CIRCUIT_BREAKER_OPEN(10000, "이용량 증가로 현재 서비스가 불가능합니다."),
     SERVER_TIMEOUT(10001, "응답 시간을 초과하였습니다.");

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Builder
+@Table(name = "TB_TIMESALE_SOLDOUT")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TimeSaleSoldOut extends BaseEntity {
@@ -24,4 +24,8 @@ public class TimeSaleSoldOut extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "timesale_id")
     private TimeSaleProduct timeSaleProduct;
+
+    public void updateTimeSaleProduct(TimeSaleProduct timeSaleProduct) {
+        this.timeSaleProduct = timeSaleProduct;
+    }
 }

@@ -6,8 +6,7 @@ import lombok.*;
 
 @Entity
 @Getter
-@Table(name = "product_category")
-@Builder
+@Table(name = "TB_PRODUCT_CATEGORY")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProductCategory extends BaseEntity {
@@ -23,4 +22,21 @@ public class ProductCategory extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    public void updateProduct(Product product) {
+        this.product = product;
+    }
+
+    public void updateCategory(Category category) {
+        this.category = category;
+    }
+
+    public static ProductCategory createOf(Product product, Category category) {
+        return new ProductCategory(product, category);
+    }
+
+    private ProductCategory(Product product, Category category) {
+        this.product = product;
+        this.category = category;
+    }
 }
