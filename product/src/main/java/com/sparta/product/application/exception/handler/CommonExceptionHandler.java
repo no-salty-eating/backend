@@ -1,8 +1,8 @@
-package com.sparta.product.presentation.exception.handler;
+package com.sparta.product.application.exception.handler;
 
 import com.sparta.product.application.dtos.Response;
-import com.sparta.product.presentation.exception.Error;
-import com.sparta.product.presentation.exception.CustomException;
+import com.sparta.product.application.exception.Error;
+import com.sparta.product.application.exception.ProductException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice(basePackages = {"좌표"})
 public class CommonExceptionHandler {
 
-    @ExceptionHandler(CustomException.class)
-    public Response<Void> MemberExceptionHandler(CustomException e) {
+    @ExceptionHandler(ProductException.class)
+    public Response<Void> ProductExceptionHandler(ProductException e) {
 
         Error error = e.getError();
 
