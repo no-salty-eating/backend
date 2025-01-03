@@ -1,0 +1,79 @@
+server:
+  port: 19094
+
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: refresh
+#  zipkin:
+#    tracing:
+#      endpoint: ${ZIPKIN_ENDPOINT}
+#  tracing:
+#    sampling:
+#      probability: 1.0
+
+spring:
+  output:
+    ansi:
+      enabled: always
+  r2dbc:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+#  sql:
+#    init:
+#      mode: always
+#      schema-locations: classpath:db-init/schema.sql
+#  data:
+#    redis:
+#      host: ${REDIS_HOST}
+#      port: ${REDIS_PORT}
+  config:
+    import: classpath:application-key.yml
+
+---
+
+springdoc:
+  use-fqn: true
+  cache:
+    disabled: true
+  api-docs:
+    path: /api-docs
+    groups:
+      enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    groups-order: asc
+    display-request-duration: true
+    doc-expansion: none
+    disable-swagger-default-url: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+---
+
+logging:
+  level:
+    com.study: debug
+    org.springframework.r2dbc.core: debug
+    org.springframework.r2dbc.connection.init: debug
+    org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler: off
+    org.springframework.web.HttpLogging: off
+  pattern:
+    console: "%d{HH:mm:ss.SSS}|%highlight(%-5level)|%X{txid:-}|%green(%t)|%blue(\\(%F:%L\\))|%msg%n"
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+  r2dbc:
+    url: r2dbc:pool:h2:mem://localhost/payment
+  sql:
+    init:
+      mode: always
+      data-locations: ""
