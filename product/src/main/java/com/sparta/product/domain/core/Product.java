@@ -1,6 +1,7 @@
 package com.sparta.product.domain.core;
 
 import com.sparta.product.application.dtos.product.ProductRequestDto;
+import com.sparta.product.application.dtos.product.ProductUpdateRequestDto;
 import com.sparta.product.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -55,5 +56,27 @@ public class Product extends BaseEntity {
         this.price = price;
         this.stock = stock;
         this.productCategoryList = productCategoryList;
+    }
+
+    public void updateFrom(ProductUpdateRequestDto productUpdateRequestDto) {
+        if (productUpdateRequestDto.productName() != null) {
+            name = productUpdateRequestDto.productName();
+        }
+
+        if (productUpdateRequestDto.price() != null) {
+            price = productUpdateRequestDto.price();
+        }
+
+        if (productUpdateRequestDto.stock() != null) {
+            stock = productUpdateRequestDto.stock();
+        }
+
+        if (productUpdateRequestDto.isPublic() != null) {
+            if (productUpdateRequestDto.isPublic()) {
+                super.toPublic();
+            } else {
+                super.toPrivate();
+            }
+        }
     }
 }

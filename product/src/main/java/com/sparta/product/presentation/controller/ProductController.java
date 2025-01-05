@@ -3,6 +3,7 @@ package com.sparta.product.presentation.controller;
 import com.sparta.product.application.dtos.Response;
 import com.sparta.product.application.dtos.product.ProductRequestDto;
 import com.sparta.product.application.dtos.product.ProductResponseDto;
+import com.sparta.product.application.dtos.product.ProductUpdateRequestDto;
 import com.sparta.product.application.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +28,13 @@ public class ProductController {
                                                    @RequestHeader(name = "X-UserId", required = false) String userId,
                                                    @RequestHeader(name = "X-Role") String role) {
         return productService.getProduct(productId, role);
+    }
+
+    @PatchMapping("/{productId}")
+    public Response<Void> updateProduct(@PathVariable Long productId,
+                                        @RequestBody @Valid ProductUpdateRequestDto productUpdateRequestDto,
+                                        @RequestHeader(name = "X-UserId", required = false) String userId,
+                                        @RequestHeader(name = "X-Role") String role) {
+        return productService.updateProduct(productId, role, productUpdateRequestDto);
     }
 }

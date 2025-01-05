@@ -3,6 +3,7 @@ package com.sparta.product.application.service;
 import com.sparta.product.application.dtos.Response;
 import com.sparta.product.application.dtos.product.ProductRequestDto;
 import com.sparta.product.application.dtos.product.ProductResponseDto;
+import com.sparta.product.application.dtos.product.ProductUpdateRequestDto;
 import com.sparta.product.application.exception.category.NotFoundCategoryException;
 import com.sparta.product.application.exception.common.ForbiddenRoleException;
 import com.sparta.product.application.exception.product.NotFoundProductException;
@@ -39,7 +40,7 @@ public class ProductService {
         List<Long> categories = productRequestDto.productCategoryList();
 
         // 쿼리 목록 리스트로 한번에 가져오기
-        Map<Long, Category> categoryMap = categoryRepository.findAllById(categories)
+        Map<Long, Category> categoryMap = categoryRepository.findAllByIdInAndIsDeletedFalse(categories)
                 .stream()
                 .collect(Collectors.toMap(Category::getId,
                         category -> category));
@@ -59,13 +60,43 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Response<ProductResponseDto> getProduct(Long productId, String role) {
-        Product product = productRepository.findById(productId).orElseThrow(NotFoundProductException::new);
 
         return new Response<>(HttpStatus.OK.value(),
                 "OK",
                 role.equals(UserRoleEnum.MASTER.toString()) ?
-                        ProductResponseDto.forMasterFrom(product)
-                        : ProductResponseDto.forUserOrSellerFrom(product));
+                        ProductResponseDto.forMasterFrom(productRepository.findById(productId).orElseThrow(NotFoundProductException::new))
+                        : ProductResponseDto.forUserOrSellerFrom(productRepository.findByIdAndIsDeletedFalseAndIsPublicTrue(productId).orElseThrow(NotFoundProductException::new)));
+    }
+
+    // TODO : 수정 시 timesale 상품도 수정되도록 변경 필요
+    @Transactional
+    public Response<Void> updateProduct(Long productId, String role, ProductUpdateRequestDto productUpdateRequestDto) {
+        checkIsSellerOrMaster(role);
+
+        Product product = productRepository.findByIdAndIsDeletedFalse(productId).orElseThrow(NotFoundProductException::new);
+
+        if (productUpdateRequestDto.productCategoryList() != null && !productUpdateRequestDto.productCategoryList().isEmpty()) {
+            List<Long> categories = productUpdateRequestDto.productCategoryList();
+
+            Map<Long, Category> categoryMap = categoryRepository.findAllByIdInAndIsDeletedFalse(categories)
+                    .stream()
+                    .collect(Collectors.toMap(Category::getId,
+                            category -> category));
+
+            product.getProductCategoryList().clear();
+
+            for (Long categoryId : categories) {
+                Category findCategory = categoryMap.get(categoryId);
+                if (findCategory == null) {
+                    throw new NotFoundCategoryException();
+                }
+                ProductCategory productCategory = ProductCategory.createOf(product, findCategory);
+                product.addProductCategoryList(productCategory);
+            }
+        }
+        product.updateFrom(productUpdateRequestDto);
+
+        return new Response<>(HttpStatus.OK.value(), "수정 완료.", null);
     }
 
     private void checkIsSellerOrMaster(String role) {
