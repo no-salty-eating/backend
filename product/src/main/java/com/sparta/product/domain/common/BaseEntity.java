@@ -27,17 +27,13 @@ public abstract class BaseEntity {
     private boolean isDeleted = false;
 
     @Column(name = "is_public")
-    private boolean isPublic = true;
+    private boolean isPublic;
 
-    public void softDelete() {
-        this.isDeleted = true;
+    public void updateIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 
-    public void toPrivate() {
-        this.isPublic = false;
-    }
-
-    public void toPublic() {
-        this.isPublic = true;
+    public void updateIsPublic(Boolean isPublic) {
+        this.isPublic = isPublic;
     }
 }

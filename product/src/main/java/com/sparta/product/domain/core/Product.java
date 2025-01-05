@@ -47,15 +47,17 @@ public class Product extends BaseEntity {
                 productRequestDto.productName(),
                 productRequestDto.price(),
                 productRequestDto.stock(),
-                new ArrayList<>()
+                new ArrayList<>(),
+                productRequestDto.isPublic()
         );
     }
 
-    public Product(String name, Integer price, Integer stock, List<ProductCategory> productCategoryList) {
+    public Product(String name, Integer price, Integer stock, List<ProductCategory> productCategoryList, Boolean isPublic) {
         this.name = name;
         this.price = price;
         this.stock = stock;
         this.productCategoryList = productCategoryList;
+        super.updateIsPublic(isPublic);
     }
 
     public void updateFrom(ProductUpdateRequestDto productUpdateRequestDto) {
@@ -72,11 +74,7 @@ public class Product extends BaseEntity {
         }
 
         if (productUpdateRequestDto.isPublic() != null) {
-            if (productUpdateRequestDto.isPublic()) {
-                super.toPublic();
-            } else {
-                super.toPrivate();
-            }
+            super.updateIsPublic(productUpdateRequestDto.isPublic());
         }
     }
 }
