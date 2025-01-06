@@ -1,0 +1,10 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  r2dbc:
+    url: r2dbc:pool:h2:mem://localhost/order
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db-init/schema.sql
