@@ -40,19 +40,8 @@ public class ProductService {
         List<Long> categories = productRequestDto.productCategoryList();
 
         // 쿼리 목록 리스트로 한번에 가져오기
-        Map<Long, Category> categoryMap = categoryRepository.findAllByIdInAndIsDeletedFalse(categories)
-                .stream()
-                .collect(Collectors.toMap(Category::getId,
-                        category -> category));
-
-        for (Long categoryId : categories) {
-            Category findCategory = categoryMap.get(categoryId);
-            if (findCategory == null) {
-                throw new NotFoundCategoryException();
-            }
-            ProductCategory productCategory = ProductCategory.createOf(product, findCategory);
-            product.addProductCategoryList(productCategory);
-        }
+        Map<Long, Category> categoryMap = getCategoryMap(categories);
+        product.updateCategories(categories, categoryMap);
 
         productRepository.save(product);
         return new Response<>(HttpStatus.CREATED.value(), "상품 등록 완료", null);
@@ -60,7 +49,6 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Response<ProductResponseDto> getProduct(Long productId, String role) {
-
         return new Response<>(HttpStatus.OK.value(),
                 "OK",
                 role.equals(UserRoleEnum.MASTER.toString()) ?
@@ -77,21 +65,8 @@ public class ProductService {
         if (productUpdateRequestDto.productCategoryList() != null && !productUpdateRequestDto.productCategoryList().isEmpty()) {
             List<Long> categories = productUpdateRequestDto.productCategoryList();
 
-            Map<Long, Category> categoryMap = categoryRepository.findAllByIdInAndIsDeletedFalse(categories)
-                    .stream()
-                    .collect(Collectors.toMap(Category::getId,
-                            category -> category));
-
-            product.getProductCategoryList().clear();
-
-            for (Long categoryId : categories) {
-                Category findCategory = categoryMap.get(categoryId);
-                if (findCategory == null) {
-                    throw new NotFoundCategoryException();
-                }
-                ProductCategory productCategory = ProductCategory.createOf(product, findCategory);
-                product.addProductCategoryList(productCategory);
-            }
+            Map<Long, Category> categoryMap = getCategoryMap(categories);
+            product.updateCategories(categories, categoryMap);
         }
         product.updateFrom(productUpdateRequestDto);
 
@@ -107,6 +82,13 @@ public class ProductService {
         product.updateIsDeleted(true);
 
         return new Response<>(HttpStatus.OK.value(), "삭제 완료.", null);
+    }
+
+    private Map<Long, Category> getCategoryMap(List<Long> categories) {
+        return categoryRepository.findAllByIdInAndIsDeletedFalse(categories)
+                .stream()
+                .collect(Collectors.toMap(Category::getId,
+                        category -> category));
     }
 
     private void checkIsSellerOrMaster(String role) {

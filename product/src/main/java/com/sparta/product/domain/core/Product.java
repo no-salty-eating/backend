@@ -2,6 +2,7 @@ package com.sparta.product.domain.core;
 
 import com.sparta.product.application.dtos.product.ProductRequestDto;
 import com.sparta.product.application.dtos.product.ProductUpdateRequestDto;
+import com.sparta.product.application.exception.category.NotFoundCategoryException;
 import com.sparta.product.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Getter
@@ -75,6 +77,19 @@ public class Product extends BaseEntity {
 
         if (productUpdateRequestDto.isPublic() != null) {
             super.updateIsPublic(productUpdateRequestDto.isPublic());
+        }
+    }
+
+    public void updateCategories(List<Long> categoryIds, Map<Long, Category> categoryMap) {
+        this.productCategoryList.clear();
+
+        for (Long categoryId : categoryIds) {
+            Category findCategory = categoryMap.get(categoryId);
+            if (findCategory == null) {
+                throw new NotFoundCategoryException();
+            }
+            ProductCategory productCategory = ProductCategory.createOf(this, findCategory);
+            this.addProductCategoryList(productCategory);
         }
     }
 }
