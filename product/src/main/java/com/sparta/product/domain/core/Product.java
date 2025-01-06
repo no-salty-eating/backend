@@ -54,7 +54,7 @@ public class Product extends BaseEntity {
         );
     }
 
-    public Product(String name, Integer price, Integer stock, List<ProductCategory> productCategoryList, Boolean isPublic) {
+    private Product(String name, Integer price, Integer stock, List<ProductCategory> productCategoryList, Boolean isPublic) {
         this.name = name;
         this.price = price;
         this.stock = stock;

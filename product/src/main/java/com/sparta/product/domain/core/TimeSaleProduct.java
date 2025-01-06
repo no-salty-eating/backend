@@ -1,5 +1,6 @@
 package com.sparta.product.domain.core;
 
+import com.sparta.product.application.dtos.timesale.TimeSaleProductRequestDto;
 import com.sparta.product.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,7 +38,7 @@ public class TimeSaleProduct extends BaseEntity {
     private LocalDateTime timeSaleEndTime;
 
     @Column(name = "is_sold_out")
-    private Boolean isSoldOut;
+    private Boolean isSoldOut = false;
 
     @OneToMany(mappedBy = "timeSaleProduct", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<TimeSaleSoldOut> timeSaleSoldOutList;
@@ -45,6 +46,26 @@ public class TimeSaleProduct extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
+
+    public static TimeSaleProduct createOf(TimeSaleProductRequestDto timeSaleProductRequestDto, Product product) {
+        return new TimeSaleProduct(
+                product,
+                timeSaleProductRequestDto.discountRate(),
+                timeSaleProductRequestDto.quantity(),
+                timeSaleProductRequestDto.timeSaleStartTime(),
+                timeSaleProductRequestDto.timeSaleEndTime()
+        );
+    }
+
+    private TimeSaleProduct(Product product, Integer discountRate, Integer quantity,
+                            LocalDateTime timeSaleStartTime, LocalDateTime timeSaleEndTime) {
+        this.product = product;
+        this.discountRate = discountRate;
+        discountPrice = product.getPrice() * (1 - discountRate / 100);
+        this.quantity = quantity;
+        this.timeSaleStartTime = timeSaleStartTime;
+        this.timeSaleEndTime = timeSaleEndTime;
+    }
 
     public void addTimeSaleSoldOutList(TimeSaleSoldOut timeSaleSoldOut) {
         timeSaleSoldOutList.add(timeSaleSoldOut);

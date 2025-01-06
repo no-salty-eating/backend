@@ -31,6 +31,8 @@ public enum Error {
     ORDER_BEEN_CANCELED(3004, "주문이 취소되었습니다."),
     BEFORE_PURCHASE_TIME(3005, "구매 가능 시간이 아닙니다."),
 
+    TIMESALE_QUANTITY_EXCEED_PRODUCT_STOCK(8000, "상품의 보유 수량을 초과하였습니다."),
+
     METHOD_ARGUMENT_NOT_VALID(9997, "유효하지 않은 값입니다."),
     FORBIDDEN(9998, "접근 권한이 없습니다."),
     INTERNAL_SERVER_ERROR(9999, "서버 오류입니다."),
