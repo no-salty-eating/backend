@@ -1,0 +1,18 @@
+server:
+  port: 19092
+
+spring:
+  application:
+    name: point-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${host.db.url}:3306/pointDB
+    username: ${database.username}
+    password: ${database.password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
