@@ -37,4 +37,11 @@ public class ProductController {
                                         @RequestHeader(name = "X-Role") String role) {
         return productService.updateProduct(productId, role, productUpdateRequestDto);
     }
+
+    @DeleteMapping("/{productId}")
+    public Response<Void> softDeleteProduct(@PathVariable Long productId,
+                                            @RequestHeader(name = "X-UserId", required = false) String userId,
+                                            @RequestHeader(name = "X-Role") String role) {
+        return productService.softDeleteProduct(productId, role);
+    }
 }
