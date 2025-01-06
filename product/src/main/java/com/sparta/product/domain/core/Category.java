@@ -1,6 +1,7 @@
 package com.sparta.product.domain.core;
 
 import com.sparta.product.application.dtos.category.CategoryRequestDto;
+import com.sparta.product.application.dtos.category.CategoryUpdateRequestDto;
 import com.sparta.product.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,5 +36,15 @@ public class Category extends BaseEntity {
         return Category.builder()
                 .name(categoryRequestDto.categoryName())
                 .build();
+    }
+
+    public void updateFrom(CategoryUpdateRequestDto categoryUpdateRequestDto) {
+        if (categoryUpdateRequestDto.categoryName() != null) {
+            name = categoryUpdateRequestDto.categoryName();
+        }
+
+        if (categoryUpdateRequestDto.isPublic() != null) {
+            super.updateIsPublic(categoryUpdateRequestDto.isPublic());
+        }
     }
 }

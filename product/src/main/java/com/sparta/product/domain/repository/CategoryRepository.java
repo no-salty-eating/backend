@@ -15,4 +15,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long>, Custo
 
 //    @Query("select c from Category c where c.id in :categoryIds And c.isDeleted = false")
     List<Category> findAllByIdInAndIsDeletedFalse(@Param("categoryIds") List<Long> categoryIds);
+
+    Optional<Category> findByIdAndIsDeletedFalseAndIsPublicTrue(Long id);
+
+    Boolean existsByName(String name);
 }
