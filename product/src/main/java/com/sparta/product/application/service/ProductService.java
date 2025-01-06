@@ -68,7 +68,6 @@ public class ProductService {
                         : ProductResponseDto.forUserOrSellerFrom(productRepository.findByIdAndIsDeletedFalseAndIsPublicTrue(productId).orElseThrow(NotFoundProductException::new)));
     }
 
-    // TODO : 수정 시 timesale 상품도 수정되도록 변경 필요
     @Transactional
     public Response<Void> updateProduct(Long productId, String role, ProductUpdateRequestDto productUpdateRequestDto) {
         checkIsSellerOrMaster(role);
@@ -97,6 +96,17 @@ public class ProductService {
         product.updateFrom(productUpdateRequestDto);
 
         return new Response<>(HttpStatus.OK.value(), "수정 완료.", null);
+    }
+
+    @Transactional
+    public Response<Void> softDeleteProduct(Long productId, String role) {
+        checkIsSellerOrMaster(role);
+
+        Product product = productRepository.findByIdAndIsDeletedFalse(productId).orElseThrow(NotFoundProductException::new);
+
+        product.updateIsDeleted(true);
+
+        return new Response<>(HttpStatus.OK.value(), "삭제 완료.", null);
     }
 
     private void checkIsSellerOrMaster(String role) {
