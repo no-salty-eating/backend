@@ -54,7 +54,7 @@ public class UserService {
         String role = requestDto.getRole(); // SignupRequestDto에 role 값이 있다고 가정
 
         try {
-            UserRoleEnum userRoleEnum = UserRoleEnum.valueOf(role); // Enum 값으로 변환 시도
+            UserRoleEnum.valueOf(role); // Enum 값으로 변환 시도
         } catch (IllegalArgumentException e) {
             throw new UserException(NOT_VALID_ROLE_ENUM, HttpStatus.BAD_REQUEST);
         }
