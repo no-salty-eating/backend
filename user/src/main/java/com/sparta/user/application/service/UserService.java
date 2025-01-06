@@ -1,12 +1,9 @@
 package com.sparta.user.application.service;
 
 
-
 import static com.sparta.user.application.exception.Error.ALREADY_EXIST_EMAIL;
 import static com.sparta.user.application.exception.Error.ALREADY_EXIST_ID;
-import static com.sparta.user.application.exception.Error.INVALID_PASSWORD;
 import static com.sparta.user.application.exception.Error.INVALID_UPDATE_REQUEST;
-import static com.sparta.user.application.exception.Error.METHOD_ARGUMENT_NOT_VALID;
 import static com.sparta.user.application.exception.Error.NOT_FOUND_USER;
 import static com.sparta.user.application.exception.Error.NOT_VALID_ROLE_ENUM;
 
@@ -19,16 +16,13 @@ import com.sparta.user.application.exception.UserException;
 import com.sparta.user.domain.model.UserRoleEnum;
 import com.sparta.user.domain.model.core.User;
 import com.sparta.user.infrastructure.repository.UserRepository;
-import jakarta.validation.Valid;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @Slf4j(topic = "User Service")
 @Service

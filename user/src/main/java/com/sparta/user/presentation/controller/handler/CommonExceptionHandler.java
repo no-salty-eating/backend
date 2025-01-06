@@ -29,9 +29,7 @@ public class CommonExceptionHandler  {
     public Response<Void> MethodArgumentNotValidHandler(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
 
-        e.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
-        });
+        e.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
         String message = errors.toString().replace("{", "").replace("}", "");
 
