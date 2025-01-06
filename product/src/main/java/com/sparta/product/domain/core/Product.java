@@ -1,6 +1,7 @@
 package com.sparta.product.domain.core;
 
 import com.sparta.product.application.dtos.product.ProductRequestDto;
+import com.sparta.product.application.dtos.product.ProductUpdateRequestDto;
 import com.sparta.product.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,17 +44,37 @@ public class Product extends BaseEntity {
 
     public static Product createFrom(ProductRequestDto productRequestDto) {
         return new Product(
-                productRequestDto.name(),
+                productRequestDto.productName(),
                 productRequestDto.price(),
                 productRequestDto.stock(),
-                new ArrayList<>()
+                new ArrayList<>(),
+                productRequestDto.isPublic()
         );
     }
 
-    public Product(String name, Integer price, Integer stock, List<ProductCategory> productCategoryList) {
+    public Product(String name, Integer price, Integer stock, List<ProductCategory> productCategoryList, Boolean isPublic) {
         this.name = name;
         this.price = price;
         this.stock = stock;
         this.productCategoryList = productCategoryList;
+        super.updateIsPublic(isPublic);
+    }
+
+    public void updateFrom(ProductUpdateRequestDto productUpdateRequestDto) {
+        if (productUpdateRequestDto.productName() != null) {
+            name = productUpdateRequestDto.productName();
+        }
+
+        if (productUpdateRequestDto.price() != null) {
+            price = productUpdateRequestDto.price();
+        }
+
+        if (productUpdateRequestDto.stock() != null) {
+            stock = productUpdateRequestDto.stock();
+        }
+
+        if (productUpdateRequestDto.isPublic() != null) {
+            super.updateIsPublic(productUpdateRequestDto.isPublic());
+        }
     }
 }

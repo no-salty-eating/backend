@@ -20,6 +20,7 @@ public class Category extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String name;
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
@@ -32,7 +33,7 @@ public class Category extends BaseEntity {
 
     public static Category createFrom(CategoryRequestDto categoryRequestDto) {
         return Category.builder()
-                .name(categoryRequestDto.name())
+                .name(categoryRequestDto.categoryName())
                 .build();
     }
 }
