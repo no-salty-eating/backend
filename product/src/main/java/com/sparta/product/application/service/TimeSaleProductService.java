@@ -1,6 +1,5 @@
 package com.sparta.product.application.service;
 
-import com.sparta.product.application.dtos.Response;
 import com.sparta.product.application.dtos.timesale.TimeSaleProductRequestDto;
 import com.sparta.product.application.exception.common.ForbiddenRoleException;
 import com.sparta.product.application.exception.product.NotFoundProductException;
@@ -10,6 +9,7 @@ import com.sparta.product.domain.core.Product;
 import com.sparta.product.domain.core.TimeSaleProduct;
 import com.sparta.product.domain.repository.ProductRepository;
 import com.sparta.product.domain.repository.TimeSaleProductRepository;
+import com.sparta.product.presentation.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -37,10 +37,14 @@ public class TimeSaleProductService {
         }
 
         TimeSaleProduct timeSaleProduct = TimeSaleProduct.createOf(timeSaleProductRequestDto, product);
-        product.addTimeSaleProductList(timeSaleProduct);
+//        product.addTimeSaleProductList(timeSaleProduct);
 
         timeSaleProductRepository.save(timeSaleProduct);
-        return new Response<>(HttpStatus.CREATED.value(), "타임 세일 등록 완료", null);
+
+        return Response.<Void>builder()
+                .code(HttpStatus.CREATED.value())
+                .message(HttpStatus.CREATED.getReasonPhrase())
+                .build();
     }
 
     private void checkIsMaster(String role) {

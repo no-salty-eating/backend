@@ -1,4 +1,4 @@
-package com.sparta.product.application.dtos;
+package com.sparta.product.presentation;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;

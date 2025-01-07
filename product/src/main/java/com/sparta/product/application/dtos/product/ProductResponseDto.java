@@ -3,6 +3,7 @@ package com.sparta.product.application.dtos.product;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sparta.product.application.dtos.productCategory.ProductCategoryResponseDto;
+import com.sparta.product.domain.core.Category;
 import com.sparta.product.domain.core.Product;
 
 import java.time.LocalDateTime;
@@ -21,26 +22,22 @@ public record ProductResponseDto(
         @JsonProperty("updated_at") LocalDateTime updatedAt
         ) {
 
-    public static ProductResponseDto forUserOrSellerFrom(Product product) {
+    public static ProductResponseDto forUserOrSellerOf(Product product, List<Category> categories) {
         return new ProductResponseDto(
                 product.getId(),
-                product.getProductCategoryList().stream()
+                categories.stream()
                         .map(ProductCategoryResponseDto::from)
                         .toList(),
                 product.getName(),
                 product.getPrice(),
-                product.getStock(),
-                null,
-                null,
-                null,
-                null
+                product.getStock()
         );
     }
 
-    public static ProductResponseDto forMasterFrom(Product product) {
+    public static ProductResponseDto forMasterOf(Product product, List<Category> categories) {
         return new ProductResponseDto(
                 product.getId(),
-                product.getProductCategoryList().stream()
+                categories.stream()
                         .map(ProductCategoryResponseDto::from)
                         .toList(),
                 product.getName(),
@@ -51,5 +48,9 @@ public record ProductResponseDto(
                 product.getCreatedAt(),
                 product.getUpdatedAt()
         );
+    }
+
+    private ProductResponseDto(Long productId, List<ProductCategoryResponseDto> categories, String productName, Integer price, Integer stock) {
+        this(productId, categories, productName, price, stock, null, null, null, null);
     }
 }

@@ -1,18 +1,20 @@
 package com.sparta.product.application.service;
 
-import com.sparta.product.application.dtos.Response;
 import com.sparta.product.application.dtos.product.ProductRequestDto;
 import com.sparta.product.application.dtos.product.ProductResponseDto;
 import com.sparta.product.application.dtos.product.ProductUpdateRequestDto;
 import com.sparta.product.application.exception.category.NotFoundCategoryException;
 import com.sparta.product.application.exception.common.ForbiddenRoleException;
 import com.sparta.product.application.exception.product.NotFoundProductException;
+import com.sparta.product.application.exception.productCategory.NotFoundProductCategoryException;
 import com.sparta.product.domain.common.UserRoleEnum;
 import com.sparta.product.domain.core.Category;
 import com.sparta.product.domain.core.Product;
 import com.sparta.product.domain.core.ProductCategory;
 import com.sparta.product.domain.repository.CategoryRepository;
+import com.sparta.product.domain.repository.ProductCategoryRepository;
 import com.sparta.product.domain.repository.ProductRepository;
+import com.sparta.product.presentation.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -30,30 +32,46 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductCategoryRepository productCategoryRepository;
 
     @Transactional
     public Response<Void> createProduct(ProductRequestDto productRequestDto, String role) {
         checkIsSellerOrMaster(role);
 
-        Product product = Product.createFrom(productRequestDto);
-
-        List<Long> categories = productRequestDto.productCategoryList();
-
-        // 쿼리 목록 리스트로 한번에 가져오기
-        Map<Long, Category> categoryMap = getCategoryMap(categories);
-        product.updateCategories(categories, categoryMap);
+        Product product = Product.createFrom(productRequestDto.productName(), productRequestDto.price(), productRequestDto.stock(), productRequestDto.isPublic());
 
         productRepository.save(product);
-        return new Response<>(HttpStatus.CREATED.value(), "상품 등록 완료", null);
+
+        List<Long> categories = productRequestDto.productCategoryList();
+        saveProductCategory(categories, product);
+
+        return Response.<Void>builder()
+                .code(HttpStatus.CREATED.value())
+                .message(HttpStatus.CREATED.getReasonPhrase())
+                .build();
     }
 
     @Transactional(readOnly = true)
     public Response<ProductResponseDto> getProduct(Long productId, String role) {
-        return new Response<>(HttpStatus.OK.value(),
-                "OK",
-                role.equals(UserRoleEnum.MASTER.toString()) ?
-                        ProductResponseDto.forMasterFrom(productRepository.findById(productId).orElseThrow(NotFoundProductException::new))
-                        : ProductResponseDto.forUserOrSellerFrom(productRepository.findByIdAndIsDeletedFalseAndIsPublicTrue(productId).orElseThrow(NotFoundProductException::new)));
+        List<ProductCategory> productCategories = role.equals(UserRoleEnum.MASTER.toString())
+                ? productCategoryRepository.findByProductIdWithoutConditions(productId)
+                : productCategoryRepository.findByProductIdWithConditions(productId);
+
+        if (productCategories.isEmpty()) {
+            throw new NotFoundProductCategoryException();
+        }
+
+        Product product = productCategories.get(0).getProduct();
+
+        List<Category> categories = productCategories.stream()
+                .map(ProductCategory::getCategory)
+                .toList();
+
+        return Response.<ProductResponseDto>builder()
+                .data(role.equals(UserRoleEnum.MASTER.toString()) ?
+                        ProductResponseDto.forMasterOf(product, categories)
+                        : ProductResponseDto.forUserOrSellerOf(product, categories))
+                .build();
     }
 
     @Transactional
@@ -62,15 +80,14 @@ public class ProductService {
 
         Product product = productRepository.findByIdAndIsDeletedFalse(productId).orElseThrow(NotFoundProductException::new);
 
-        if (productUpdateRequestDto.productCategoryList() != null && !productUpdateRequestDto.productCategoryList().isEmpty()) {
-            List<Long> categories = productUpdateRequestDto.productCategoryList();
-
-            Map<Long, Category> categoryMap = getCategoryMap(categories);
-            product.updateCategories(categories, categoryMap);
+        List<Long> categories = productUpdateRequestDto.productCategoryList();
+        if (categories != null && !categories.isEmpty()) {
+            productCategoryRepository.deleteByProductId(productId);
+            saveProductCategory(categories, product);
         }
-        product.updateFrom(productUpdateRequestDto);
+        product.updateFrom(productUpdateRequestDto.productName(), productUpdateRequestDto.price(), productUpdateRequestDto.stock(), productUpdateRequestDto.isPublic());
 
-        return new Response<>(HttpStatus.OK.value(), "수정 완료.", null);
+        return Response.<Void>builder().build();
     }
 
     @Transactional
@@ -81,7 +98,19 @@ public class ProductService {
 
         product.updateIsDeleted(true);
 
-        return new Response<>(HttpStatus.OK.value(), "삭제 완료.", null);
+        return Response.<Void>builder().build();
+    }
+
+    private void saveProductCategory(List<Long> categories, Product product) {
+        Map<Long, Category> categoryMap = getCategoryMap(categories);
+        categories.forEach(categoryId -> {
+            Category category = categoryMap.get(categoryId);
+            if (category == null) {
+                throw new NotFoundCategoryException();
+            }
+            ProductCategory productCategory = ProductCategory.createOf(product, category);
+            productCategoryRepository.save(productCategory);
+        });
     }
 
     private Map<Long, Category> getCategoryMap(List<Long> categories) {
