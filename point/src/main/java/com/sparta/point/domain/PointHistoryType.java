@@ -1,4 +1,4 @@
-package com.sparta.Point.domain;
+package com.sparta.point.domain;
 
 public enum PointHistoryType {
     EARN, USE

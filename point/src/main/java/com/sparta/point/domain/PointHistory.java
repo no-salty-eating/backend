@@ -1,4 +1,4 @@
-package com.sparta.Point.domain;
+package com.sparta.point.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
