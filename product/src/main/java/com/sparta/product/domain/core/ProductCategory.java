@@ -3,6 +3,7 @@ package com.sparta.product.domain.core;
 import com.sparta.product.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Getter
@@ -22,14 +23,6 @@ public class ProductCategory extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
-
-    public void updateProduct(Product product) {
-        this.product = product;
-    }
-
-    public void updateCategory(Category category) {
-        this.category = category;
-    }
 
     public static ProductCategory createOf(Product product, Category category) {
         return new ProductCategory(product, category);

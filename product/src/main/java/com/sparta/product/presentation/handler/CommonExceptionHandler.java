@@ -1,6 +1,7 @@
-package com.sparta.product.application.exception.handler;
+package com.sparta.product.presentation.handler;
 
-import com.sparta.product.application.dtos.Response;
+import com.sparta.product.application.exception.productCategory.ProductCategoryException;
+import com.sparta.product.presentation.Response;
 import com.sparta.product.application.exception.category.CategoryException;
 import com.sparta.product.application.exception.common.Error;
 import com.sparta.product.application.exception.common.ForbiddenException;
@@ -61,6 +62,16 @@ public class CommonExceptionHandler {
         return Response.<Void>builder()
                 .code(Error.METHOD_ARGUMENT_NOT_VALID.getCode())
                 .message(message)
+                .build();
+    }
+
+    @ExceptionHandler(ProductCategoryException.class)
+    public Response<Void> ProductCategoryExceptionHandler(ProductCategoryException e) {
+        Error error = e.getError();
+
+        return Response.<Void>builder()
+                .code(error.getCode())
+                .message(error.getMessage())
                 .build();
     }
 }

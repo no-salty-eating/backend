@@ -3,9 +3,11 @@ package com.sparta.product.application.dtos.category;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sparta.product.domain.core.Category;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record CategoryResponseDto(
         @JsonProperty("category_id") Long categoryId,
@@ -19,11 +21,7 @@ public record CategoryResponseDto(
     public static CategoryResponseDto forUserOrSellerFrom(Category category) {
         return new CategoryResponseDto(
                 category.getId(),
-                category.getName(),
-                null,
-                null,
-                null,
-                null
+                category.getName()
         );
     }
 
@@ -36,5 +34,9 @@ public record CategoryResponseDto(
                 category.getCreatedAt(),
                 category.getUpdatedAt()
         );
+    }
+
+    public CategoryResponseDto(Long categoryId, String categoryName) {
+        this(categoryId, categoryName, null, null, null, null);
     }
 }
