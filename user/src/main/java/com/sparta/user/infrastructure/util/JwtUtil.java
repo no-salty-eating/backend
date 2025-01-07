@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtUtil {
 
+    // 사용자 권한 값의 KEY
+    public static final String AUTHORIZATION_KEY = "role";
     // Token 식별자
     public static final String BEARER_PREFIX = "Bearer ";
 
@@ -42,7 +44,7 @@ public class JwtUtil {
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(loginId) // 사용자 식별자값(ID)
-                        .claim("role", role.getAuthority()) // 사용자 권한
+                        .claim(AUTHORIZATION_KEY, role.getAuthority()) // 사용자 권한
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME)) // 만료 시간
                         .setIssuedAt(date) // 발급일
                         .signWith(key, signatureAlgorithm) // 암호화 알고리즘

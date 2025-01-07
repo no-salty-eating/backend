@@ -5,7 +5,7 @@ import static com.sparta.user.application.exception.Error.NOT_FOUND_USER;
 
 import com.sparta.user.application.dto.Response;
 import com.sparta.user.application.dto.response.JwtTokenResponseDto;
-import com.sparta.user.application.dto.request.LogInRequestDto;
+import com.sparta.user.application.dto.request.LoginRequestDto;
 import com.sparta.user.application.exception.UserException;
 import com.sparta.user.domain.model.core.User;
 import com.sparta.user.infrastructure.repository.UserRepository;
@@ -25,7 +25,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public Response<JwtTokenResponseDto> logIn(LogInRequestDto requestDto) {
+    public Response<JwtTokenResponseDto> login(LoginRequestDto requestDto) {
         String loginId = requestDto.getLoginId();
         String password = requestDto.getPassword();
 

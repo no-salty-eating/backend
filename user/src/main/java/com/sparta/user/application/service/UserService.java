@@ -8,7 +8,7 @@ import static com.sparta.user.application.exception.Error.NOT_FOUND_USER;
 import static com.sparta.user.application.exception.Error.NOT_VALID_ROLE_ENUM;
 
 import com.sparta.user.application.dto.Response;
-import com.sparta.user.application.dto.request.SignInRequestDto;
+import com.sparta.user.application.dto.request.JoinRequestDto;
 import com.sparta.user.application.dto.request.UpdateUserRequestDto;
 import com.sparta.user.application.dto.response.LoginIdResponseDto;
 import com.sparta.user.application.dto.response.UserResponseDto;
@@ -33,8 +33,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Response<LoginIdResponseDto> signIn(SignInRequestDto requestDto) {
+    public Response<LoginIdResponseDto> join(JoinRequestDto requestDto) {
         String loginId = requestDto.getLoginId();
+        String password = passwordEncoder.encode(requestDto.getPassword());
 
 
         // 회원 중복 확인
@@ -59,7 +60,7 @@ public class UserService {
             throw new UserException(NOT_VALID_ROLE_ENUM, HttpStatus.BAD_REQUEST);
         }
         // 사용자 등록
-        User user = User.createUser(requestDto, passwordEncoder);
+        User user = User.createUser(loginId, password, requestDto.getName(), email, role);
         userRepository.save(user);
 
         return new Response<>(HttpStatus.CREATED.value(), "회원가입 완료", LoginIdResponseDto.of(user));
@@ -93,7 +94,7 @@ public class UserService {
             throw new UserException(INVALID_UPDATE_REQUEST, HttpStatus.NOT_FOUND);
         }
 
-        user.updateUser(requestDto, passwordEncoder);
+        user.updateUser(passwordEncoder.encode(requestDto.getPassword()), requestDto.getName(), requestDto.getEmail(), requestDto.getIsPublic());
 
         return new Response<>(HttpStatus.OK.value(), "수정 완료", LoginIdResponseDto.of(user));
     }
