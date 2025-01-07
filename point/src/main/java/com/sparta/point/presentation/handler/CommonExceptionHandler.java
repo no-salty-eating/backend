@@ -1,6 +1,6 @@
-package com.sparta.point.application.exception.handler;
+package com.sparta.point.presentation.handler;
 
-import com.sparta.point.application.dto.Response;
+import com.sparta.point.presentation.response.Response;
 import com.sparta.point.application.exception.Error;
 import com.sparta.point.application.exception.PointException;
 import lombok.RequiredArgsConstructor;
