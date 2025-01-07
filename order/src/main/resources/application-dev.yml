@@ -1,6 +1,3 @@
-server:
-  port: 19094
-
 #management:
 #  endpoints:
 #    web:
@@ -14,6 +11,10 @@ server:
 #      probability: 1.0
 
 spring:
+  config:
+    import: classpath:application-key.yml
+    activate:
+      on-profile: dev
   output:
     ansi:
       enabled: always
@@ -21,16 +22,16 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
-#  sql:
-#    init:
-#      mode: always
-#      schema-locations: classpath:db-init/schema.sql
-#  data:
-#    redis:
-#      host: ${REDIS_HOST}
-#      port: ${REDIS_PORT}
-  config:
-    import: classpath:application-key.yml
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db-init/schema.sql
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+  kafka:
+    bootstrap-servers: localhost:9092
 
 ---
 
@@ -52,28 +53,3 @@ springdoc:
     disable-swagger-default-url: true
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
-
----
-
-logging:
-  level:
-    com.study: debug
-    org.springframework.r2dbc.core: debug
-    org.springframework.r2dbc.connection.init: debug
-    org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler: off
-    org.springframework.web.HttpLogging: off
-  pattern:
-    console: "%d{HH:mm:ss.SSS}|%highlight(%-5level)|%X{txid:-}|%green(%t)|%blue(\\(%F:%L\\))|%msg%n"
-
----
-
-spring:
-  config:
-    activate:
-      on-profile: test
-  r2dbc:
-    url: r2dbc:pool:h2:mem://localhost/payment
-  sql:
-    init:
-      mode: always
-      data-locations: ""
