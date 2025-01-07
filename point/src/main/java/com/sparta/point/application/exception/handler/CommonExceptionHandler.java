@@ -1,8 +1,8 @@
-package com.sparta.Point.application.exception.handler;
+package com.sparta.point.application.exception.handler;
 
-import com.sparta.Point.application.dto.Response;
-import com.sparta.Point.application.exception.Error;
-import com.sparta.Point.application.exception.PointException;
+import com.sparta.point.application.dto.Response;
+import com.sparta.point.application.exception.Error;
+import com.sparta.point.application.exception.PointException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

@@ -1,4 +1,4 @@
-package com.sparta.Point.application.dto;
+package com.sparta.point.application.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
