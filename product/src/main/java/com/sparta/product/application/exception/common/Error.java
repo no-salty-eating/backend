@@ -33,6 +33,13 @@ public enum Error {
 
     NOT_FOUND_PRODUCTCATEGORY(7000, "상품이나 카테고리를 찾을 수 없습니다. 정상적인 상태인지 확인해주세요."),
     TIMESALE_QUANTITY_EXCEED_PRODUCT_STOCK(8000, "상품의 보유 수량을 초과하였습니다."),
+    NOT_FOUND_TIMESALE_PRODUCT(8001, "해당 타임세일 상품을 찾을 수 없습니다."),
+    NOT_FOUND_ON_TIMESALE_PRODUCT(8002, "진행 중인 타임세일 상품이 아닙니다."),
+    EXCEED_TIMESALE_QUANTITY(8002, "남은 타임세일 재고 수량을 초과하였습니다."),
+    INVALID_TIMESALE_START_TIME(8100, "시작 시간은 현재 시간 이후여야 합니다."),
+    INVALID_TIMESALE_END_TIME(8101, "종료 시간은 시작 시간 이후여야 합니다."),
+
+    TIMESALE_SCHEDULE_ERROR(9001, "타임세일 스케줄링 중 오류가 발생했습니다."),
 
     METHOD_ARGUMENT_NOT_VALID(9997, "유효하지 않은 값입니다."),
     FORBIDDEN(9998, "접근 권한이 없습니다."),

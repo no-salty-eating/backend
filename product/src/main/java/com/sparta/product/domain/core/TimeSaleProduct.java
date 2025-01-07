@@ -25,7 +25,7 @@ public class TimeSaleProduct extends BaseEntity {
     private Integer discountRate;
 
     @Column(name = "discount_price")
-    private Integer discountPrice;
+    private Double discountPrice;
 
     private Integer quantity;
 
@@ -40,20 +40,17 @@ public class TimeSaleProduct extends BaseEntity {
     @Column(name = "is_sold_out")
     private Boolean isSoldOut = false;
 
-    @OneToMany(mappedBy = "timeSaleProduct", fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<TimeSaleSoldOut> timeSaleSoldOutList;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
-    public static TimeSaleProduct createOf(TimeSaleProductRequestDto timeSaleProductRequestDto, Product product) {
+    public static TimeSaleProduct createOf(Integer discountRate, Integer quantity, LocalDateTime timeSaleStartTime, LocalDateTime timeSaleEndTime, Product product) {
         return new TimeSaleProduct(
                 product,
-                timeSaleProductRequestDto.discountRate(),
-                timeSaleProductRequestDto.quantity(),
-                timeSaleProductRequestDto.timeSaleStartTime(),
-                timeSaleProductRequestDto.timeSaleEndTime()
+                discountRate,
+                quantity,
+                timeSaleStartTime,
+                timeSaleEndTime
         );
     }
 
@@ -61,18 +58,17 @@ public class TimeSaleProduct extends BaseEntity {
                             LocalDateTime timeSaleStartTime, LocalDateTime timeSaleEndTime) {
         this.product = product;
         this.discountRate = discountRate;
-        discountPrice = product.getPrice() * (1 - discountRate / 100);
+        discountPrice = product.getPrice() * (1 - discountRate / 100.0);
         this.quantity = quantity;
         this.timeSaleStartTime = timeSaleStartTime;
         this.timeSaleEndTime = timeSaleEndTime;
     }
 
-    public void addTimeSaleSoldOutList(TimeSaleSoldOut timeSaleSoldOut) {
-        timeSaleSoldOutList.add(timeSaleSoldOut);
-        timeSaleSoldOut.updateTimeSaleProduct(this);
+    public void updateIsSoldOut(Boolean isSoldOut) {
+        this.isSoldOut = isSoldOut;
     }
 
-    public void updateProduct(Product product) {
-        this.product = product;
+    public void decreaseQuantity(Integer quantity) {
+        this.quantity -= quantity;
     }
 }

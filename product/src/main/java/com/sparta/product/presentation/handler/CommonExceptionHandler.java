@@ -1,6 +1,8 @@
 package com.sparta.product.presentation.handler;
 
 import com.sparta.product.application.exception.productCategory.ProductCategoryException;
+import com.sparta.product.application.exception.timesale.TimeSaleException;
+import com.sparta.product.application.exception.scheduler.ScheduleException;
 import com.sparta.product.presentation.Response;
 import com.sparta.product.application.exception.category.CategoryException;
 import com.sparta.product.application.exception.common.Error;
@@ -67,6 +69,26 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(ProductCategoryException.class)
     public Response<Void> ProductCategoryExceptionHandler(ProductCategoryException e) {
+        Error error = e.getError();
+
+        return Response.<Void>builder()
+                .code(error.getCode())
+                .message(error.getMessage())
+                .build();
+    }
+
+    @ExceptionHandler(TimeSaleException.class)
+    public Response<Void> TimeSaleExceptionHandler(TimeSaleException e) {
+        Error error = e.getError();
+
+        return Response.<Void>builder()
+                .code(error.getCode())
+                .message(error.getMessage())
+                .build();
+    }
+
+    @ExceptionHandler(ScheduleException.class)
+    public Response<Void> ScheduleExceptionHandler(ScheduleException e) {
         Error error = e.getError();
 
         return Response.<Void>builder()

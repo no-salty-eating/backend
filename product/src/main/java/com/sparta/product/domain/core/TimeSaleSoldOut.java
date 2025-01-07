@@ -25,7 +25,12 @@ public class TimeSaleSoldOut extends BaseEntity {
     @JoinColumn(name = "timesale_id")
     private TimeSaleProduct timeSaleProduct;
 
-    public void updateTimeSaleProduct(TimeSaleProduct timeSaleProduct) {
+    public static TimeSaleSoldOut createFrom(TimeSaleProduct timeSaleProduct) {
+        return new TimeSaleSoldOut(timeSaleProduct);
+    }
+
+    private TimeSaleSoldOut(TimeSaleProduct timeSaleProduct) {
         this.timeSaleProduct = timeSaleProduct;
+        soldOutTime = LocalDateTime.now();
     }
 }
