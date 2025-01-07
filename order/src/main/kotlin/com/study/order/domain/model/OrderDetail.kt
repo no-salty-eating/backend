@@ -10,6 +10,7 @@ import org.springframework.data.relational.core.mapping.Table
 class OrderDetail(
     var orderId: Long,
     var productId: Long,
+    var couponId: Long? = null,
     var price: Int,
     var quantity: Int = 0,
     @Id
@@ -33,6 +34,7 @@ class OrderDetail(
         arrayOf(
             OrderDetail::orderId,
             OrderDetail::productId,
+            OrderDetail::couponId,
             OrderDetail::price,
             OrderDetail::quantity,
         ), superToString = { super.toString() })

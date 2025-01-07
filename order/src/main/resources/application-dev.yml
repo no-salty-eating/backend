@@ -32,9 +32,17 @@ spring:
       port: ${REDIS_PORT}
   kafka:
     bootstrap-servers: localhost:9092
+eureka:
+  instance:
+    initial-status: up
+    prefer-ip-address: false
+    instance-id: order-server
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_NAME}:${EUREKA_PORT}/${EUREKA_HOST}/
+    region: ap-northeast-2
 
 ---
-
 springdoc:
   use-fqn: true
   cache:

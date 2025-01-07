@@ -1,4 +1,4 @@
-package com.study.order.infrastructure.config
+package com.study.order.infrastructure.config.log
 
 import com.study.order.infrastructure.extension.txid
 import io.micrometer.context.ContextRegistry
@@ -13,8 +13,7 @@ import reactor.core.publisher.Mono
 import reactor.util.context.Context
 import java.util.*
 
-//TODO: gateway 에서 보내주는 형식으로 변경하기
-const val KEY_TXID = "txid"
+const val KEY_TXID = "X-UserId"
 
 @Order(1)
 @Component

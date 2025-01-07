@@ -1,6 +1,5 @@
-package com.study.order.infrastructure.config
+package com.study.order.infrastructure.config.log
 
-import mu.KotlinLogging
 import org.springframework.core.annotation.Order
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpMethod
@@ -14,11 +13,12 @@ import reactor.core.publisher.Mono
 import java.io.ByteArrayOutputStream
 import java.nio.channels.Channels
 
-private val logger = KotlinLogging.logger { }
-
 @Component
 @Order(11)
 class RequestLoggingFilter : WebFilter {
+
+    private val logger = LoggerProvider.logger
+
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
 
         val request = exchange.request
