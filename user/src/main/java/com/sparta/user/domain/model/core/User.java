@@ -1,7 +1,5 @@
 package com.sparta.user.domain.model.core;
 
-import com.sparta.user.application.dto.request.SignInRequestDto;
-import com.sparta.user.application.dto.request.UpdateUserRequestDto;
 import com.sparta.user.domain.model.UserRoleEnum;
 import com.sparta.user.domain.model.common.BaseEntity;
 import jakarta.persistence.Column;
@@ -17,11 +15,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder(access = AccessLevel.PRIVATE)
 @Getter
 @Table(name = "tb_user")
@@ -54,31 +51,29 @@ public class User extends BaseEntity {
      */
 
 
-    public static User createUser(SignInRequestDto dto, PasswordEncoder passwordEncoder) {
+    public static User createUser(String loginId, String password, String name, String email, String role) {
         return User.builder()
-                .loginId(dto.getLoginId())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .name(dto.getName())
-                .email(dto.getEmail())
-                .role(UserRoleEnum.valueOf(dto.getRole()))
+                .loginId(loginId)
+                .password(password)
+                .name(name)
+                .email(email)
+                .role(UserRoleEnum.valueOf(role))  // role은 문자열로 받아서 UserRoleEnum으로 변환
                 .build();
     }
-
-    public void updateUser(UpdateUserRequestDto dto, PasswordEncoder passwordEncoder) {
-        if (dto.getPassword() != null) {
-            this.password = passwordEncoder.encode(dto.getPassword());
+    public void updateUser(String password, String name, String email, Boolean isPublic) {
+        if (password != null) {
+            this.password = password;
         }
-        if (dto.getName() != null) {
-            this.name = dto.getName();
+        if (name != null) {
+            this.name = name;
         }
-        if (dto.getEmail() != null) {
-            this.email = dto.getEmail();
+        if (email != null) {
+            this.email = email;
         }
-        if (dto.getIsPublic() != null) {
-            if(dto.getIsPublic()) {
+        if (isPublic != null) {
+            if (isPublic) {
                 this.toPublic();
-            }
-            else{
+            } else {
                 this.toPrivate();
             }
         }

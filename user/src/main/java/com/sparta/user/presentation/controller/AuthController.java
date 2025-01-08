@@ -2,8 +2,8 @@ package com.sparta.user.presentation.controller;
 
 import com.sparta.user.application.dto.Response;
 import com.sparta.user.application.dto.response.JwtTokenResponseDto;
-import com.sparta.user.application.dto.request.LogInRequestDto;
-import com.sparta.user.application.dto.request.SignInRequestDto;
+import com.sparta.user.application.dto.request.LoginRequestDto;
+import com.sparta.user.application.dto.request.JoinRequestDto;
 import com.sparta.user.application.dto.response.LoginIdResponseDto;
 import com.sparta.user.application.service.AuthService;
 import com.sparta.user.application.service.UserService;
@@ -22,15 +22,15 @@ public class AuthController {
     private final UserService userService;
     private final AuthService authService;
 
-    @PostMapping("/signIn")
-    public Response<LoginIdResponseDto> signIn(@Valid @RequestBody SignInRequestDto requestDto) {
+    @PostMapping("/join")
+    public Response<LoginIdResponseDto> join(@Valid @RequestBody JoinRequestDto requestDto) {
 
-        return userService.signIn(requestDto);
+        return userService.join(requestDto);
     }
 
-    @PostMapping("/logIn")
-    Response<JwtTokenResponseDto> logIn(@RequestBody LogInRequestDto requestDto) {
+    @PostMapping("/login")
+    Response<JwtTokenResponseDto> login(@RequestBody LoginRequestDto requestDto) {
 
-        return authService.logIn(requestDto);
+        return authService.login(requestDto);
     }
 }

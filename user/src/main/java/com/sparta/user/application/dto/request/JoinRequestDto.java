@@ -9,7 +9,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class SignInRequestDto {
+public class JoinRequestDto {
 
     @NotBlank
     @Size(min = 4, max = 10)
