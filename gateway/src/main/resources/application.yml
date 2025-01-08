@@ -13,8 +13,8 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/users/**, /auth/**
-        - id: order-service
-          uri: lb://order-service
+        - id: coupon-service
+          uri: lb://coupon-service
           predicates:
             - Path=/coupons/**, /userCoupons/**
 
