@@ -1,16 +1,12 @@
 package com.sparta.product.domain.core;
 
-import com.sparta.product.application.dtos.product.ProductRequestDto;
-import com.sparta.product.application.dtos.product.ProductUpdateRequestDto;
-import com.sparta.product.application.exception.category.NotFoundCategoryException;
 import com.sparta.product.domain.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 @Entity
 @Getter
@@ -28,68 +24,37 @@ public class Product extends BaseEntity {
     private Integer price;
     private Integer stock;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductCategory> productCategoryList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TimeSaleProduct> timeSaleProductList = new ArrayList<>();
-
-    public void addProductCategoryList(ProductCategory productCategory) {
-        productCategoryList.add(productCategory);
-        productCategory.updateProduct(this);
-    }
-
-    public void addTimeSaleProductList(TimeSaleProduct timeSaleProduct) {
-        timeSaleProductList.add(timeSaleProduct);
-        timeSaleProduct.updateProduct(this);
-    }
-
-    public static Product createFrom(ProductRequestDto productRequestDto) {
+    public static Product createFrom(String productName, Integer price, Integer stock, Boolean isPublic) {
         return new Product(
-                productRequestDto.productName(),
-                productRequestDto.price(),
-                productRequestDto.stock(),
-                new ArrayList<>(),
-                productRequestDto.isPublic()
+                productName,
+                price,
+                stock,
+                isPublic
         );
     }
 
-    public Product(String name, Integer price, Integer stock, List<ProductCategory> productCategoryList, Boolean isPublic) {
+    private Product(String name, Integer price, Integer stock, Boolean isPublic) {
         this.name = name;
         this.price = price;
         this.stock = stock;
-        this.productCategoryList = productCategoryList;
         super.updateIsPublic(isPublic);
     }
 
-    public void updateFrom(ProductUpdateRequestDto productUpdateRequestDto) {
-        if (productUpdateRequestDto.productName() != null) {
-            name = productUpdateRequestDto.productName();
+    public void updateFrom(String productName, Integer price, Integer stock, Boolean isPublic) {
+        if (productName != null) {
+            name = productName;
         }
 
-        if (productUpdateRequestDto.price() != null) {
-            price = productUpdateRequestDto.price();
+        if (price != null) {
+            this.price = price;
         }
 
-        if (productUpdateRequestDto.stock() != null) {
-            stock = productUpdateRequestDto.stock();
+        if (stock != null) {
+            this.stock = stock;
         }
 
-        if (productUpdateRequestDto.isPublic() != null) {
-            super.updateIsPublic(productUpdateRequestDto.isPublic());
-        }
-    }
-
-    public void updateCategories(List<Long> categoryIds, Map<Long, Category> categoryMap) {
-        this.productCategoryList.clear();
-
-        for (Long categoryId : categoryIds) {
-            Category findCategory = categoryMap.get(categoryId);
-            if (findCategory == null) {
-                throw new NotFoundCategoryException();
-            }
-            ProductCategory productCategory = ProductCategory.createOf(this, findCategory);
-            this.addProductCategoryList(productCategory);
+        if (isPublic != null) {
+            super.updateIsPublic(isPublic);
         }
     }
 }
