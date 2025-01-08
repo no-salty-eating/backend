@@ -1,0 +1,53 @@
+### POST
+POST http://localhost:9090/eureka/apps/point-server
+Content-Type: application/json
+
+{
+  "instance": {
+	"hostName": "localhost",
+	"app": "POINT-SERVER",
+	"ipAddr": "127.0.0.1",
+	"status": "UP",
+	"port": {"$": 19092, "@enabled": true},
+	"dataCenterInfo": {
+	  "@class": "com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo",
+	  "name": "MyOwn"
+	}
+  }
+}
+
+### POST
+POST http://localhost:9090/eureka/apps/coupon-server
+Content-Type: application/json
+
+{
+  "instance": {
+	"hostName": "localhost",
+	"app": "COUPON-SERVER",
+	"ipAddr": "127.0.0.1",
+	"status": "UP",
+	"port": {"$": 19093, "@enabled": true},
+	"dataCenterInfo": {
+	  "@class": "com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo",
+	  "name": "MyOwn"
+	}
+  }
+}
+
+### POST
+POST http://localhost:9090/eureka/apps/product-server
+Content-Type: application/json
+
+{
+  "instance": {
+	"hostName": "localhost",
+	"app": "PRODUCT-SERVER",
+	"ipAddr": "127.0.0.1",
+	"status": "UP",
+	"port": {"$": 19096, "@enabled": true},
+	"dataCenterInfo": {
+	  "@class": "com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo",
+	  "name": "MyOwn"
+	}
+  }
+}

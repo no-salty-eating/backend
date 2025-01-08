@@ -1,7 +1,6 @@
-package com.study.order.infrastructure.config
+package com.study.order.infrastructure.config.log
 
 import com.study.order.infrastructure.extension.txid
-import mu.KotlinLogging
 import org.slf4j.MDC
 import org.springframework.boot.web.error.ErrorAttributeOptions
 import org.springframework.boot.web.reactive.error.DefaultErrorAttributes
@@ -9,10 +8,10 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest
 
-private val logger = KotlinLogging.logger {}
-
 @Configuration
 class ErrorConfig {
+
+    private val logger = LoggerProvider.logger
 
     @Bean
     fun errorAttribute(): DefaultErrorAttributes {

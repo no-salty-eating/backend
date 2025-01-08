@@ -9,5 +9,5 @@ import org.springframework.data.r2dbc.config.EnableR2dbcAuditing
 class OrderApplication
 
 fun main(args: Array<String>) {
-	runApplication<OrderApplication>(*args)
+    runApplication<OrderApplication>(*args)
 }

@@ -8,3 +8,6 @@ spring:
     init:
       mode: always
       schema-locations: classpath:db-init/schema.sql
+logging:
+  level:
+    com.netflix.discovery: off

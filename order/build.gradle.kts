@@ -21,6 +21,9 @@ repositories {
 
 dependencies {
 
+	implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer:4.2.0")
+	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.2.0")
+
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.9.0")
 	implementation("io.micrometer:context-propagation:1.1.2")
 	implementation("org.springframework.boot:spring-boot-starter-aop")
