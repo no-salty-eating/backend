@@ -23,28 +23,26 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Transactional
-    public Response<Void> createCategory(String categoryName, String role) {
+    public void createCategory(String categoryName, String role) {
         checkIsMaster(role);
         checkIsExistCategory(categoryName);
 
         categoryRepository.save(Category.createFrom(categoryName));
-        return Response.<Void>builder()
-                .code(HttpStatus.CREATED.value())
-                .message(HttpStatus.CREATED.getReasonPhrase())
-                .build();
     }
 
     @Transactional(readOnly = true)
-    public Response<CategoryResponseDto> getCategory(Long categoryId, String role) {
-        return Response.<CategoryResponseDto>builder()
-                .data(role.equals(UserRoleEnum.MASTER.toString()) ?
-                        CategoryResponseDto.forMasterFrom(categoryRepository.findById(categoryId).orElseThrow(NotFoundCategoryException::new))
-                        : CategoryResponseDto.forUserOrSellerFrom(categoryRepository.findByIdAndIsDeletedFalseAndIsPublicTrue(categoryId).orElseThrow(NotFoundCategoryException::new)))
-                .build();
+    public CategoryResponseDto getCategory(Long categoryId, String role) {
+        Category category = role.equals(UserRoleEnum.MASTER.toString()) ?
+                categoryRepository.findById(categoryId).orElseThrow(NotFoundCategoryException::new)
+                : categoryRepository.findByIdAndIsDeletedFalseAndIsPublicTrue(categoryId).orElseThrow(NotFoundCategoryException::new);
+
+        return role.equals(UserRoleEnum.MASTER.toString()) ?
+                        CategoryResponseDto.forMasterFrom(category)
+                        : CategoryResponseDto.forUserOrSellerFrom(category);
     }
 
     @Transactional
-    public Response<Void> updateCategory(Long categoryId, String role, CategoryUpdateRequestDto categoryUpdateRequestDto) {
+    public void updateCategory(Long categoryId, String role, CategoryUpdateRequestDto categoryUpdateRequestDto) {
         checkIsMaster(role);
         if (categoryUpdateRequestDto.categoryName() != null) {
             checkIsExistCategory(categoryUpdateRequestDto);
@@ -52,18 +50,14 @@ public class CategoryService {
 
         Category category = categoryRepository.findById(categoryId).orElseThrow(NotFoundCategoryException::new);
         category.updateFrom(categoryUpdateRequestDto.categoryName(), categoryUpdateRequestDto.isPublic());
-
-        return Response.<Void>builder().build();
     }
 
     @Transactional
-    public Response<Void> softDeleteCategory(Long categoryId, String role) {
+    public void softDeleteCategory(Long categoryId, String role) {
         checkIsMaster(role);
 
         Category category = categoryRepository.findById(categoryId).orElseThrow(NotFoundCategoryException::new);
         category.updateIsDeleted(true);
-
-        return Response.<Void>builder().build();
     }
 
     private void checkIsExistCategory(CategoryUpdateRequestDto categoryUpdateRequestDto) {

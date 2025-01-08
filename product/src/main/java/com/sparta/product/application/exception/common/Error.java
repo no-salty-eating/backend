@@ -18,12 +18,6 @@ public enum Error {
     NOT_FOUND_WISHLIST(1006, "해당 위시리스트를 찾을 수 없습니다."),
     QUANTITY_NOT_ENOUGH(1007, "수량은 1개 이상이어야 합니다."),
 
-    NOT_FOUND_PRODUCT(2000, "해당 상품을 찾을 수 없습니다."),
-    IS_NOT_SALE_PRODUCT(2001, "판매 중인 상품이 아닙니다."),
-    NOT_CORRECT_CATEGORY(2002, "정확한 카테고리를 입력해주세요."),
-    ALREADY_EXIST_CATEGORY(2003, "이미 존재하는 카테고리입니다."),
-    NOT_FOUND_CATEGORY(2004, "존재하지 않는 카테고리입니다."),
-
     NOT_FOUND_ORDER(3000, "해당 주문을 찾을 수 없습니다."),
     OUT_OF_STOCK(3001, "재고가 부족합니다."),
     ALREADY_SHIPPING(3002, "이미 배송 중인 상품입니다."),
@@ -31,21 +25,29 @@ public enum Error {
     ORDER_BEEN_CANCELED(3004, "주문이 취소되었습니다."),
     BEFORE_PURCHASE_TIME(3005, "구매 가능 시간이 아닙니다."),
 
-    NOT_FOUND_PRODUCTCATEGORY(7000, "상품이나 카테고리를 찾을 수 없습니다. 정상적인 상태인지 확인해주세요."),
-    TIMESALE_QUANTITY_EXCEED_PRODUCT_STOCK(8000, "상품의 보유 수량을 초과하였습니다."),
-    NOT_FOUND_TIMESALE_PRODUCT(8001, "해당 타임세일 상품을 찾을 수 없습니다."),
-    NOT_FOUND_ON_TIMESALE_PRODUCT(8002, "진행 중인 타임세일 상품이 아닙니다."),
-    EXCEED_TIMESALE_QUANTITY(8002, "남은 타임세일 재고 수량을 초과하였습니다."),
-    INVALID_TIMESALE_START_TIME(8100, "시작 시간은 현재 시간 이후여야 합니다."),
-    INVALID_TIMESALE_END_TIME(8101, "종료 시간은 시작 시간 이후여야 합니다."),
+    NOT_FOUND_PRODUCT(5000, "해당 상품을 찾을 수 없습니다."),
+    IS_NOT_SALE_PRODUCT(5001, "판매 중인 상품이 아닙니다."),
 
-    TIMESALE_SCHEDULE_ERROR(9001, "타임세일 스케줄링 중 오류가 발생했습니다."),
+    NOT_FOUND_PRODUCTCATEGORY(5050, "상품이나 카테고리를 찾을 수 없습니다. 정상적인 상태인지 확인해주세요."),
 
-    METHOD_ARGUMENT_NOT_VALID(9997, "유효하지 않은 값입니다."),
-    FORBIDDEN(9998, "접근 권한이 없습니다."),
+    ALREADY_EXIST_CATEGORY(6000, "이미 존재하는 카테고리입니다."),
+    NOT_FOUND_CATEGORY(6001, "존재하지 않는 카테고리입니다."),
+    NOT_CORRECT_CATEGORY(6300, "정확한 카테고리를 입력해주세요."),
+
+    NOT_FOUND_TIMESALE_PRODUCT(7000, "해당 타임세일 상품을 찾을 수 없습니다."),
+    NOT_FOUND_ON_TIMESALE_PRODUCT(7001, "진행 중인 타임세일 상품이 아닙니다."),
+    INVALID_TIMESALE_START_TIME(7100, "시작 시간은 현재 시간 이후여야 합니다."),
+    INVALID_TIMESALE_END_TIME(7101, "종료 시간은 시작 시간 이후여야 합니다."),
+    TIMESALE_QUANTITY_EXCEED_PRODUCT_STOCK(7300, "상품의 보유 수량을 초과하였습니다."),
+    EXCEED_TIMESALE_QUANTITY(7301, "남은 타임세일 재고 수량을 초과하였습니다."),
+    TIMESALE_SCHEDULE_ERROR(7500, "타임세일 스케줄링 중 오류가 발생했습니다."),
+
     INTERNAL_SERVER_ERROR(9999, "서버 오류입니다."),
     CIRCUIT_BREAKER_OPEN(10000, "이용량 증가로 현재 서비스가 불가능합니다."),
-    SERVER_TIMEOUT(10001, "응답 시간을 초과하였습니다.");
+    SERVER_TIMEOUT(10001, "응답 시간을 초과하였습니다."),
+
+    METHOD_ARGUMENT_NOT_VALID(20000, "유효하지 않은 값입니다."),
+    FORBIDDEN(20001, "접근 권한이 없습니다.");
 
     Integer code;
     String message;

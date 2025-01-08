@@ -38,7 +38,7 @@ public class TimeSaleService {
     private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
-    public Response<Void> createTimeSaleProduct(TimeSaleProductRequestDto timeSaleProductRequestDto, String role) {
+    public void createTimeSaleProduct(TimeSaleProductRequestDto timeSaleProductRequestDto, String role) {
         checkIsMaster(role);
 
         Long productId = timeSaleProductRequestDto.productId();
@@ -55,11 +55,6 @@ public class TimeSaleService {
         timeSaleProductRepository.save(timeSaleProduct);
 
         redisManager.scheduleTimeSale(timeSaleProduct);
-
-        return Response.<Void>builder()
-                .code(HttpStatus.CREATED.value())
-                .message(HttpStatus.CREATED.getReasonPhrase())
-                .build();
     }
 
     private void validateTimeSaleRequest(TimeSaleProductRequestDto request, Product product) {

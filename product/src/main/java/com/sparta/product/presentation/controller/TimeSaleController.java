@@ -6,6 +6,7 @@ import com.sparta.product.presentation.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -20,6 +21,10 @@ public class TimeSaleController {
     public Response<Void> createTimeSaleProduct(@RequestBody @Valid TimeSaleProductRequestDto timeSaleProductRequestDto,
                                                 @RequestHeader(name = "X-UserId", required = false) String userId,
                                                 @RequestHeader(name = "X-Role") String role) {
-        return timeSaleService.createTimeSaleProduct(timeSaleProductRequestDto, role);
+        timeSaleService.createTimeSaleProduct(timeSaleProductRequestDto, role);
+        return Response.<Void>builder()
+                .code(HttpStatus.CREATED.value())
+                .message(HttpStatus.CREATED.getReasonPhrase())
+                .build();
     }
 }

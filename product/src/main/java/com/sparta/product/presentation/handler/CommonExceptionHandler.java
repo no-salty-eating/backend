@@ -20,6 +20,7 @@ import java.util.Map;
 @RestControllerAdvice(basePackages = {"com.sparta.product.presentation.controller"})
 public class CommonExceptionHandler {
 
+
     @ExceptionHandler(ProductException.class)
     public Response<Void> ProductExceptionHandler(ProductException e) {
 
@@ -51,6 +52,7 @@ public class CommonExceptionHandler {
                 .build();
     }
 
+    // global error 경우가 있을 수 있으니 예외 처리가 이상하게 나오면 확인 필요
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Response<Void> MethodArgumentNotValidHandler(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
