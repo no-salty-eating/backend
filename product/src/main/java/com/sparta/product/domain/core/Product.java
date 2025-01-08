@@ -57,4 +57,8 @@ public class Product extends BaseEntity {
             super.updateIsPublic(isPublic);
         }
     }
+
+    public void decreaseStock(Integer quantity) {
+        stock -= quantity;
+    }
 }
