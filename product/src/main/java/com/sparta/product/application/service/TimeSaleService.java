@@ -13,14 +13,13 @@ import com.sparta.product.domain.repository.TimeSaleProductRepository;
 import com.sparta.product.application.service.redis.RedisKeys;
 import com.sparta.product.application.service.redis.TimeSaleRedisManager;
 import com.sparta.product.domain.repository.TimeSaleSoldOutRepository;
-import com.sparta.product.presentation.Response;
+import com.sparta.product.application.dtos.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -38,7 +37,7 @@ public class TimeSaleService {
     private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
-    public void createTimeSaleProduct(TimeSaleProductRequestDto timeSaleProductRequestDto, String role) {
+    public Response<Void> createTimeSaleProduct(TimeSaleProductRequestDto timeSaleProductRequestDto, String role) {
         checkIsMaster(role);
 
         Long productId = timeSaleProductRequestDto.productId();
@@ -55,6 +54,11 @@ public class TimeSaleService {
         timeSaleProductRepository.save(timeSaleProduct);
 
         redisManager.scheduleTimeSale(timeSaleProduct);
+
+        return Response.<Void>builder()
+                .code(HttpStatus.CREATED.value())
+                .message(HttpStatus.CREATED.getReasonPhrase())
+                .build();
     }
 
     private void validateTimeSaleRequest(TimeSaleProductRequestDto request, Product product) {

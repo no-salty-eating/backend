@@ -2,11 +2,10 @@ package com.sparta.product.presentation.controller;
 
 import com.sparta.product.application.dtos.timesale.TimeSaleProductRequestDto;
 import com.sparta.product.application.service.TimeSaleService;
-import com.sparta.product.presentation.Response;
+import com.sparta.product.application.dtos.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -21,10 +20,6 @@ public class TimeSaleController {
     public Response<Void> createTimeSaleProduct(@RequestBody @Valid TimeSaleProductRequestDto timeSaleProductRequestDto,
                                                 @RequestHeader(name = "X-UserId", required = false) String userId,
                                                 @RequestHeader(name = "X-Role") String role) {
-        timeSaleService.createTimeSaleProduct(timeSaleProductRequestDto, role);
-        return Response.<Void>builder()
-                .code(HttpStatus.CREATED.value())
-                .message(HttpStatus.CREATED.getReasonPhrase())
-                .build();
+        return timeSaleService.createTimeSaleProduct(timeSaleProductRequestDto, role);
     }
 }

@@ -14,7 +14,7 @@ import com.sparta.product.domain.core.ProductCategory;
 import com.sparta.product.domain.repository.CategoryRepository;
 import com.sparta.product.domain.repository.ProductCategoryRepository;
 import com.sparta.product.domain.repository.ProductRepository;
-import com.sparta.product.presentation.Response;
+import com.sparta.product.application.dtos.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,7 +35,7 @@ public class ProductService {
     private final ProductCategoryRepository productCategoryRepository;
 
     @Transactional
-    public void createProduct(ProductRequestDto productRequestDto, String role) {
+    public Response<Void> createProduct(ProductRequestDto productRequestDto, String role) {
         checkIsSellerOrMaster(role);
 
         Product product = Product.createFrom(productRequestDto.productName(), productRequestDto.price(), productRequestDto.stock(), productRequestDto.isPublic());
@@ -44,10 +44,15 @@ public class ProductService {
 
         List<Long> categories = productRequestDto.productCategoryList();
         saveProductCategory(categories, product);
+
+        return Response.<Void>builder()
+                .code(HttpStatus.CREATED.value())
+                .message(HttpStatus.CREATED.getReasonPhrase())
+                .build();
     }
 
     @Transactional(readOnly = true)
-    public ProductResponseDto getProduct(Long productId, String role) {
+    public Response<ProductResponseDto> getProduct(Long productId, String role) {
         List<ProductCategory> productCategories = role.equals(UserRoleEnum.MASTER.toString())
                 ? productCategoryRepository.findByProductIdWithoutConditions(productId)
                 : productCategoryRepository.findByProductIdWithConditions(productId);
@@ -56,13 +61,15 @@ public class ProductService {
             throw new NotFoundProductCategoryException();
         }
 
-        return role.equals(UserRoleEnum.MASTER.toString()) ?
-                ProductResponseDto.forMasterOf(productCategories)
-                : ProductResponseDto.forUserOrSellerOf(productCategories);
+        return Response.<ProductResponseDto>builder()
+                .data(role.equals(UserRoleEnum.MASTER.toString()) ?
+                        ProductResponseDto.forMasterOf(productCategories)
+                        : ProductResponseDto.forUserOrSellerOf(productCategories))
+                .build();
     }
 
     @Transactional
-    public void updateProduct(Long productId, String role, ProductUpdateRequestDto productUpdateRequestDto) {
+    public Response<Void> updateProduct(Long productId, String role, ProductUpdateRequestDto productUpdateRequestDto) {
         checkIsSellerOrMaster(role);
 
         Product product = productRepository.findByIdAndIsDeletedFalse(productId).orElseThrow(NotFoundProductException::new);
@@ -73,15 +80,19 @@ public class ProductService {
             saveProductCategory(categories, product);
         }
         product.updateFrom(productUpdateRequestDto.productName(), productUpdateRequestDto.price(), productUpdateRequestDto.stock(), productUpdateRequestDto.isPublic());
+
+        return Response.<Void>builder().build();
     }
 
     @Transactional
-    public void softDeleteProduct(Long productId, String role) {
+    public Response<Void> softDeleteProduct(Long productId, String role) {
         checkIsSellerOrMaster(role);
 
         Product product = productRepository.findByIdAndIsDeletedFalse(productId).orElseThrow(NotFoundProductException::new);
 
         product.updateIsDeleted(true);
+
+        return Response.<Void>builder().build();
     }
 
     private void saveProductCategory(List<Long> categories, Product product) {
