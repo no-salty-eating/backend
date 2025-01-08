@@ -1,8 +1,9 @@
 package com.sparta.coupon.presentation.controller;
 
 import com.sparta.coupon.application.dto.Response;
-import com.sparta.coupon.application.dto.request.CouponDto;
-import com.sparta.coupon.application.dto.request.CouponDto.GetDetailResponse;
+import com.sparta.coupon.application.dto.request.CreateCouponRequestDto;
+import com.sparta.coupon.application.dto.response.GetCouponDetailResponseDto;
+import com.sparta.coupon.application.dto.response.GetCouponResponseDto;
 import com.sparta.coupon.application.service.CouponService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,19 +23,19 @@ public class CouponController {
     private final CouponService couponService;
 
     @PostMapping
-    public Response<CouponDto.GetResponse> createCoupon(@RequestBody CouponDto.CreateRequest request) {
+    public Response<GetCouponResponseDto> createCoupon(@RequestBody CreateCouponRequestDto request) {
 
         return new Response<>(HttpStatus.CREATED.value(), "쿠폰 생성 완료", couponService.createCoupon(request));
     }
 
     @GetMapping("/{couponId}")
-    public Response<CouponDto.GetDetailResponse> getCoupon(@PathVariable Long couponId) {
+    public Response<GetCouponDetailResponseDto> getCoupon(@PathVariable Long couponId) {
 
         return new Response<>(HttpStatus.CREATED.value(), "쿠폰 단건 조회 완료", couponService.getCoupon(couponId));
     }
 
     @GetMapping
-    public Response<List<GetDetailResponse>> getAllCoupons() {
+    public Response<List<GetCouponDetailResponseDto>> getAllCoupons() {
 
         return new Response<>(HttpStatus.CREATED.value(), "쿠폰 전체 조회 완료", couponService.getAllCoupons());
     }
