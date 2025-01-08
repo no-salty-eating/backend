@@ -23,4 +23,15 @@ public class Point extends BaseEntity {
         this.userId = userId;
         this.points = points;
     }
+
+    public void updatePoints(PointHistoryType pointHistoryType, int pointAmount) {
+        if (pointHistoryType == PointHistoryType.EARN) {
+            points += pointAmount;
+        } else {
+            if (points - pointAmount < 0) {
+                throw new IllegalArgumentException("사용 가능한 적립금을 초과했습니다.");
+            }
+            points -= pointAmount;
+        }
+    }
 }
