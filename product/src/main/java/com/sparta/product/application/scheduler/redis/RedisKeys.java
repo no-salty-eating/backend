@@ -1,4 +1,4 @@
-package com.sparta.product.application.service.redis;
+package com.sparta.product.application.scheduler.redis;
 
 import org.springframework.stereotype.Component;
 
