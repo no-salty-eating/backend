@@ -24,7 +24,7 @@ public class TimeSaleController {
         return timeSaleService.createTimeSaleProduct(timeSaleProductRequestDto, role);
     }
 
-    @PostMapping("/purchase")
+    @PostMapping("/timesale-quantity-decrease")
     public Response<Void> purchaseTimeSaleProduct(@RequestBody @Valid TimeSaleProductPurchaseRequestDto timeSaleProductPurchaseRequestDto,
                                                   @RequestHeader(name = "X-UserId", required = false) String userId,
                                                   @RequestHeader(name = "X-Role") String role) {
