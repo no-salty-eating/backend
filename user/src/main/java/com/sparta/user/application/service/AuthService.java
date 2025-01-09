@@ -1,5 +1,6 @@
 package com.sparta.user.application.service;
 
+import static com.sparta.user.application.exception.Error.ACCOUNT_NOT_PUBLIC;
 import static com.sparta.user.application.exception.Error.INVALID_PASSWORD;
 import static com.sparta.user.application.exception.Error.NOT_FOUND_USER;
 
@@ -33,6 +34,10 @@ public class AuthService {
         User user = userRepository.findByLoginId(loginId).orElseThrow(
                 () -> new UserException(NOT_FOUND_USER, HttpStatus.NOT_FOUND)
         );
+
+        if (!user.isPublic()){
+            throw new UserException(ACCOUNT_NOT_PUBLIC, HttpStatus.FORBIDDEN);
+        }
 
         // 비밀번호 확인
         if (!passwordEncoder.matches(password, user.getPassword())) {

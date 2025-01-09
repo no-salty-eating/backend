@@ -15,7 +15,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:19090/eureka/
+      defaultZone: http://localhost:9090/eureka/
 
 service:
   jwt:
@@ -23,7 +23,7 @@ service:
     secret-key: ${JWT_SECRET_KEY}
 
 server:
-  port: 19092
+  port: 19091
 
 management:
   zipkin:
@@ -36,4 +36,4 @@ management:
 
 openapi:
   service:
-    url : http://localhost:19091/user-service
+    url : http://localhost:19090/user-service
