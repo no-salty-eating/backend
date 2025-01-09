@@ -162,7 +162,7 @@ class PaymentService(
             if (payment.pgStatus == CAPTURE_RETRY) {
                 paymentApiService.retry(payment.id)
             }
-            if (payment.pgStatus == CAPTURE_SUCCESS) {
+            if (payment.pgStatus == CAPTURE_SUCCESS || payment.pgStatus == CAPTURE_FAIL) {
                 kafkaProducer.sendEvent(
                     PAYMENT_RESULT, PaymentResultEvent(
                         payment.pgOrderId,
