@@ -158,7 +158,6 @@ class PaymentService(
             }
             cacheService.remove(payment.id)
 
-            //TODO: 결제 요청 큐 만들기, paymentResultEvent 처리로직 만들기
             if (payment.pgStatus == CAPTURE_RETRY) {
                 paymentApiService.retry(payment.id)
             }
