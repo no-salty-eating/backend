@@ -6,5 +6,5 @@ import org.springframework.stereotype.Component;
 public class RedisKeys {
     public static final String TIMESALE_START_KEY = "timesale:start";
     public static final String TIMESALE_END_KEY = "timesale:end";
-    public static final String TIMESALE_INVENTORY = "timesale:inventory";
+    public static final String TIMESALE_ON = "timesale:on:";
 }

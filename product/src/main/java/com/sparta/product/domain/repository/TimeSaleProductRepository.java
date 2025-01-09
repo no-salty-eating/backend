@@ -11,4 +11,6 @@ public interface TimeSaleProductRepository extends JpaRepository<TimeSaleProduct
     Optional<TimeSaleProduct> findByIdAndIsDeletedFalseAndIsPublicTrue(Long productId);
 
     boolean existsByProductIdAndTimeSaleEndTimeAfter(Long id, LocalDateTime now);
+
+    Optional<TimeSaleProduct> findByProductIdAndIsDeletedFalseAndIsPublicTrue(Long productId);
 }

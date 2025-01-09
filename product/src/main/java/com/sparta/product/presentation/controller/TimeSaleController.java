@@ -7,6 +7,7 @@ import com.sparta.product.application.dtos.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -21,13 +22,19 @@ public class TimeSaleController {
     public Response<Void> createTimeSaleProduct(@RequestBody @Valid TimeSaleProductRequestDto timeSaleProductRequestDto,
                                                 @RequestHeader(name = "X-UserId", required = false) String userId,
                                                 @RequestHeader(name = "X-Role") String role) {
-        return timeSaleService.createTimeSaleProduct(timeSaleProductRequestDto, role);
+        timeSaleService.createTimeSaleProduct(timeSaleProductRequestDto, role);
+        return Response.<Void>builder()
+                .code(HttpStatus.CREATED.value())
+                .message(HttpStatus.CREATED.getReasonPhrase())
+                .build();
     }
 
+    // TODO : kafka 쪽으로 옮겨야..
     @PostMapping("/timesale-quantity-decrease")
     public Response<Void> purchaseTimeSaleProduct(@RequestBody @Valid TimeSaleProductPurchaseRequestDto timeSaleProductPurchaseRequestDto,
                                                   @RequestHeader(name = "X-UserId", required = false) String userId,
                                                   @RequestHeader(name = "X-Role") String role) {
-        return timeSaleService.purchaseTimeSaleProduct(timeSaleProductPurchaseRequestDto, role);
+        timeSaleService.purchaseTimeSaleProduct(timeSaleProductPurchaseRequestDto, role);
+        return Response.<Void>builder().build();
     }
 }

@@ -1,13 +1,14 @@
 package com.sparta.product.domain.core;
 
-import com.sparta.product.application.dtos.timesale.TimeSaleProductRequestDto;
 import com.sparta.product.domain.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter

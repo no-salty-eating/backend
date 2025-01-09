@@ -25,7 +25,6 @@ public class TimeSaleSchedulerService {
 
         Product product = timeSaleProduct.getProduct();
 
-        // 상품과 타임세일 상품의 공개 여부 업데이트
         product.updateIsPublic(false);
         timeSaleProduct.updateIsPublic(true);
 
@@ -37,12 +36,11 @@ public class TimeSaleSchedulerService {
         TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findById(productId)
                 .orElseThrow(NotFoundTimeSaleException::new);
 
-        timeSaleRedisManager.removeInventory(productId.toString());
+        timeSaleRedisManager.removeTimeSaleOn(productId.toString());
         timeSaleRedisManager.removeEndSchedule(productId.toString());
 
         Product product = timeSaleProduct.getProduct();
 
-        // 상품과 타임세일 상품의 공개 여부 업데이트
         product.updateIsPublic(true);
         timeSaleProduct.updateIsPublic(false);
 

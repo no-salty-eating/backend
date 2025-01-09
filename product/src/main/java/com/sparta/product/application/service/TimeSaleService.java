@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -39,7 +40,7 @@ public class TimeSaleService {
     private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
-    public Response<Void> createTimeSaleProduct(TimeSaleProductRequestDto timeSaleProductRequestDto, String role) {
+    public void createTimeSaleProduct(TimeSaleProductRequestDto timeSaleProductRequestDto, String role) {
         checkIsMaster(role);
 
         Long productId = timeSaleProductRequestDto.productId();
@@ -56,21 +57,16 @@ public class TimeSaleService {
         timeSaleProductRepository.save(timeSaleProduct);
 
         redisManager.scheduleTimeSale(timeSaleProduct);
-
-        return Response.<Void>builder()
-                .code(HttpStatus.CREATED.value())
-                .message(HttpStatus.CREATED.getReasonPhrase())
-                .build();
     }
 
     @Transactional
-    public Response<Void> purchaseTimeSaleProduct(TimeSaleProductPurchaseRequestDto timeSaleProductPurchaseRequestDto, String role) {
+    public void purchaseTimeSaleProduct(TimeSaleProductPurchaseRequestDto timeSaleProductPurchaseRequestDto, String role) {
         Long timeSaleProductId = timeSaleProductPurchaseRequestDto.timeSaleProductId();
         Integer quantity = timeSaleProductPurchaseRequestDto.quantity();
         TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByIdAndIsDeletedFalseAndIsPublicTrue(timeSaleProductId)
                 .orElseThrow(NotFoundOnTimeSaleException::new);
 
-        // 재고 확인 후 감소
+        // redis에 재고 확인 후 감소
         if (!redisManager.decreaseInventory(timeSaleProductId, quantity)) {
             throw new ExceedTimeSaleQuantityException();
         }
@@ -89,9 +85,6 @@ public class TimeSaleService {
                 timeSaleSoldOutRepository.save(TimeSaleSoldOut.createFrom(timeSaleProduct));
                 timeSaleSchedulerService.endTimeSale(timeSaleProductId);
             }
-
-            return Response.<Void>builder().build();
-
         } catch (Exception e) {
             // 구매 실패 시 Redis 재고 원복
             redisManager.increaseInventory(timeSaleProductId, quantity);
@@ -100,6 +93,7 @@ public class TimeSaleService {
         }
     }
 
+    // TODO : kafka로 메시지 받으면 실행 되도록?
     @Async
     @Transactional
     protected void processTimeSalePurchaseAsyncToDB(TimeSaleProduct timeSaleProduct, Integer quantity) {
@@ -120,8 +114,10 @@ public class TimeSaleService {
     }
 
     private boolean isStockEmpty(Long timeSaleProductId) {
-        String inventoryKey = RedisKeys.TIMESALE_INVENTORY;
-        String remainingStock = (String) redisTemplate.opsForHash().get(inventoryKey, timeSaleProductId.toString());
+        String key = RedisKeys.TIMESALE_ON + timeSaleProductId;
+        Map<Object, Object> productInfo = redisTemplate.opsForHash().entries(key);
+
+        String remainingStock = (String) productInfo.get("quantity");
         return remainingStock == null || Integer.parseInt(remainingStock) <= 0;
     }
 
