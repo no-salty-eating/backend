@@ -19,10 +19,8 @@ class Consumer(
             ReceiverOptions.create<String, String>(prop)
         }.subscription(listOf(topic)).let { option ->
             ReactiveKafkaConsumerTemplate(option)
-        }.let { consumer ->
-            consumer.receiveAutoAck().flatMap { record ->
-                mono { runner.invoke(record) }
-            }
+        }.receiveAutoAck().flatMap { record ->
+            mono { runner.invoke(record) }
         }.subscribe()
     }
 }

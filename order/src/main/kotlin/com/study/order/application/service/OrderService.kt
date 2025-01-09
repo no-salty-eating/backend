@@ -6,7 +6,6 @@ import com.study.order.application.dto.event.CreateOrderEvent
 import com.study.order.application.dto.event.ProductStockDecreaseEvent
 import com.study.order.application.dto.request.CreateOrderRequestDto
 import com.study.order.application.dto.response.ProductResponse
-import com.study.order.application.exception.InvalidCouponCategoryException
 import com.study.order.application.exception.InvalidCouponException
 import com.study.order.application.exception.InvalidCouponPriceException
 import com.study.order.application.exception.NotEnoughStockException
@@ -17,7 +16,6 @@ import com.study.order.domain.model.OrderDetail
 import com.study.order.domain.repository.OrderDetailRepository
 import com.study.order.domain.repository.OrderRepository
 import com.study.order.infrastructure.config.log.LoggerProvider
-import org.bouncycastle.asn1.x500.style.RFC4519Style.description
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -40,16 +38,16 @@ class OrderService(
     @Transactional
     suspend fun create(request: CreateOrderRequestDto): Long? {
 
-        val productIds = request.products.map { it.productId }.toSet()
-        val productsByCouponId = request.products
-            .filter { it.couponId != null }
-            .associate {
-                it.couponId!! to it.productId
-            }
+//        val productIds = request.products.map { it.productId }.toSet()
+//        val productsByCouponId = request.products
+//            .filter { it.couponId != null }
+//            .associate {
+//                it.couponId!! to it.productId
+//            }
 
-        val couponIds = productsByCouponId.keys
+//        val couponIds = productsByCouponId.keys
 //        val productsById = productService.getProductList(productIds).associateBy { it.id }
-
+//
 //        if (request.products.any {
 //                val product = productsById[it.productId] ?: throw NotFoundProductException()
 //                it.quantity > product.stock
@@ -65,11 +63,7 @@ class OrderService(
 //                val productId = productsByCouponId[couponId]
 //                val product: ProductResponse = productsById[productId]!!
 //
-//                if (!product.categoryList.any { category -> category.id == coupon.useCategoryId }) {
-//                    throw InvalidCouponCategoryException()
-//                }
-//
-//                if (product.price < coupon.availablePrice) {
+//                if (product.price < coupon.minOrderAmount) {
 //                    throw InvalidCouponPriceException()
 //                }
 //
@@ -77,9 +71,12 @@ class OrderService(
 //                    throw InvalidCouponException()
 //                }
 //
-//                when {
-//                    coupon.discountRate != null -> product.price * (coupon.discountRate / 100)
-//                    coupon.discountPrice != null -> coupon.discountPrice
+//                when (coupon.discountType) {
+//                    "AMOUNT" -> coupon.discountValue
+//                    "RATE" -> if (product.price * (coupon.discountValue / 100) > coupon.maxDiscountAmount)
+//                        coupon.maxDiscountAmount
+//                    else product.price * (coupon.discountValue / 100)
+//
 //                    else -> throw InvalidCouponException()
 //                }
 //            }
@@ -111,15 +108,15 @@ class OrderService(
             )
         }
 
-        if (couponIds.isNotEmpty())
-            messageService.sendEvent(COUPON_USED, couponIds)
+//        if (couponIds.isNotEmpty())
+//            messageService.sendEvent(COUPON_USED, couponIds)
 
-        messageService.sendEvent(PRODUCT_STOCK_DECREASE, request.products.map {
-            ProductStockDecreaseEvent(
-                it.productId,
-                it.quantity
-            )
-        })
+//        messageService.sendEvent(PRODUCT_STOCK_DECREASE, request.products.map {
+//            ProductStockDecreaseEvent(
+//                it.productId,
+//                it.quantity
+//            )
+//        })
 
         messageService.sendEvent(
             CREATE_ORDER, CreateOrderEvent(

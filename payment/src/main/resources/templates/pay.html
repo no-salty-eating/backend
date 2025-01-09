@@ -8,9 +8,10 @@
 
 <div>
 	<p>주문정보</p>
-	<p th:text = "${pay.id}"/>
-	<p th:text = "${pay.description}"/>
-	<p th:text = "${pay.paymentPrice}"/>
+	<p th:text = "${payment.id}"/>
+	<p th:text = "${payment.description}"/>
+	<p th:text = "${payment.paymentPrice}"/>
+	<p th:text = "${payment.userId}"/>
 </div>
 
 <!-- 할인 쿠폰 -->
@@ -80,8 +81,8 @@
 			await widgets.requestPayment({
 				orderId: `[[${payment.pgOrderId}]]`,
 				orderName: `[[${payment.description}]]`,
-				successUrl: window.location.origin + "/pay/success",
-				failUrl: window.location.origin + "/pay/fail",
+				successUrl: window.location.origin + "/payment/success",
+				failUrl: window.location.origin + "/payment/fail",
 				customerEmail: "customer123@gmail.com",
 				customerName: `[[${payment.userId}]]`,
 				customerMobilePhone: "01012341234",

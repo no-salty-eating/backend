@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS TB_PAYMENT (
     payment_price bigint,
     description varchar(300),
     pg_order_id varchar(32) not null,
-    pg_key varchar(49) not null,
+    pg_key varchar(49),
     pg_status varchar(20) not null,
     pg_retry_count int,
     is_deleted boolean,

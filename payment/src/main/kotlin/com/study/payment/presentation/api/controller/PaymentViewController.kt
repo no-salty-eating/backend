@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
 @RequestMapping("/payment")
-class PaymentController (
+class PaymentViewController (
     private val paymentService: PaymentService,
 ) {
 
@@ -22,7 +22,7 @@ class PaymentController (
         return "pay.html"
     }
     // 주문 생성 -> 토스에 연락 -> 토스에서 pgKey 발급 -> /pay/success 호출
-    @GetMapping("/pay/success")
+    @GetMapping("/success")
     suspend fun requestPayment(request: PaySucceedRequest): String {
         if (!paymentService.paymentKeyInjection(request.toDto()))
             return "pay-fail.html"
@@ -33,11 +33,4 @@ class PaymentController (
             "pay-fail.html"
         }
     }
-
-    @PatchMapping("/{paymentId}")
-    suspend fun retryRequestPayment(@PathVariable paymentId: Long) {
-        paymentService.retryRequestPayment(paymentId)
-    }
-
-
 }

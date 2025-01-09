@@ -32,6 +32,8 @@ spring:
       port: ${REDIS_PORT}
   kafka:
     bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: earliest
 eureka:
   instance:
     initial-status: up
@@ -46,6 +48,7 @@ payment:
     domain: ${DOMAIN}
   toss:
     domain: https://api.tosspayments.com
+#    domain: https://api.tosspayments-test.com
     key:
       client: ${PAYMENT_CLIENT}
       secret: ${PAYMENT_SECRET}

@@ -9,4 +9,6 @@ interface PaymentRepository {
     suspend fun findByPgOrderId(pgOrderId: String): Payment?
 
     suspend fun findById(id:Long): Payment?
+
+    suspend fun findAllById(ids:List<Long>): List<Payment>
 }
