@@ -10,7 +10,6 @@ import com.sparta.coupon.application.exception.CouponException;
 import com.sparta.coupon.infrastructure.repository.CouponRepository;
 import com.sparta.coupon.model.core.Coupon;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -48,8 +47,7 @@ public class CouponService {
                 .orElseThrow(() -> new CouponException(NOT_FOUND_COUPON, HttpStatus.NOT_FOUND));
 
         return  coupons.stream()
-                .map(GetCouponDetailResponseDto::from)
-                .collect(Collectors.toList());
+                .map(GetCouponDetailResponseDto::from).toList();
     }
 
 }

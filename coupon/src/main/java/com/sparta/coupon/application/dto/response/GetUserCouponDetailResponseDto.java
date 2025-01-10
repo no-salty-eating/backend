@@ -1,11 +1,13 @@
 package com.sparta.coupon.application.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sparta.coupon.model.CouponStatusEnum;
 import com.sparta.coupon.model.DiscountTypeEnum;
 import com.sparta.coupon.model.core.Coupon;
 import com.sparta.coupon.model.core.UserCoupon;
 import java.time.LocalDateTime;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record GetUserCouponDetailResponseDto (
         Long id,
         Long couponId,

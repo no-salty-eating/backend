@@ -3,7 +3,6 @@ package com.sparta.coupon.model.core;
 
 import static com.sparta.coupon.application.exception.Error.CANCEL_UNAVAILABLE_COUPON;
 import static com.sparta.coupon.application.exception.Error.EXPIRED_COUPON;
-import static com.sparta.coupon.application.exception.Error.ISSUE_NOT_VALID_TIME;
 import static com.sparta.coupon.application.exception.Error.USED_COUPON;
 
 import com.sparta.coupon.application.exception.CouponException;
