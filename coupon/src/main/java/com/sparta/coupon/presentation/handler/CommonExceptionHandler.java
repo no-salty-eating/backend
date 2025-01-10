@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RequiredArgsConstructor
-@RestControllerAdvice(basePackages = {"com.sparta.user.presentation.controller"})
+@RestControllerAdvice(basePackages = {"com.sparta.coupon.presentation.controller"})
 public class CommonExceptionHandler  {
 
     @ExceptionHandler(CouponException.class)

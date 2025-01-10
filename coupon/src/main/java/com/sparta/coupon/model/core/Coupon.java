@@ -84,4 +84,9 @@ public class Coupon extends BaseEntity {
                 .expireTime(endTime.plusDays(30)) // 만료 시간을 종료 시간 기준으로 30일 후로 설정
                 .build();
     }
+
+    public void issueCoupon() {
+        this.issueQuantity++;
+    }
+
 }

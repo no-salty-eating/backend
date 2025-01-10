@@ -21,6 +21,10 @@ public enum Error {
     NOT_FOUND_COUPON(2000, "존재하지 않는 쿠폰입니다."),
     ISSUE_NOT_VALID_TIME(2100, "쿠폰 발급 기간이 아닙니다."),
     COUPON_EXHAUSTED(2101, "쿠폰이 모두 소진되었습니다."),
+    USED_COUPON(2102, "이미 사용된 쿠폰입니다."),
+    EXPIRED_COUPON(2103, "만료된 쿠폰입니다."),
+    CANCEL_UNAVAILABLE_COUPON(2104, "사용 취소가 불가능한 쿠폰입니다."),
+    UNAVAILABLE_COUPON(2105, "쿠폰을 찾을 수 없거나 접근 권한이 없습니다."),
 
 
     METHOD_ARGUMENT_NOT_VALID(9997, "유효하지 않은 값입니다."),

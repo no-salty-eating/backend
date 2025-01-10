@@ -4,8 +4,10 @@ package com.sparta.coupon.application.service;
 import static com.sparta.coupon.application.exception.Error.COUPON_EXHAUSTED;
 import static com.sparta.coupon.application.exception.Error.ISSUE_NOT_VALID_TIME;
 import static com.sparta.coupon.application.exception.Error.NOT_FOUND_COUPON;
+import static com.sparta.coupon.application.exception.Error.UNAVAILABLE_COUPON;
 
 import com.sparta.coupon.application.dto.request.IssueRequestDto;
+import com.sparta.coupon.application.dto.response.GetCouponResponseDto;
 import com.sparta.coupon.application.dto.response.GetUserCouponDetailResponseDto;
 import com.sparta.coupon.application.exception.CouponException;
 import com.sparta.coupon.infrastructure.repository.CouponRepository;
@@ -26,7 +28,7 @@ public class UserCouponService {
     private final UserCouponRepository userCouponRepository;
 
     @Transactional
-    public GetUserCouponDetailResponseDto issueUserCoupon(String id, IssueRequestDto requestDto) {
+    public GetUserCouponDetailResponseDto issueUserCoupon(String userId, IssueRequestDto requestDto) {
 
          Coupon coupon = couponRepository.findByIdAndIsDeletedFalseWithLock(requestDto.couponId())
                 .orElseThrow(() -> new CouponException(NOT_FOUND_COUPON, HttpStatus.NOT_FOUND));
@@ -40,11 +42,34 @@ public class UserCouponService {
             throw new CouponException(COUPON_EXHAUSTED, HttpStatus.BAD_REQUEST);
         }
 
-        UserCoupon userCoupon = UserCoupon.issueUserCoupon(Long.parseLong(id), coupon);
+        UserCoupon userCoupon = UserCoupon.issueUserCoupon(Long.parseLong(userId), coupon);
+        userCoupon.getCoupon().issueCoupon();
         userCouponRepository.save(userCoupon);
 
         return GetUserCouponDetailResponseDto.from(userCoupon);
 
+    }
+
+    @Transactional
+    public GetCouponResponseDto useCoupon(String userId, Long userCouponId) {
+
+        UserCoupon userCoupon = userCouponRepository.findByIdAndUserIdAndIsDeletedFalse(userCouponId, Long.parseLong(userId))
+                .orElseThrow(() -> new CouponException(UNAVAILABLE_COUPON, HttpStatus.NOT_FOUND));
+
+        userCoupon.use();
+
+        return GetCouponResponseDto.from(userCoupon.getCoupon());
+    }
+
+    @Transactional
+    public GetCouponResponseDto cancelCoupon(String userId, Long userCouponId) {
+
+        UserCoupon userCoupon = userCouponRepository.findByIdAndUserIdAndIsDeletedFalse(userCouponId, Long.parseLong(userId))
+                .orElseThrow(() -> new CouponException(UNAVAILABLE_COUPON, HttpStatus.NOT_FOUND));
+
+        userCoupon.cancel();
+
+        return GetCouponResponseDto.from(userCoupon.getCoupon());
     }
 
 }

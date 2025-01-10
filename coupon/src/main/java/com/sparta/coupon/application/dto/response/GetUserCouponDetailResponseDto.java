@@ -32,7 +32,7 @@ public record GetUserCouponDetailResponseDto (
                 coupon.getStartTime(),
                 coupon.getEndTime(),
                 userCoupon.getCouponStatus(),
-                userCoupon.getUpdatedAt()
+                userCoupon.getUsedAt()
         );
     }
 }

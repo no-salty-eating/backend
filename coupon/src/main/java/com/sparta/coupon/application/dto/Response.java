@@ -18,5 +18,7 @@ public record Response<T>(
         if (message == null) {
             message = HttpStatus.OK.getReasonPhrase();
         }
+
+
     }
 }
