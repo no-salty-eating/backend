@@ -1,8 +1,9 @@
 package com.sparta.product.presentation.controller;
 
+import com.sparta.product.application.dtos.timesale.TimeSaleProductPurchaseRequestDto;
 import com.sparta.product.application.dtos.timesale.TimeSaleProductRequestDto;
 import com.sparta.product.application.service.TimeSaleService;
-import com.sparta.product.presentation.Response;
+import com.sparta.product.application.dtos.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,5 +22,12 @@ public class TimeSaleController {
                                                 @RequestHeader(name = "X-UserId", required = false) String userId,
                                                 @RequestHeader(name = "X-Role") String role) {
         return timeSaleService.createTimeSaleProduct(timeSaleProductRequestDto, role);
+    }
+
+    @PostMapping("/timesale-quantity-decrease")
+    public Response<Void> purchaseTimeSaleProduct(@RequestBody @Valid TimeSaleProductPurchaseRequestDto timeSaleProductPurchaseRequestDto,
+                                                  @RequestHeader(name = "X-UserId", required = false) String userId,
+                                                  @RequestHeader(name = "X-Role") String role) {
+        return timeSaleService.purchaseTimeSaleProduct(timeSaleProductPurchaseRequestDto, role);
     }
 }

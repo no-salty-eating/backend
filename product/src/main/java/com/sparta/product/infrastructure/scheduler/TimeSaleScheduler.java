@@ -1,7 +1,7 @@
 package com.sparta.product.infrastructure.scheduler;
 
-import com.sparta.product.application.service.TimeSaleSchedulerService;
-import com.sparta.product.application.service.redis.TimeSaleRedisManager;
+import com.sparta.product.application.scheduler.TimeSaleSchedulerService;
+import com.sparta.product.application.scheduler.redis.TimeSaleRedisManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
