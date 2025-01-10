@@ -16,7 +16,7 @@ import java.util.List;
 public record ProductResponseDto(
         @JsonProperty("product_id") Long productId,
         @JsonProperty("product_category_list") List<ProductCategoryResponseDto> productCategoryList,
-        @JsonProperty("product_name") String productName,
+        @JsonProperty("name") String name,
         Integer price,
         Integer stock,
         @JsonProperty("is_deleted") Boolean isDeleted,
@@ -37,7 +37,7 @@ public record ProductResponseDto(
                 .productCategoryList(categories.stream()
                         .map(ProductCategoryResponseDto::from)
                         .toList())
-                .productName(product.getName())
+                .name(product.getName())
                 .price(product.getPrice())
                 .stock(product.getStock())
                 .build();
@@ -57,10 +57,20 @@ public record ProductResponseDto(
                 product.getName(),
                 product.getPrice(),
                 product.getStock(),
-                product.isDeleted(),
-                product.isPublic(),
+                product.getIsDeleted(),
+                product.getIsPublic(),
                 product.getCreatedAt(),
                 product.getUpdatedAt()
         );
+    }
+
+    public static ProductResponseDto fromDto(ProductResponseDto productResponseDto, Integer newStock) {
+        return ProductResponseDto.builder()
+                .productId(productResponseDto.productId())
+                .productCategoryList(productResponseDto.productCategoryList())
+                .name(productResponseDto.name())
+                .price(productResponseDto.price())
+                .stock(newStock)
+                .build();
     }
 }

@@ -3,6 +3,9 @@ host:
   db:
     url: localhost
 
+kafka:
+  port: 9092
+
 database:
   username: root
   password: root

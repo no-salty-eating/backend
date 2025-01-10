@@ -8,6 +8,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -21,7 +23,7 @@ public class TimeSaleRedisManager {
             // 시작 시간 스케줄링
             redisTemplate.opsForZSet().add(
                     RedisKeys.TIMESALE_START_KEY,
-                    timeSaleProduct.getId().toString(),
+                    timeSaleProduct.getProduct().getId().toString(),
                     timeSaleProduct.getTimeSaleStartTime().atZone(ZoneId.of("Asia/Seoul"))
                             .toInstant()
                             .toEpochMilli()
@@ -30,20 +32,29 @@ public class TimeSaleRedisManager {
             // 종료 시간 스케줄링
             redisTemplate.opsForZSet().add(
                     RedisKeys.TIMESALE_END_KEY,
-                    timeSaleProduct.getId().toString(),
+                    timeSaleProduct.getProduct().getId().toString(),
                     timeSaleProduct.getTimeSaleEndTime().atZone(ZoneId.of("Asia/Seoul"))
                             .toInstant()
                             .toEpochMilli()
             );
 
-            // 재고 초기화
-            redisTemplate.opsForHash().put(RedisKeys.TIMESALE_INVENTORY,
-                    timeSaleProduct.getId().toString(),
-                    timeSaleProduct.getQuantity().toString());
         } catch (Exception e) {
-            log.error("Failed to schedule timesale for product {}", timeSaleProduct.getId(), e);
+            log.error("Failed to schedule timesale for product {}", timeSaleProduct.getProduct().getId(), e);
             throw new TimeSaleScheduleException();
         }
+    }
+
+    public void createTimeSaleProduct(TimeSaleProduct timeSaleProduct) {
+        Map<String, String> productInfo = new HashMap<>();
+        productInfo.put("product_id", timeSaleProduct.getProduct().getId().toString());
+        productInfo.put("name", timeSaleProduct.getProduct().getName());
+        productInfo.put("stock", timeSaleProduct.getStock().toString());
+        productInfo.put("price", timeSaleProduct.getDiscountPrice().toString());
+
+        redisTemplate.opsForHash().putAll(
+                RedisKeys.TIMESALE_ON + timeSaleProduct.getProduct().getId(),
+                productInfo
+        );
     }
 
     public Set<String> getStartTimeSales(long currentTime) {
@@ -62,38 +73,52 @@ public class TimeSaleRedisManager {
         );
     }
 
-    public void removeStartSchedule(String timeSaleProductId) {
-        redisTemplate.opsForZSet().remove(RedisKeys.TIMESALE_START_KEY, timeSaleProductId);
+    public void removeStartSchedule(String productId) {
+        redisTemplate.opsForZSet().remove(RedisKeys.TIMESALE_START_KEY, productId);
     }
 
-    public void removeEndSchedule(String timeSaleProductId) {
-        redisTemplate.opsForZSet().remove(RedisKeys.TIMESALE_END_KEY, timeSaleProductId);
+    public void removeEndSchedule(String productId) {
+        redisTemplate.opsForZSet().remove(RedisKeys.TIMESALE_END_KEY, productId);
     }
 
-    public void removeInventory(String timeSaleProductId) {
-        String inventoryKey = RedisKeys.TIMESALE_INVENTORY;
-        redisTemplate.opsForHash().delete(inventoryKey, timeSaleProductId);
+    public void removeTimeSaleOn(String productId) {
+        String key = RedisKeys.TIMESALE_ON + productId;
+        redisTemplate.delete(key);
     }
 
-    public boolean checkInventoryQuantity(Long timeSaleProductId, Integer quantity) {
-        String inventoryKey = RedisKeys.TIMESALE_INVENTORY;
-        String remainingQuantity = (String) redisTemplate.opsForHash().get(inventoryKey, timeSaleProductId.toString());
+    public boolean checkSoldOut(Long productId) {
+        String key = RedisKeys.TIMESALE_ON + productId;
+        Map<Object, Object> productInfo = redisTemplate.opsForHash().entries(key);
+        String remainingStock = (String) productInfo.get("stock");
 
-        return remainingQuantity != null && Integer.parseInt(remainingQuantity) >= quantity;
+        return remainingStock != null && remainingStock.equals("0");
     }
 
-    public boolean decreaseInventory(Long timeSaleProductId, Integer quantity) {
-        if (checkInventoryQuantity(timeSaleProductId, quantity)) {
-            String inventoryKey = RedisKeys.TIMESALE_INVENTORY;
-            redisTemplate.opsForHash().increment(inventoryKey, timeSaleProductId.toString(), -Long.valueOf(quantity));
-            return true;
-        } else {
-            return false;
+    public boolean decreaseInventory(Long productId, Integer stock) {
+        String key = RedisKeys.TIMESALE_ON + productId;
+        Map<Object, Object> productInfo = redisTemplate.opsForHash().entries(key);
+
+        if (!productInfo.isEmpty()) {
+            String remainingStock = (String) productInfo.get("stock");
+            if (remainingStock != null && Integer.parseInt(remainingStock) >= stock) {
+                // 수량 감소
+                int newQuantity = Integer.parseInt(remainingStock) - stock;
+                redisTemplate.opsForHash().put(key, "stock", String.valueOf(newQuantity));
+                return true;
+            }
         }
+        return false;
     }
 
-    public void increaseInventory(Long timeSaleProductId, Integer quantity) {
-        String inventoryKey = RedisKeys.TIMESALE_INVENTORY;
-        redisTemplate.opsForHash().increment(inventoryKey, timeSaleProductId.toString(), Long.valueOf(quantity));
+    public void increaseInventory(Long productId, Integer stock) {
+        String key = RedisKeys.TIMESALE_ON + productId;
+        Map<Object, Object> productInfo = redisTemplate.opsForHash().entries(key);
+
+        if (!productInfo.isEmpty()) {
+            String remainingStock = (String) productInfo.get("stock");
+            int newQuantity = (remainingStock != null ? Integer.parseInt(remainingStock) : 0) + stock;
+
+            redisTemplate.opsForHash().put(key, "stock", String.valueOf(newQuantity));
+        }
     }
 }

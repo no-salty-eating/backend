@@ -19,10 +19,13 @@ public class KafkaConfig {
     @Value("${host.url}")
     private String hostUrl;
 
+    @Value("${kafka.port}")
+    private String kafkaPort;
+
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, hostUrl + ":9092");
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, hostUrl + ":" + kafkaPort);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
@@ -41,7 +44,7 @@ public class KafkaConfig {
         // 컨슈머 팩토리 설정을 위한 맵을 생성합니다.
         Map<String, Object> configProps = new HashMap<>();
         // Kafka 브로커의 주소를 설정합니다.
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, hostUrl + ":9092");
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, hostUrl + ":" + kafkaPort);
         // 메시지 키의 디시리얼라이저 클래스를 설정합니다.
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         // 메시지 값의 디시리얼라이저 클래스를 설정합니다.

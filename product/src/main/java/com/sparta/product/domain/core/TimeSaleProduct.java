@@ -1,13 +1,14 @@
 package com.sparta.product.domain.core;
 
-import com.sparta.product.application.dtos.timesale.TimeSaleProductRequestDto;
 import com.sparta.product.domain.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
@@ -25,9 +26,9 @@ public class TimeSaleProduct extends BaseEntity {
     private Integer discountRate;
 
     @Column(name = "discount_price")
-    private Double discountPrice;
+    private Integer discountPrice;
 
-    private Integer quantity;
+    private Integer stock;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "timesale_start_time")
@@ -54,12 +55,14 @@ public class TimeSaleProduct extends BaseEntity {
         );
     }
 
-    private TimeSaleProduct(Product product, Integer discountRate, Integer quantity,
+    private TimeSaleProduct(Product product, Integer discountRate, Integer stock,
                             LocalDateTime timeSaleStartTime, LocalDateTime timeSaleEndTime) {
+        double discountedPrice = product.getPrice() * (1 - discountRate / 100.0);
+
         this.product = product;
         this.discountRate = discountRate;
-        discountPrice = product.getPrice() * (1 - discountRate / 100.0);
-        this.quantity = quantity;
+        this.discountPrice = (int) (Math.round(discountedPrice / 10.0) * 10);
+        this.stock = stock;
         this.timeSaleStartTime = timeSaleStartTime;
         this.timeSaleEndTime = timeSaleEndTime;
     }
@@ -69,6 +72,6 @@ public class TimeSaleProduct extends BaseEntity {
     }
 
     public void decreaseQuantity(Integer quantity) {
-        this.quantity -= quantity;
+        this.stock -= quantity;
     }
 }

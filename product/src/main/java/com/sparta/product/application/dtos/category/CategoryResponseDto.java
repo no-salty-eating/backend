@@ -30,8 +30,8 @@ public record CategoryResponseDto(
         return new CategoryResponseDto(
                 category.getId(),
                 category.getName(),
-                category.isDeleted(),
-                category.isPublic(),
+                category.getIsDeleted(),
+                category.getIsPublic(),
                 category.getCreatedAt(),
                 category.getUpdatedAt()
         );

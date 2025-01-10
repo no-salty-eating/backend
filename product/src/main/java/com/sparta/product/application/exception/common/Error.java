@@ -39,6 +39,7 @@ public enum Error {
     INVALID_TIMESALE_START_TIME(7100, "시작 시간은 현재 시간 이후여야 합니다."),
     INVALID_TIMESALE_END_TIME(7101, "종료 시간은 시작 시간 이후여야 합니다."),
     DUPLICATE_TIMESALE_PRODUCT(7102, "이미 진행 중이거나 예정된 타임세일이 있습니다."),
+    EMPTY_STOCK_EXCEPTION(7103, "재고가 없습니다."),
     TIMESALE_QUANTITY_EXCEED_PRODUCT_STOCK(7300, "상품의 보유 수량을 초과하였습니다."),
     EXCEED_TIMESALE_QUANTITY(7301, "남은 타임세일 재고 수량을 초과하였습니다."),
     TIMESALE_SCHEDULE_ERROR(7500, "타임세일 스케줄링 중 오류가 발생했습니다."),
