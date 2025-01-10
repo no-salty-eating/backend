@@ -5,14 +5,11 @@ import com.study.order.application.client.PointService
 import com.study.order.application.client.ProductService
 import com.study.order.application.dto.request.CreateOrderRequestDto
 import com.study.order.application.dto.request.ProductQuantityRequestDto
-import com.study.order.application.dto.response.CategoryResponse
 import com.study.order.application.dto.response.CouponResponse
-import com.study.order.application.dto.response.ProductResponse
+import com.study.order.application.dto.response.ProductResponseDto
 import com.study.order.application.messaging.MessageService
 import com.study.order.infrastructure.config.log.LoggerProvider
 import com.study.order.infrastructure.repository.OrderRepository
-import com.study.order.presentation.api.request.CreateOrderRequest
-import com.study.order.presentation.api.request.ProductQuantityRequest
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldNotBe
 import org.mockito.Mockito
@@ -46,14 +43,10 @@ class OrderServiceTest(
         )
 
         Mockito.`when`(productService.getProductList(setOf(1, 2))).thenReturn(listOf(
-                ProductResponse(1, "apple", 1000, 100, listOf(CategoryResponse(1, "fruit"))),
-                ProductResponse(2, "banana", 2000, 100, listOf(
-                        CategoryResponse(1, "fruit"),
-                        CategoryResponse(2, "yellow"),
-                    )
-                ),
+                ProductResponseDto(1, "apple", 1000, 100, ),
+                ProductResponseDto(2, "banana", 2000, 100,),
             ))
-        Mockito.`when`(couponService.getCouponList(setOf(1234, 4321))).thenReturn(listOf(
+        Mockito.`when`(couponService.getCouponList(123, setOf(1234, 4321))).thenReturn(listOf(
                 CouponResponse(1234, "AMOUNT",1000, 500, 1000,  "AVAILABLE"),
                 CouponResponse(4321, "AMOUNT", 500, 0, 500, "AVAILABLE"),
             ))

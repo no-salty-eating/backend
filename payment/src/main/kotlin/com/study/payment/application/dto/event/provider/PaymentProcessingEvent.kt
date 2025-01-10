@@ -1,7 +1,6 @@
 package com.study.payment.application.dto.event.provider
 
-data class PaymentResultEvent(
+data class PaymentProcessingEvent(
+    val id: Long,
     val pgOrderId: String,
-    val paymentPrice: Int,
-    val pgStatus: String,
 )

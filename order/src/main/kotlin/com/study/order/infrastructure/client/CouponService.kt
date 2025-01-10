@@ -11,11 +11,10 @@ class CouponService(
     private val couponServiceWebClient: WebClient
 ) : CouponService {
 
-    //TODO: 해당 형식으로 API 만들어달라 요청
-    override suspend fun getCouponList(couponIdSet: Set<Long>): List<CouponResponse> {
+    override suspend fun getCouponList(userId : Long, couponIdSet: Set<Long>): List<CouponResponse> {
         return couponServiceWebClient.get()
             .uri { builder ->
-                builder.path("/coupons/list")
+                builder.path("/coupons/list/$userId")
                     .queryParam("couponIds", couponIdSet.joinToString(","))
                     .build()
             }
