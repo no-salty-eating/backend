@@ -10,13 +10,15 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(makeFinal = true)
 public enum Error {
 
-    NOT_FOUND_USER(1000, "존재하지 않는 사용자입니다."),
-    ALREADY_EXIST_EMAIL(1001, "이미 존재하는 이메일입니다."),
-    NOT_CORRECT_CERTIFICATION_NUMBER(1002, "인증번호가 틀렸습니다."),
-    EXPIRED_CERTIFICATION_NUMBER(1003, "인증번호가 만료되었습니다."),
-    INVALID_PASSWORD(1004, "비밀번호가 맞지 않습니다."),
-    ACCOUNT_NOT_ENABLED(1005, "활성화 되지 않은 계정입니다."),
-    ALREADY_EXIST_ID(1006, "이미 존재하는 ID 입니다."),
+    // 조회 (GET) 오류 - 1000번대
+    NOT_FOUND_USER(1000, "존재하지 않는 사용자입니다."), // 사용자 조회 시
+    ACCOUNT_NOT_PUBLIC(1001, "활성화되지 않은 계정입니다."), // 계정 조회 시
+    INVALID_PASSWORD(1002, "비밀번호가 맞지 않습니다."),
+
+    // 추가 (POST) 오류 - 1100번대
+    ALREADY_EXIST_EMAIL(1100, "이미 존재하는 이메일입니다."), // 이메일 추가 시
+    ALREADY_EXIST_ID(1101, "이미 존재하는 ID 입니다."), // ID 추가 시
+
 
     METHOD_ARGUMENT_NOT_VALID(9997, "유효하지 않은 값입니다."),
     FORBIDDEN(9998, "접근 권한이 없습니다."),

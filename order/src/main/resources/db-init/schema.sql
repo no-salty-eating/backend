@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS TB_ORDER (
     user_id bigint,
     pg_order_id varchar(32),
     total_price bigint,
-    description varchar(300),
+    payment_price bigint,
     point_amount bigint,
     order_status varchar(20),
     is_deleted boolean,

@@ -2,7 +2,7 @@ version: "3.8"
 services:
   db:
     image: mariadb:latest
-    container_name: mariadb
+    container_name: mariadb-order
     restart: unless-stopped
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     ports:

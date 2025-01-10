@@ -3,6 +3,8 @@ package com.study.order.application.service
 import com.study.order.application.client.CouponService
 import com.study.order.application.client.PointService
 import com.study.order.application.client.ProductService
+import com.study.order.application.dto.request.CreateOrderRequestDto
+import com.study.order.application.dto.request.ProductQuantityRequestDto
 import com.study.order.application.dto.response.CategoryResponse
 import com.study.order.application.dto.response.CouponResponse
 import com.study.order.application.dto.response.ProductResponse
@@ -27,7 +29,6 @@ private val logger = LoggerProvider.logger
 @SpringBootTest
 @ActiveProfiles("test")
 class OrderServiceTest(
-    @Autowired pointService: PointService,
     @Autowired couponService: CouponService,
     @Autowired productService: ProductService,
     @Autowired messageService: MessageService,
@@ -37,14 +38,13 @@ class OrderServiceTest(
 
 
     "create" {
-        val request = CreateOrderRequest(
-            1, 1000, listOf(
-                ProductQuantityRequest(1, 1, 1234),
-                ProductQuantityRequest(2, 2, 4321),
+        val request = CreateOrderRequestDto(
+            1, listOf(
+                ProductQuantityRequestDto(1, 1, 1234),
+                ProductQuantityRequestDto(2, 2, 4321),
             )
         )
 
-        Mockito.`when`(pointService.validateUserPoints(1, 1000)).thenReturn(true)
         Mockito.`when`(productService.getProductList(setOf(1, 2))).thenReturn(listOf(
                 ProductResponse(1, "apple", 1000, 100, listOf(CategoryResponse(1, "fruit"))),
                 ProductResponse(2, "banana", 2000, 100, listOf(
@@ -54,8 +54,8 @@ class OrderServiceTest(
                 ),
             ))
         Mockito.`when`(couponService.getCouponList(setOf(1234, 4321))).thenReturn(listOf(
-                CouponResponse(1234, 1, 500, null, 0, "AVAILABLE"),
-                CouponResponse(4321, 2, null, 10, 0, "AVAILABLE"),
+                CouponResponse(1234, "AMOUNT",1000, 500, 1000,  "AVAILABLE"),
+                CouponResponse(4321, "AMOUNT", 500, 0, 500, "AVAILABLE"),
             ))
         val orderId = orderService.create(request)
 

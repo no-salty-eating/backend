@@ -14,7 +14,7 @@ import com.sparta.product.domain.core.ProductCategory;
 import com.sparta.product.domain.repository.CategoryRepository;
 import com.sparta.product.domain.repository.ProductCategoryRepository;
 import com.sparta.product.domain.repository.ProductRepository;
-import com.sparta.product.presentation.Response;
+import com.sparta.product.application.dtos.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -61,16 +61,10 @@ public class ProductService {
             throw new NotFoundProductCategoryException();
         }
 
-        Product product = productCategories.get(0).getProduct();
-
-        List<Category> categories = productCategories.stream()
-                .map(ProductCategory::getCategory)
-                .toList();
-
         return Response.<ProductResponseDto>builder()
                 .data(role.equals(UserRoleEnum.MASTER.toString()) ?
-                        ProductResponseDto.forMasterOf(product, categories)
-                        : ProductResponseDto.forUserOrSellerOf(product, categories))
+                        ProductResponseDto.forMasterOf(productCategories)
+                        : ProductResponseDto.forUserOrSellerOf(productCategories))
                 .build();
     }
 

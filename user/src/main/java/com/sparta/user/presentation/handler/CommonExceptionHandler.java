@@ -6,14 +6,17 @@ import com.sparta.user.application.exception.UserException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RequiredArgsConstructor
 @RestControllerAdvice(basePackages = {"com.sparta.user.presentation.controller"})
 public class CommonExceptionHandler  {
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(UserException.class)
     public Response<Void> UserExceptionHandler(UserException e) {
 
@@ -25,6 +28,7 @@ public class CommonExceptionHandler  {
                 .build();
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Response<Void> MethodArgumentNotValidHandler(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();

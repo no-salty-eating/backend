@@ -14,7 +14,7 @@ class OrderDetail(
     var price: Int,
     var quantity: Int = 0,
     @Id
-    var id: Long = 0,
+    val id: Long = 0,
 ) : BaseEntity() {
     override fun equals(other: Any?): Boolean = kotlinEquals(
         other, arrayOf(
