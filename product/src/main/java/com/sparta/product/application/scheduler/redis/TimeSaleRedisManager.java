@@ -1,4 +1,4 @@
-package com.sparta.product.application.service.redis;
+package com.sparta.product.application.scheduler.redis;
 
 import com.sparta.product.domain.core.TimeSaleProduct;
 import com.sparta.product.application.exception.scheduler.TimeSaleScheduleException;
@@ -8,8 +8,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -39,7 +37,9 @@ public class TimeSaleRedisManager {
             );
 
             // 재고 초기화
-            redisTemplate.opsForHash().put(RedisKeys.TIMESALE_INVENTORY, timeSaleProduct.getId().toString(), timeSaleProduct.getQuantity().toString());
+            redisTemplate.opsForHash().put(RedisKeys.TIMESALE_INVENTORY,
+                    timeSaleProduct.getId().toString(),
+                    timeSaleProduct.getQuantity().toString());
         } catch (Exception e) {
             log.error("Failed to schedule timesale for product {}", timeSaleProduct.getId(), e);
             throw new TimeSaleScheduleException();
@@ -62,34 +62,38 @@ public class TimeSaleRedisManager {
         );
     }
 
-    public void removeStartSchedule(String productId) {
-        redisTemplate.opsForZSet().remove(RedisKeys.TIMESALE_START_KEY, productId);
+    public void removeStartSchedule(String timeSaleProductId) {
+        redisTemplate.opsForZSet().remove(RedisKeys.TIMESALE_START_KEY, timeSaleProductId);
     }
 
-    public void removeEndSchedule(String productId) {
-        redisTemplate.opsForZSet().remove(RedisKeys.TIMESALE_END_KEY, productId);
+    public void removeEndSchedule(String timeSaleProductId) {
+        redisTemplate.opsForZSet().remove(RedisKeys.TIMESALE_END_KEY, timeSaleProductId);
     }
 
-    public void removeInventory(String productId) {
+    public void removeInventory(String timeSaleProductId) {
         String inventoryKey = RedisKeys.TIMESALE_INVENTORY;
-        redisTemplate.opsForHash().delete(inventoryKey, productId);
+        redisTemplate.opsForHash().delete(inventoryKey, timeSaleProductId);
     }
 
-    public boolean decreaseInventory(Long productId, Integer quantity) {
+    public boolean checkInventoryQuantity(Long timeSaleProductId, Integer quantity) {
         String inventoryKey = RedisKeys.TIMESALE_INVENTORY;
-        Long remainingQuantity = (Long) redisTemplate.opsForHash().get(inventoryKey, productId.toString());
+        String remainingQuantity = (String) redisTemplate.opsForHash().get(inventoryKey, timeSaleProductId.toString());
 
-        if (remainingQuantity != null && remainingQuantity >= quantity) {
-            redisTemplate.opsForHash().increment(inventoryKey, productId.toString(), -quantity);
+        return remainingQuantity != null && Integer.parseInt(remainingQuantity) >= quantity;
+    }
+
+    public boolean decreaseInventory(Long timeSaleProductId, Integer quantity) {
+        if (checkInventoryQuantity(timeSaleProductId, quantity)) {
+            String inventoryKey = RedisKeys.TIMESALE_INVENTORY;
+            redisTemplate.opsForHash().increment(inventoryKey, timeSaleProductId.toString(), -Long.valueOf(quantity));
             return true;
         } else {
-            // 재고가 부족한 경우 원복
             return false;
         }
     }
 
-    public void increaseInventory(Long productId, Integer quantity) {
+    public void increaseInventory(Long timeSaleProductId, Integer quantity) {
         String inventoryKey = RedisKeys.TIMESALE_INVENTORY;
-        redisTemplate.opsForHash().increment(inventoryKey, productId.toString(), quantity);
+        redisTemplate.opsForHash().increment(inventoryKey, timeSaleProductId.toString(), Long.valueOf(quantity));
     }
 }
