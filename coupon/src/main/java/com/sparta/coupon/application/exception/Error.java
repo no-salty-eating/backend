@@ -19,6 +19,8 @@ public enum Error {
     ALREADY_EXIST_ID(1006, "이미 존재하는 ID 입니다."),
 
     NOT_FOUND_COUPON(2000, "존재하지 않는 쿠폰입니다."),
+    ISSUE_NOT_VALID_TIME(2100, "쿠폰 발급 기간이 아닙니다."),
+    COUPON_EXHAUSTED(2101, "쿠폰이 모두 소진되었습니다."),
 
 
     METHOD_ARGUMENT_NOT_VALID(9997, "유효하지 않은 값입니다."),

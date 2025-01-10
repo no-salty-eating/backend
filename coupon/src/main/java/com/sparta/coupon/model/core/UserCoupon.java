@@ -43,5 +43,11 @@ public class UserCoupon extends BaseEntity {
     @Column(nullable = false)
     private CouponStatusEnum couponStatus;
 
-
+    public static UserCoupon issueUserCoupon(Long userId, Coupon coupon) {
+        return UserCoupon.builder()
+                .userId(userId)
+                .coupon(coupon)
+                .couponStatus(CouponStatusEnum.AVAILABLE)
+                .build();
+    }
 }
