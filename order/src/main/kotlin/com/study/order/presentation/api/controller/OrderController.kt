@@ -3,6 +3,7 @@ package com.study.order.presentation.api.controller
 import com.study.order.application.service.OrderService
 import com.study.order.presentation.api.controller.docs.OrderControllerDocs
 import com.study.order.presentation.api.request.CreateOrderRequest
+import com.study.order.presentation.api.request.toDto
 import com.study.order.presentation.api.response.Response
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,7 +22,7 @@ class OrderController (
         return Response(
             HttpStatus.CREATED.value(),
             HttpStatus.CREATED.reasonPhrase,
-            orderService.create(request)
+            orderService.create(request.toDto())
         )
     }
 

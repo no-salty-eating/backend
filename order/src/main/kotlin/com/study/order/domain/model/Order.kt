@@ -9,11 +9,11 @@ import org.springframework.data.relational.core.mapping.Table
 @Table("TB_ORDER")
 class Order (
     @Id
-    var id: Long = 0,
+    val id: Long = 0,
     var userId: Long,
     var pgOrderId: String? = null,
     var totalPrice: Int = 0,
-    var description: String? = null,
+    var paymentPrice: Int = 0,
     var pointAmount: Int = 0,
     var orderStatus: OrderStatus = OrderStatus.ORDER_PROGRESS,
 ) : BaseEntity() {
@@ -35,7 +35,7 @@ class Order (
             Order::userId,
             Order::pgOrderId,
             Order::totalPrice,
-            Order::description,
+            Order::paymentPrice,
             Order::pointAmount,
             Order::orderStatus,
         ), superToString = { super.toString() })
