@@ -8,7 +8,7 @@ import com.sparta.product.application.exception.common.ForbiddenRoleException;
 import com.sparta.product.domain.common.UserRoleEnum;
 import com.sparta.product.domain.core.Category;
 import com.sparta.product.domain.repository.CategoryRepository;
-import com.sparta.product.presentation.Response;
+import com.sparta.product.application.dtos.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

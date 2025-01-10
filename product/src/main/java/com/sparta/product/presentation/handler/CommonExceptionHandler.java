@@ -3,7 +3,7 @@ package com.sparta.product.presentation.handler;
 import com.sparta.product.application.exception.productCategory.ProductCategoryException;
 import com.sparta.product.application.exception.timesale.TimeSaleException;
 import com.sparta.product.application.exception.scheduler.ScheduleException;
-import com.sparta.product.presentation.Response;
+import com.sparta.product.application.dtos.Response;
 import com.sparta.product.application.exception.category.CategoryException;
 import com.sparta.product.application.exception.common.Error;
 import com.sparta.product.application.exception.common.ForbiddenException;
@@ -19,6 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestControllerAdvice(basePackages = {"com.sparta.product.presentation.controller"})
 public class CommonExceptionHandler {
+
 
     @ExceptionHandler(ProductException.class)
     public Response<Void> ProductExceptionHandler(ProductException e) {
@@ -51,6 +52,7 @@ public class CommonExceptionHandler {
                 .build();
     }
 
+    // global error 경우가 있을 수 있으니 예외 처리가 이상하게 나오면 확인 필요
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Response<Void> MethodArgumentNotValidHandler(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();

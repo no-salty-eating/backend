@@ -18,11 +18,12 @@ public record CategoryResponseDto(
         @JsonProperty("updated_at") LocalDateTime updatedAt
 ) {
 
+    // TODO : 추후 dto 분리 고려 예정
     public static CategoryResponseDto forUserOrSellerFrom(Category category) {
-        return new CategoryResponseDto(
-                category.getId(),
-                category.getName()
-        );
+        return CategoryResponseDto.builder()
+                .categoryId(category.getId())
+                .categoryName(category.getName())
+                .build();
     }
 
     public static CategoryResponseDto forMasterFrom(Category category) {
@@ -36,7 +37,4 @@ public record CategoryResponseDto(
         );
     }
 
-    public CategoryResponseDto(Long categoryId, String categoryName) {
-        this(categoryId, categoryName, null, null, null, null);
-    }
 }
