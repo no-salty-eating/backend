@@ -1,6 +1,6 @@
 package com.sparta.product.application.scheduler.redis;
 
-import com.sparta.product.application.exception.product.NotFoundProductException;
+import com.sparta.product.application.exception.timesale.NotFoundOnTimeSaleException;
 import com.sparta.product.application.scheduler.TimeSaleSchedulerService;
 import com.sparta.product.domain.core.TimeSaleProduct;
 import com.sparta.product.domain.repository.TimeSaleProductRepository;
@@ -34,13 +34,12 @@ public class TimeSaleScheduler {
             Set<String> startProducts = redisManager.getStartTimeSales(currentTime);
             if (startProducts != null && !startProducts.isEmpty()) {
                 for (String productId : startProducts) {
-                    TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findById(Long.valueOf(productId))
-                            .orElseThrow(NotFoundProductException::new);
-
-                    redisManager.createTimeSaleProduct(timeSaleProduct);
-
                     timeSaleSchedulerService.startTimeSale(Long.valueOf(productId));
                     redisManager.removeStartSchedule(productId);
+
+                    TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(Long.valueOf(productId))
+                            .orElseThrow(NotFoundOnTimeSaleException::new);
+                    redisManager.createTimeSaleProduct(timeSaleProduct);
                 }
             }
         } catch (Exception e) {
@@ -53,10 +52,10 @@ public class TimeSaleScheduler {
         try {
             Set<String> endProducts = redisManager.getEndTimeSales(currentTime);
             if (endProducts != null && !endProducts.isEmpty()) {
-                for (String timeSaleId : endProducts) {
-                    timeSaleSchedulerService.endTimeSale(Long.valueOf(timeSaleId));
-                    redisManager.removeEndSchedule(timeSaleId);
-                    redisManager.removeTimeSaleOn(timeSaleId);
+                for (String productId : endProducts) {
+                    redisManager.removeEndSchedule(productId);
+                    redisManager.removeTimeSaleOn(productId);
+                    timeSaleSchedulerService.endTimeSale(Long.valueOf(productId));
                 }
             }
         } catch (Exception e) {

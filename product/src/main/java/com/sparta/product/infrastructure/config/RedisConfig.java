@@ -20,15 +20,4 @@ public class RedisConfig {
         template.setHashValueSerializer(new StringRedisSerializer());
         return template;
     }
-
-    @Bean
-    public RedisTemplate<String, ProductResponseDto> productResponseTemplate(
-            RedisConnectionFactory redisConnectionFactory
-    ) {
-        RedisTemplate<String, ProductResponseDto> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
-        template.setKeySerializer(RedisSerializer.string());
-        template.setValueSerializer(RedisSerializer.json());
-        return template;
-    }
 }

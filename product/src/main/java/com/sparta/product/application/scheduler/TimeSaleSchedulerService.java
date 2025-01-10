@@ -1,6 +1,6 @@
 package com.sparta.product.application.scheduler;
 
-import com.sparta.product.application.exception.timesale.NotFoundTimeSaleException;
+import com.sparta.product.application.exception.timesale.NotFoundOnTimeSaleException;
 import com.sparta.product.application.scheduler.redis.TimeSaleRedisManager;
 import com.sparta.product.domain.core.Product;
 import com.sparta.product.domain.core.TimeSaleProduct;
@@ -20,8 +20,8 @@ public class TimeSaleSchedulerService {
 
     @Transactional
     public void startTimeSale(Long productId) {
-        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findById(productId)
-                .orElseThrow(NotFoundTimeSaleException::new);
+        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
+                .orElseThrow(NotFoundOnTimeSaleException::new);
 
         Product product = timeSaleProduct.getProduct();
 
@@ -33,8 +33,8 @@ public class TimeSaleSchedulerService {
 
     @Transactional
     public void endTimeSale(Long productId) {
-        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findById(productId)
-                .orElseThrow(NotFoundTimeSaleException::new);
+        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
+                .orElseThrow(NotFoundOnTimeSaleException::new);
 
         timeSaleRedisManager.removeTimeSaleOn(productId.toString());
         timeSaleRedisManager.removeEndSchedule(productId.toString());
@@ -43,6 +43,7 @@ public class TimeSaleSchedulerService {
 
         product.updateIsPublic(true);
         timeSaleProduct.updateIsPublic(false);
+        timeSaleProduct.getProduct().updateIsPublic(true);
 
         log.info("TimeSale ended - productId: {}, timeSaleId: {}", product.getId(), timeSaleProduct.getId());
     }

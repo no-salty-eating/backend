@@ -1,6 +1,6 @@
 package com.sparta.product.presentation.controller;
 
-import com.sparta.product.application.dtos.Response;
+import com.sparta.product.presentation.Response;
 import com.sparta.product.application.dtos.category.CategoryResponseDto;
 import com.sparta.product.application.dtos.category.CategoryUpdateRequestDto;
 import com.sparta.product.application.service.CategoryService;

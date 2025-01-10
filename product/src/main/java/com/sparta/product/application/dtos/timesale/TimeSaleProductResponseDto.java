@@ -11,7 +11,7 @@ public record TimeSaleProductResponseDto(
         @JsonProperty("timesale_product_id") Long timeSaleProductId,
         @JsonProperty("product_id") Long productId,
         @JsonProperty("discount_rate") Integer discountRate,
-        @JsonProperty("discount_price") Double discountPrice,
+        @JsonProperty("discount_price") Integer discountPrice,
         Integer quantity,
         @JsonProperty("timesale_start_time") LocalDateTime timeSaleStartTime,
         @JsonProperty("timesale_end_time") LocalDateTime timeSaleEndTime,
@@ -23,7 +23,7 @@ public record TimeSaleProductResponseDto(
                 timeSaleProduct.getProduct().getId(),
                 timeSaleProduct.getDiscountRate(),
                 timeSaleProduct.getDiscountPrice(),
-                timeSaleProduct.getQuantity(),
+                timeSaleProduct.getStock(),
                 timeSaleProduct.getTimeSaleStartTime(),
                 timeSaleProduct.getTimeSaleEndTime(),
                 timeSaleProduct.getIsSoldOut()
