@@ -45,7 +45,7 @@ public class AuthService {
         }
 
         JwtTokenResponseDto token = JwtTokenResponseDto.builder()
-                .accessToken(jwtUtil.createToken(user.getLoginId(), user.getRole()))
+                .accessToken(jwtUtil.createToken(user.getLoginId(), user.getId() ,user.getRole()))
                 .build();
 
         return new Response<>(HttpStatus.OK.value(), "로그인 성공", token);

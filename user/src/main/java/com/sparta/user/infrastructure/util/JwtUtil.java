@@ -19,6 +19,8 @@ public class JwtUtil {
 
     // 사용자 권한 값의 KEY
     public static final String AUTHORIZATION_KEY = "role";
+    // 사용자 헤더 id 변수
+    public static final String  ID_KEY  = "id";
     // Token 식별자
     public static final String BEARER_PREFIX = "Bearer ";
 
@@ -38,12 +40,13 @@ public class JwtUtil {
     }
 
     // 토큰 생성
-    public String createToken(String loginId, UserRoleEnum role) {
+    public String createToken(String loginId, Long id, UserRoleEnum role) {
         Date date = new Date();
 
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(loginId) // 사용자 식별자값(ID)
+                        .claim(ID_KEY, id) // 사용자 권한
                         .claim(AUTHORIZATION_KEY, role.getAuthority()) // 사용자 권한
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME)) // 만료 시간
                         .setIssuedAt(date) // 발급일
