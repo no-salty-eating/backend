@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.study.payment.application.client.PaymentApiService
 import com.study.payment.application.client.TossPayService
 import com.study.payment.application.dto.event.consumer.CreateOrderEvent
+import com.study.payment.application.dto.event.provider.PaymentProcessingEvent
 import com.study.payment.application.dto.event.provider.PaymentResultEvent
 import com.study.payment.application.dto.request.PaySucceedRequestDto
 import com.study.payment.application.exception.InvalidPaymentPriceException
@@ -33,6 +34,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import java.time.Duration as JavaDuration
 
+private const val PAYMENT_PROCESSING = "payment-processing"
 private const val PAYMENT_RESULT = "payment-result"
 
 @Service
@@ -49,7 +51,17 @@ class PaymentService(
     private val logger = LoggerProvider.logger
 
     suspend fun getPaymentInfo(pgOrderId: String): Payment {
-        return getOrderByPgOrderId(pgOrderId)
+
+        val payment = getOrderByPgOrderId(pgOrderId)
+
+        kafkaProducer.sendEvent(PAYMENT_PROCESSING, payment.pgOrderId?.let {
+            PaymentProcessingEvent(
+                payment.id,
+                it
+            )
+        })
+
+        return payment
     }
 
     suspend fun getPayments(paymentIds: List<Long>): List<Payment> {
@@ -130,10 +142,23 @@ class PaymentService(
 
         try {
             // TODO: 이걸 사용할 일이 있을까? / userId 가 2자 이상이어야 실행가능함
-            tossPayApi.confirm(PaySucceedRequestDto.from(payment)).let { logger.debug { " >> 결제정보 : $it" } }
+            tossPayApi.confirm(PaySucceedRequestDto.from(payment))
+                .let { logger.debug { " >> 결제정보 : $it" } } // 이거 몽고디비로 던지면 될까
             payment.pgStatus = CAPTURE_SUCCESS
         } catch (e: Exception) {
 
+            // 결제 특성 상 결제 이력은 DB에 저장해두어야 함 ( retry 나 fail 전부 )
+            // 결제 이력 테이블 만들어야함
+            // 부하가 select + update < insert
+            // 언제 시도 -> 왜 실패?
+
+            /*
+            * 이벤트 발행 시 A / B / C / D 에 데이터가 생기는 경우
+            * -> 중앙에서 nosql 에 그냥 관리하는 경우도 있음 ( 변경될 여지가 없는 경우 )
+            * 카프카 리밸런싱?
+            * -> 컨슈머로 인식을 한 경우 한번씩 헬스체크 함 -> 대답안함 -> 컨슈머를 붙였다 뗐다 함..?
+            * -> 수신(소비) 속도보다 작업 속도가 느린경우 -> 컨슈머를 제외해버림 !
+            * */
             logger.error(e.message, e)
             payment.pgStatus = when (e) {
                 is WebClientRequestException -> CAPTURE_RETRY
@@ -164,7 +189,7 @@ class PaymentService(
             if (payment.pgStatus == CAPTURE_SUCCESS || payment.pgStatus == CAPTURE_FAIL) {
                 kafkaProducer.sendEvent(
                     PAYMENT_RESULT, PaymentResultEvent(
-                        payment.pgOrderId,
+                        payment.pgOrderId!!,
                         payment.paymentPrice,
                         payment.pgStatus.name,
                     )

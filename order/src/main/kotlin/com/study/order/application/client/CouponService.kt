@@ -4,6 +4,6 @@ import com.study.order.application.dto.response.CouponResponse
 
 interface CouponService {
 
-    suspend fun getCouponList(couponIdSet: Set<Long>): List<CouponResponse>
+    suspend fun getCouponList(userId: Long, couponIdSet: Set<Long>): List<CouponResponse>
 
 }

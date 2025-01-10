@@ -1,4 +1,4 @@
-package com.study.payment.application.dto.event.provider
+package com.study.order.application.dto.event.consumer
 
 data class PaymentResultEvent(
     val pgOrderId: String,

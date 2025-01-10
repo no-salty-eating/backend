@@ -1,6 +1,7 @@
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
+	kotlin("plugin.serialization") version "2.1.0"
 	id("org.springframework.boot") version "3.4.1"
 	id("io.spring.dependency-management") version "1.1.7"
 }
@@ -23,6 +24,7 @@ dependencies {
 
 	implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer:4.2.0")
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.2.0")
+	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.9.0")
 	implementation("io.micrometer:context-propagation:1.1.2")

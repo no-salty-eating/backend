@@ -2,17 +2,22 @@ package com.study.order.application.service
 
 import com.study.order.application.client.CouponService
 import com.study.order.application.client.ProductService
-import com.study.order.application.dto.event.CreateOrderEvent
-import com.study.order.application.dto.event.ProductStockDecreaseEvent
+import com.study.order.application.dto.event.consumer.PaymentProcessingEvent
+import com.study.order.application.dto.event.consumer.PaymentResultEvent
+import com.study.order.application.dto.event.provider.CreateOrderEvent
+import com.study.order.application.dto.event.provider.OrderSuccessEvent
+import com.study.order.application.dto.event.provider.ProductStockAdjustmentEvent
 import com.study.order.application.dto.request.CreateOrderRequestDto
-import com.study.order.application.dto.response.ProductResponse
+import com.study.order.application.dto.response.ProductResponseDto
 import com.study.order.application.exception.InvalidCouponException
 import com.study.order.application.exception.InvalidCouponPriceException
 import com.study.order.application.exception.NotEnoughStockException
+import com.study.order.application.exception.NotFoundOrderException
 import com.study.order.application.exception.NotFoundProductException
 import com.study.order.application.messaging.MessageService
 import com.study.order.domain.model.Order
 import com.study.order.domain.model.OrderDetail
+import com.study.order.domain.model.OrderStatus
 import com.study.order.domain.repository.OrderDetailRepository
 import com.study.order.domain.repository.OrderRepository
 import com.study.order.infrastructure.config.log.LoggerProvider
@@ -21,13 +26,15 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 private const val CREATE_ORDER = "create-order"
-private const val COUPON_USED = "coupon-used"
-private const val PRODUCT_STOCK_DECREASE = "product-stock-decrease"
+private const val PRODUCT_STOCK_ADJUSTMENT = "product-stock-adjustment"
+private const val ORDER_SUCCESS = "order-success"
+private const val ORDER_FAILURE = "order-failure"
 
 @Service
 class OrderService(
-//    private val couponService: CouponService,
-//    private val productService: ProductService,
+    private val cacheService: CacheService,
+    private val couponService: CouponService,
+    private val productService: ProductService,
     private val messageService: MessageService,
     private val orderRepository: OrderRepository,
     private val orderDetailRepository: OrderDetailRepository,
@@ -38,59 +45,69 @@ class OrderService(
     @Transactional
     suspend fun create(request: CreateOrderRequestDto): Long? {
 
-//        val productIds = request.products.map { it.productId }.toSet()
-//        val productsByCouponId = request.products
-//            .filter { it.couponId != null }
-//            .associate {
-//                it.couponId!! to it.productId
-//            }
+        val products = request.products.map {
+            cacheService.get(it.productId)
+                ?: productService.getProduct(it.productId)
+                ?: throw NotFoundProductException()
+        }.associateBy { it.productId }
 
-//        val couponIds = productsByCouponId.keys
-//        val productsById = productService.getProductList(productIds).associateBy { it.id }
-//
-//        if (request.products.any {
-//                val product = productsById[it.productId] ?: throw NotFoundProductException()
-//                it.quantity > product.stock
-//            }) {
-//            throw NotEnoughStockException()
-//        }
+        val productsByCouponId = request.products
+            .filter { it.couponId != null }
+            .associate { it.couponId!! to it.productId }
 
-//        val discountPrice = if (couponIds.isNotEmpty()) {
-//            val couponsById = couponService.getCouponList(couponIds).associateBy { it.id }
-//
-//            couponsById.entries.sumOf { (couponId, coupon) ->
-//
-//                val productId = productsByCouponId[couponId]
-//                val product: ProductResponse = productsById[productId]!!
-//
-//                if (product.price < coupon.minOrderAmount) {
-//                    throw InvalidCouponPriceException()
-//                }
-//
-//                if (coupon.couponStatus != "AVAILABLE") {
-//                    throw InvalidCouponException()
-//                }
-//
-//                when (coupon.discountType) {
-//                    "AMOUNT" -> coupon.discountValue
-//                    "RATE" -> if (product.price * (coupon.discountValue / 100) > coupon.maxDiscountAmount)
-//                        coupon.maxDiscountAmount
-//                    else product.price * (coupon.discountValue / 100)
-//
-//                    else -> throw InvalidCouponException()
-//                }
-//            }
-//        } else 0
+        request.products.forEach {
+            val product = products[it.productId]!!
 
-//        val totalPrice = request.products.sumOf { productsById[it.productId]!!.price * it.quantity }
-//        val description =
-//            request.products.joinToString(", ") { "${productsById[it.productId]!!.name} x ${it.quantity}" }
+            if (product.stock < it.quantity) {
+                throw NotEnoughStockException()
+            } else {
+                for (i in 1..it.quantity) {
+                    cacheService.increment(it.productId)
+                }
+
+                if (cacheService.getSize(it.productId)!! > product.stock) {
+                    for(i in 1..it.quantity)
+                        cacheService.decrement(it.productId)
+                    throw NotEnoughStockException()
+                }
+            }
+        }
+
+        val discountPrice = if (productsByCouponId.keys.isNotEmpty()) {
+            val couponsById = couponService.getCouponList(request.userId, productsByCouponId.keys).associateBy { it.id }
+
+            couponsById.entries.sumOf { (couponId, coupon) ->
+
+                val productId = productsByCouponId[couponId]
+                val product: ProductResponseDto = products[productId]!!
+
+                if (product.price < coupon.minOrderAmount) {
+                    throw InvalidCouponPriceException()
+                }
+
+                if (coupon.couponStatus != "AVAILABLE") {
+                    throw InvalidCouponException()
+                }
+
+                when (coupon.discountType) {
+                    "AMOUNT" -> coupon.discountValue
+                    "RATE" -> if (product.price * (coupon.discountValue / 100) > coupon.maxDiscountAmount)
+                        coupon.maxDiscountAmount
+                    else product.price * (coupon.discountValue / 100)
+
+                    else -> throw InvalidCouponException()
+                }
+            }
+        } else 0
+
+        val totalPrice = request.products.sumOf { products[it.productId]!!.price * it.quantity }
+        val description =
+            request.products.joinToString(", ") { "${products[it.productId]!!.name} x ${it.quantity}" }
 
         val newOrder = orderRepository.save(
             Order(
                 userId = request.userId,
-//                totalPrice = totalPrice,
-                totalPrice = 2000,
+                totalPrice = totalPrice,
                 pgOrderId = "${UUID.randomUUID()}".replace("-", ""),
             )
         )
@@ -101,35 +118,77 @@ class OrderService(
                     orderId = newOrder.id,
                     productId = it.productId,
                     couponId = it.couponId,
-//                    price = productsById[it.productId]!!.price,
-                    price = 2000,
+                    price = products[it.productId]!!.price,
                     quantity = it.quantity,
                 )
             )
         }
 
-//        if (couponIds.isNotEmpty())
-//            messageService.sendEvent(COUPON_USED, couponIds)
+        // 여기서 redis 재고 차감
+        messageService.sendEvent(PRODUCT_STOCK_ADJUSTMENT, request.products.map {
+            ProductStockAdjustmentEvent(
+                it.productId,
+                it.quantity,
+                true
+            )
+        })
 
-//        messageService.sendEvent(PRODUCT_STOCK_DECREASE, request.products.map {
-//            ProductStockDecreaseEvent(
-//                it.productId,
-//                it.quantity
-//            )
-//        })
-
+        // 트랜잭셔널 아웃박스 패턴?
         messageService.sendEvent(
             CREATE_ORDER, CreateOrderEvent(
                 request.userId,
-//                description,
-                "으하하",
+                description,
                 newOrder.pgOrderId!!,
-//                newOrder.totalPrice - discountPrice
-                newOrder.totalPrice
+                newOrder.totalPrice - discountPrice
             )
         )
 
         return newOrder.id
     }
 
+    @Transactional
+    suspend fun updateOrderStatus(request: PaymentProcessingEvent) {
+        getOrderByPgOrderId(request.pgOrderId).orderStatus = OrderStatus.PAYMENT_PROGRESS
+    }
+
+    @Transactional
+    suspend fun updateOrderStatus(request: PaymentResultEvent) {
+        val order = getOrderByPgOrderId(request.pgOrderId)
+        val orderDetails = getOrderDetailsByOrderId(order.id)
+
+        if (request.pgStatus == "CAPTURE_SUCCESS") {
+
+            val event = orderDetails.map {
+                OrderSuccessEvent(
+                    it.productId,
+                    it.quantity,
+                    it.couponId
+                )
+            }
+            messageService.sendEvent(ORDER_SUCCESS, event)
+            order.orderStatus = OrderStatus.ORDER_FINALIZED
+        } else {
+            val event = orderDetails.map {
+                ProductStockAdjustmentEvent(
+                    it.productId,
+                    it.quantity,
+                    false
+                )
+                for (i in 1..it.quantity)
+                    cacheService.decrement(it.productId)
+            }
+            messageService.sendEvent(PRODUCT_STOCK_ADJUSTMENT, event)
+            order.orderStatus = OrderStatus.PAYMENT_FAILED
+        }
+
+        orderRepository.save(order)
+    }
+
+    private suspend fun getOrderByPgOrderId(pgOrderId: String): Order {
+        return orderRepository.findByPgOrderId(pgOrderId) ?: throw NotFoundOrderException()
+    }
+
+    private suspend fun getOrderDetailsByOrderId(orderId: Long): List<OrderDetail> {
+        return orderDetailRepository.getOrderDetailsByOrderId(orderId)
+    }
 }
