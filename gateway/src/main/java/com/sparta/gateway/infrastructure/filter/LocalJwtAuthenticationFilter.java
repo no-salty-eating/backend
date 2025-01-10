@@ -22,8 +22,11 @@ public class LocalJwtAuthenticationFilter implements GlobalFilter {
 
     private final JwtUtil jwtUtil;
 
-    // 사용자 헤더 id 변수
+    // 사용자 헤더 loginId 변수
     public static final String  LOGIN_ID = "X-UserId";
+
+    // 사용자 헤더 id 변수
+    public static final String  ID = "X-Id";
 
     // 사용자 헤더 role 변수
     public static final String  ROLE = "X-Role";
@@ -36,6 +39,7 @@ public class LocalJwtAuthenticationFilter implements GlobalFilter {
         exchange = exchange.mutate()
                 .request(exchange.getRequest().mutate()
                         .header(LOGIN_ID, "null")
+                        .header(ID, "null")
                         .header(ROLE, "null")
                         .build())
                 .build();
@@ -53,10 +57,13 @@ public class LocalJwtAuthenticationFilter implements GlobalFilter {
 
         // 토큰 검증 성공 시 헤더 덮어쓰기
         Claims claims = jwtUtil.parseClaims(token);
+
+
         // 새 요청 객체를 만들어서 헤더를 설정하고, 기존 exchange의 요청으로 교체
         exchange = exchange.mutate()
                 .request(exchange.getRequest().mutate()
                         .header(LOGIN_ID, claims.getSubject())
+                        .header(ID, claims.get("id", Long.class).toString())
                         .header(ROLE, claims.get("role", String.class))
                         .build())
                 .build();
