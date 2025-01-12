@@ -12,17 +12,6 @@ class ProductService(
     private val productServiceWebClient: WebClient
 ) : ProductService {
 
-    override suspend fun getProductList(productIdSet: Set<Long>): List<ProductResponseDto> {
-        return productServiceWebClient.get()
-            .uri { builder ->
-                builder.path("/products/list")
-                    .queryParam("productIds", productIdSet.joinToString(","))
-                    .build()
-            }
-            .retrieve()
-            .awaitBody()
-    }
-
     override suspend fun getProduct(productId: Long): ProductResponseDto? {
         return productServiceWebClient.get()
             .uri("/products/internal/$productId")

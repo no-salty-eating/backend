@@ -3,13 +3,13 @@ package com.study.order.presentation.api.controller.docs
 import com.study.order.presentation.api.request.CreateOrderRequest
 import com.study.order.presentation.api.response.Response
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import io.swagger.v3.oas.annotations.responses.ApiResponse
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 
 @Tag(name = "Order" , description = "주문 API")
 abstract class OrderControllerDocs {

@@ -35,5 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
-/order/src/main/resources/application-key.yml
-/saga/src/main/resources/application-key.yml
+
+### Kotlin ###
+.kotlin

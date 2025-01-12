@@ -27,10 +27,7 @@ class CacheService(
 
     override suspend fun get(productId: Long): ProductResponseDto? {
 
-        return opsForHash.entries(TIME_SALE_KEY + productId).asFlow().toList().associate { it.key to it.value }
-            .let { data -> mapper.writeValueAsString(data) }
-            ?.let { toProductResponseDto(toProductData(it)) }
-            ?: opsForValue.get(PRODUCT_KEY + productId).map { toProductResponseDto(it as String) }.awaitSingleOrNull()
+        return getHash(productId) ?: getValue(productId)
     }
 
     override suspend fun increment(productId: Long) {
@@ -45,6 +42,20 @@ class CacheService(
         return opsForValue.get(TIME_SALE_ORDER_KEY + productId).awaitSingleOrNull()?.toInt()
     }
 
+    private suspend fun getHash(productId: Long): ProductResponseDto? {
+        return opsForHash.entries(TIME_SALE_KEY + productId).asFlow().toList().takeIf { it.isNotEmpty() }
+            ?.associate { it.key to it.value }
+            ?.let { convertDataAsDto(mapper.writeValueAsString(it)) }
+    }
+
+    private suspend fun getValue(productId: Long): ProductResponseDto? {
+        return opsForValue.get(PRODUCT_KEY + productId).map { toProductResponseDto(it as String) }.awaitSingleOrNull()
+    }
+
+    private fun convertDataAsDto(record: String): ProductResponseDto {
+        return toProductResponseDto(mapper.readValue(record, ProductData::class.java))
+    }
+
     private fun toProductResponseDto(record: String): ProductResponseDto {
         return mapper.readValue(record, ProductResponseDto::class.java)
     }
@@ -56,9 +67,5 @@ class CacheService(
             record.price.toInt(),
             record.stock.toInt()
         )
-    }
-
-    private fun toProductData(record: String): ProductData {
-        return mapper.readValue(record, ProductData::class.java)
     }
 }

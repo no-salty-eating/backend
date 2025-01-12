@@ -17,7 +17,9 @@ import com.study.order.application.exception.NotFoundProductException
 import com.study.order.application.messaging.MessageService
 import com.study.order.domain.model.Order
 import com.study.order.domain.model.OrderDetail
-import com.study.order.domain.model.OrderStatus
+import com.study.order.domain.model.OrderStatus.ORDER_FINALIZED
+import com.study.order.domain.model.OrderStatus.PAYMENT_FAILED
+import com.study.order.domain.model.OrderStatus.PAYMENT_PROGRESS
 import com.study.order.domain.repository.OrderDetailRepository
 import com.study.order.domain.repository.OrderRepository
 import com.study.order.infrastructure.config.log.LoggerProvider
@@ -25,10 +27,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
-private const val CREATE_ORDER = "create-order"
+private const val CREATE_ORDER = "orchestrator:create-order"
 private const val PRODUCT_STOCK_ADJUSTMENT = "product-stock-adjustment"
 private const val ORDER_SUCCESS = "order-success"
-private const val ORDER_FAILURE = "order-failure"
 
 @Service
 class OrderService(
@@ -61,14 +62,19 @@ class OrderService(
             if (product.stock < it.quantity) {
                 throw NotEnoughStockException()
             } else {
+                // 여기 타임세일 상품인지 아닌지 구분해야함;
                 for (i in 1..it.quantity) {
                     cacheService.increment(it.productId)
                 }
 
-                if (cacheService.getSize(it.productId)!! > product.stock) {
-                    for(i in 1..it.quantity)
-                        cacheService.decrement(it.productId)
-                    throw NotEnoughStockException()
+                val size = cacheService.getSize(it.productId)
+
+                if (size != null) {
+                    if (size > product.stock) {
+                        for (i in 1..it.quantity)
+                            cacheService.decrement(it.productId)
+                        throw NotEnoughStockException()
+                    }
                 }
             }
         }
@@ -124,7 +130,6 @@ class OrderService(
             )
         }
 
-        // 여기서 redis 재고 차감
         messageService.sendEvent(PRODUCT_STOCK_ADJUSTMENT, request.products.map {
             ProductStockAdjustmentEvent(
                 it.productId,
@@ -148,7 +153,7 @@ class OrderService(
 
     @Transactional
     suspend fun updateOrderStatus(request: PaymentProcessingEvent) {
-        getOrderByPgOrderId(request.pgOrderId).orderStatus = OrderStatus.PAYMENT_PROGRESS
+        getOrderByPgOrderId(request.pgOrderId).updateStatus(PAYMENT_PROGRESS)
     }
 
     @Transactional
@@ -166,7 +171,7 @@ class OrderService(
                 )
             }
             messageService.sendEvent(ORDER_SUCCESS, event)
-            order.orderStatus = OrderStatus.ORDER_FINALIZED
+            order.updateStatus(ORDER_FINALIZED)
         } else {
             val event = orderDetails.map {
                 ProductStockAdjustmentEvent(
@@ -178,7 +183,7 @@ class OrderService(
                     cacheService.decrement(it.productId)
             }
             messageService.sendEvent(PRODUCT_STOCK_ADJUSTMENT, event)
-            order.orderStatus = OrderStatus.PAYMENT_FAILED
+            order.updateStatus(PAYMENT_FAILED)
         }
 
         orderRepository.save(order)

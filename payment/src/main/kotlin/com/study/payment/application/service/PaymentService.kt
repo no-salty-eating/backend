@@ -13,12 +13,7 @@ import com.study.payment.application.exception.NotFoundPaymentException
 import com.study.payment.application.exception.TooManyPaymentRequestException
 import com.study.payment.application.exception.TossApiError
 import com.study.payment.domain.model.Payment
-import com.study.payment.domain.model.PgStatus.AUTH_INVALID
-import com.study.payment.domain.model.PgStatus.AUTH_SUCCESS
-import com.study.payment.domain.model.PgStatus.CAPTURE_FAIL
-import com.study.payment.domain.model.PgStatus.CAPTURE_REQUEST
-import com.study.payment.domain.model.PgStatus.CAPTURE_RETRY
-import com.study.payment.domain.model.PgStatus.CAPTURE_SUCCESS
+import com.study.payment.domain.model.PgStatus.*
 import com.study.payment.domain.repository.PaymentRepository
 import com.study.payment.infrastructure.config.log.LoggerProvider
 import com.study.payment.infrastructure.messaging.provider.KafkaMessageProducer
@@ -34,8 +29,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import java.time.Duration as JavaDuration
 
-private const val PAYMENT_PROCESSING = "payment-processing"
-private const val PAYMENT_RESULT = "payment-result"
+private const val PAYMENT_PROCESSING = "orchestrator:payment-processing"
+private const val PAYMENT_RESULT = "orchestrator:payment-result"
 
 @Service
 class PaymentService(
@@ -101,13 +96,13 @@ class PaymentService(
     @Transactional
     suspend fun paymentKeyInjection(request: PaySucceedRequestDto): Boolean {
         val payment = getOrderByPgOrderId(request.orderId).apply {
-            pgKey = request.paymentKey
-            pgStatus = AUTH_SUCCESS
+            this.injectionPgKey(request.paymentKey)
+            this.updateStatus(AUTH_SUCCESS)
         }
 
         try {
             return if (payment.paymentPrice != request.amount) {
-                payment.pgStatus = AUTH_INVALID
+                payment.updateStatus(AUTH_INVALID)
                 logger.debug { "${payment.userId}번 사용자 결제 시도 : 결제 금액이 다름 (Payment : ${payment.paymentPrice} , Order : ${request.amount}) " }
                 throw InvalidPaymentPriceException()
             } else {
@@ -121,7 +116,7 @@ class PaymentService(
     @Transactional
     suspend fun requestPayment(request: PaySucceedRequestDto) {
         val payment = getOrderByPgOrderId(request.orderId).apply {
-            pgStatus = CAPTURE_REQUEST
+            this.updateStatus(CAPTURE_REQUEST)
             transactionHelper.executeInNewTransaction {
                 paymentRepository.save(this)
             }
@@ -144,7 +139,7 @@ class PaymentService(
             // TODO: 이걸 사용할 일이 있을까? / userId 가 2자 이상이어야 실행가능함
             tossPayApi.confirm(PaySucceedRequestDto.from(payment))
                 .let { logger.debug { " >> 결제정보 : $it" } } // 이거 몽고디비로 던지면 될까
-            payment.pgStatus = CAPTURE_SUCCESS
+            payment.updateStatus(CAPTURE_SUCCESS)
         } catch (e: Exception) {
 
             // 결제 특성 상 결제 이력은 DB에 저장해두어야 함 ( retry 나 fail 전부 )
@@ -160,21 +155,22 @@ class PaymentService(
             * -> 수신(소비) 속도보다 작업 속도가 느린경우 -> 컨슈머를 제외해버림 !
             * */
             logger.error(e.message, e)
-            payment.pgStatus = when (e) {
-                is WebClientRequestException -> CAPTURE_RETRY
-                is WebClientResponseException -> {
-                    when (e.toTossPayApiError().code) {
-                        "ALREADY_PROCESSED_PAYMENT" -> CAPTURE_SUCCESS
-                        "PROVIDER_ERROR", "FAILED_INTERVAL_SYSTEM_PROCESSING" -> CAPTURE_RETRY
-                        else -> CAPTURE_FAIL
+            payment.updateStatus(
+                when (e) {
+                    is WebClientRequestException -> CAPTURE_RETRY
+                    is WebClientResponseException -> {
+                        when (e.toTossPayApiError().code) {
+                            "ALREADY_PROCESSED_PAYMENT" -> CAPTURE_SUCCESS
+                            "PROVIDER_ERROR", "FAILED_INTERVAL_SYSTEM_PROCESSING" -> CAPTURE_RETRY
+                            else -> CAPTURE_FAIL
+                        }
                     }
+                    else -> CAPTURE_FAIL
                 }
-
-                else -> CAPTURE_FAIL
-            }
+            )
 
             if (payment.pgRetryCount >= 3) {
-                payment.pgStatus = CAPTURE_FAIL
+                payment.updateStatus(CAPTURE_FAIL)
                 throw TooManyPaymentRequestException()
             }
         } finally {
