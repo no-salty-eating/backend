@@ -100,7 +100,7 @@ public class UserService {
     }
 
     private User validateUser(String loginId) {
-        return userRepository.findByLoginIdAndIsDeletedFalse(loginId)
+        return userRepository.findByLoginIdAndIsDeletedFalseAndIsPublicTrue(loginId)
                 .orElseThrow(() -> new UserException(NOT_FOUND_USER, HttpStatus.NOT_FOUND));
     }
 
