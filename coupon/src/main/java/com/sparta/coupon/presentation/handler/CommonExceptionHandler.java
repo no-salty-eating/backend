@@ -1,5 +1,6 @@
 package com.sparta.coupon.presentation.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sparta.coupon.application.exception.CouponException;
 import com.sparta.coupon.application.dto.Response;
 import com.sparta.coupon.application.exception.Error;
@@ -40,6 +41,15 @@ public class CommonExceptionHandler  {
         return Response.<Void>builder()
                 .code(Error.METHOD_ARGUMENT_NOT_VALID.getCode())
                 .message(message)
+                .build();
+    }
+
+    @ExceptionHandler(JsonProcessingException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Response<Void> JsonProcessingExceptionHandler(JsonProcessingException e) {
+        return Response.<Void>builder()
+                .code(Error.JSON_PROCESSING_ERROR.getCode())
+                .message("Error processing JSON: " + e.getMessage())
                 .build();
     }
 }

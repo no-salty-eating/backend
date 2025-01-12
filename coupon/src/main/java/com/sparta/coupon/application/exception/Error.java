@@ -19,14 +19,19 @@ public enum Error {
     ALREADY_EXIST_ID(1006, "이미 존재하는 ID 입니다."),
 
     NOT_FOUND_COUPON(2000, "존재하지 않는 쿠폰입니다."),
+    FOUND_ISSUED_COUPON_ERROR(2001, "발급된 쿠폰 상태 조회 중 오류가 발생했습니다."),
+    NOT_FOUND_ISSUED_COUPON(2002, "발급된 쿠폰을 찾을 수 없습니다."),
     ISSUE_NOT_VALID_TIME(2100, "쿠폰 발급 기간이 아닙니다."),
     COUPON_EXHAUSTED(2101, "쿠폰이 모두 소진되었습니다."),
     USED_COUPON(2102, "이미 사용된 쿠폰입니다."),
     EXPIRED_COUPON(2103, "만료된 쿠폰입니다."),
     CANCEL_UNAVAILABLE_COUPON(2104, "사용 취소가 불가능한 쿠폰입니다."),
-    UNAVAILABLE_COUPON(2105, "쿠폰을 찾을 수 없거나 접근 권한이 없습니다."),
+    UNAVAILABLE_COUPON(2105, "발급된  쿠폰을 찾을 수 없거나 접근 권한이 없습니다."),
+    NOT_VALID_END_TIME(2106, "쿠폰 발급 완료 시간은 쿠폰 발급 시작 시간 이후여야 합니다."),
+    ISSUE_COUPON_LATER(2107, "쿠폰 발급 요청이 많아 처리할 수 없습니다. 잠시 후 다시 시도해주세요."),
+    UPDATE_ISSUED_COUPON_ERROR(2108, "발급된 쿠폰 상태 조회 중 오류가 발생했습니다."),
 
-
+    JSON_PROCESSING_ERROR(9996, "JSON 처리에 오류가 있습니다."),
     METHOD_ARGUMENT_NOT_VALID(9997, "유효하지 않은 값입니다."),
     FORBIDDEN(9998, "접근 권한이 없습니다."),
     INTERNAL_SERVER_ERROR(9999, "서버 오류입니다."),
