@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration
 private const val TOPIC_PAYMENT = "create-order"
 
 @Configuration
-class OrderEventConsumer(
+class OrderEventListener(
     private val kafkaEventProcessor: KafkaEventProcessor,
     private val mapper: ObjectMapper,
     private val paymentService: PaymentService,
@@ -19,7 +19,7 @@ class OrderEventConsumer(
     @PostConstruct
     fun init() {
 
-        kafkaEventProcessor.processEvent(TOPIC_PAYMENT, "payment-process") { record ->
+        kafkaEventProcessor.publish(TOPIC_PAYMENT, "payment-process") { record ->
             toPayment(record).let {
                 paymentService.createPaymentInfo(it)
             }

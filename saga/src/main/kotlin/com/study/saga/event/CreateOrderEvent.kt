@@ -1,6 +1,6 @@
-package com.study.saga.event.provider
+package com.study.saga.event
 
-data class CreateOrder(
+data class CreateOrderEvent(
     val userId: Long,
     val description: String,
     val pgOrderId: String,

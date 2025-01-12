@@ -11,9 +11,10 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
 
-private const val PRODUCT_KEY = "product::"
-private const val TIME_SALE_KEY = "timesale:on:"
-private const val TIME_SALE_ORDER_KEY = "timesale:order:"
+private const val PRODUCT_KEY = "product:"
+private const val TIME_SALE_KEY = "timeSale:"
+private const val PRODUCT_ORDER_KEY = "product:order:"
+private const val TIME_SALE_ORDER_KEY = "timeSale:order:"
 
 @Service
 class CacheService(
@@ -25,39 +26,38 @@ class CacheService(
     private val opsForValue = redisTemplate.opsForValue()
     private val opsForHash = redisTemplate.opsForHash<String, String>()
 
-    override suspend fun get(productId: Long): ProductResponseDto? {
-
-        return getHash(productId) ?: getValue(productId)
+    override suspend fun getProductInfo(productId: Long): ProductResponseDto? {
+        return getHash(productId)
     }
 
-    override suspend fun increment(productId: Long) {
-        opsForValue.increment(TIME_SALE_ORDER_KEY + productId).awaitSingleOrNull()
+    override suspend fun increment(productId: Long, quantity: Int) {
+        opsForValue.increment(TIME_SALE_ORDER_KEY + productId, quantity.toLong()).awaitSingleOrNull()
     }
 
-    override suspend fun decrement(productId: Long) {
-        opsForValue.decrement(TIME_SALE_ORDER_KEY + productId).awaitSingleOrNull()
+    override suspend fun decrement(productId: Long, quantity: Int) {
+        opsForValue.decrement(TIME_SALE_ORDER_KEY + productId, quantity.toLong()).awaitSingleOrNull()
     }
 
-    override suspend fun getSize(productId: Long): Int? {
+    override suspend fun getSoldQuantity(productId: Long): Int? {
         return opsForValue.get(TIME_SALE_ORDER_KEY + productId).awaitSingleOrNull()?.toInt()
+            ?: opsForValue.get(PRODUCT_ORDER_KEY + productId).awaitSingleOrNull()?.toInt()
     }
 
     private suspend fun getHash(productId: Long): ProductResponseDto? {
-        return opsForHash.entries(TIME_SALE_KEY + productId).asFlow().toList().takeIf { it.isNotEmpty() }
-            ?.associate { it.key to it.value }
-            ?.let { convertDataAsDto(mapper.writeValueAsString(it)) }
-    }
+        val keys = listOf(TIME_SALE_KEY + productId, PRODUCT_KEY + productId)
 
-    private suspend fun getValue(productId: Long): ProductResponseDto? {
-        return opsForValue.get(PRODUCT_KEY + productId).map { toProductResponseDto(it as String) }.awaitSingleOrNull()
+        for (key in keys) {
+            val entries = opsForHash.entries(key).asFlow().toList()
+            if (entries.isNotEmpty()) {
+                val productData = mapper.writeValueAsString(entries.associate { it.key to it.value })
+                return convertDataAsDto(productData)
+            }
+        }
+        return null
     }
 
     private fun convertDataAsDto(record: String): ProductResponseDto {
         return toProductResponseDto(mapper.readValue(record, ProductData::class.java))
-    }
-
-    private fun toProductResponseDto(record: String): ProductResponseDto {
-        return mapper.readValue(record, ProductResponseDto::class.java)
     }
 
     private fun toProductResponseDto(record: ProductData): ProductResponseDto {

@@ -1,7 +1,6 @@
 package com.study.order.application.service
 
 import com.study.order.application.client.CouponService
-import com.study.order.application.client.ProductService
 import com.study.order.application.dto.request.CreateOrderRequestDto
 import com.study.order.application.dto.request.ProductQuantityRequestDto
 import com.study.order.application.dto.response.CouponResponse
@@ -35,7 +34,6 @@ private val logger = LoggerProvider.logger
 class OrderServiceTest(
     @Autowired orderService: OrderService,
     @Autowired couponService: CouponService,
-    @Autowired productService: ProductService,
     @Autowired messageService: MessageService,
     @Autowired orderRepository: OrderRepository,
 ) : WithReisContainer, StringSpec({
@@ -48,12 +46,6 @@ class OrderServiceTest(
             )
         )
 
-        Mockito.`when`(productService.getProduct(1)).thenReturn(
-            ProductResponseDto(1, "apple", 1000, 100),
-        )
-        Mockito.`when`(productService.getProduct(2)).thenReturn(
-            ProductResponseDto(2, "banana", 2000, 100),
-        )
         Mockito.`when`(couponService.getCouponList(1, setOf(1234, 4321))).thenReturn(
             listOf(
                 CouponResponse(1234, "AMOUNT", 1000, 500, 1000, "AVAILABLE"),
@@ -78,12 +70,6 @@ class TestWebClientConfig {
     @Primary
     fun testCouponService(): CouponService {
         return Mockito.mock(CouponService::class.java)
-    }
-
-    @Bean
-    @Primary
-    fun testProductService(): ProductService {
-        return Mockito.mock(ProductService::class.java)
     }
 
     @Bean

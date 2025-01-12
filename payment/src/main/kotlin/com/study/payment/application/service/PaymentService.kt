@@ -13,10 +13,15 @@ import com.study.payment.application.exception.NotFoundPaymentException
 import com.study.payment.application.exception.TooManyPaymentRequestException
 import com.study.payment.application.exception.TossApiError
 import com.study.payment.domain.model.Payment
-import com.study.payment.domain.model.PgStatus.*
+import com.study.payment.domain.model.PgStatus.AUTH_INVALID
+import com.study.payment.domain.model.PgStatus.AUTH_SUCCESS
+import com.study.payment.domain.model.PgStatus.CAPTURE_FAIL
+import com.study.payment.domain.model.PgStatus.CAPTURE_REQUEST
+import com.study.payment.domain.model.PgStatus.CAPTURE_RETRY
+import com.study.payment.domain.model.PgStatus.CAPTURE_SUCCESS
 import com.study.payment.domain.repository.PaymentRepository
 import com.study.payment.infrastructure.config.log.LoggerProvider
-import com.study.payment.infrastructure.messaging.provider.KafkaMessageProducer
+import com.study.payment.infrastructure.messaging.provider.KafkaMessagePublisher
 import com.study.payment.infrastructure.utils.TransactionHelper
 import kotlinx.coroutines.delay
 import org.springframework.stereotype.Service
@@ -37,7 +42,7 @@ class PaymentService(
     private val mapper: ObjectMapper,
     private val cacheService: CacheService,
     private val tossPayApi: TossPayService,
-    private val kafkaProducer: KafkaMessageProducer,
+    private val kafkaProducer: KafkaMessagePublisher,
     private val paymentRepository: PaymentRepository,
     private val transactionHelper: TransactionHelper,
     private val paymentApiService: PaymentApiService,
@@ -45,6 +50,7 @@ class PaymentService(
 
     private val logger = LoggerProvider.logger
 
+    @Transactional(readOnly = true)
     suspend fun getPaymentInfo(pgOrderId: String): Payment {
 
         val payment = getOrderByPgOrderId(pgOrderId)
@@ -57,10 +63,6 @@ class PaymentService(
         })
 
         return payment
-    }
-
-    suspend fun getPayments(paymentIds: List<Long>): List<Payment> {
-        return paymentRepository.findAllById(paymentIds)
     }
 
     suspend fun reTryOnBoot() {
@@ -165,6 +167,7 @@ class PaymentService(
                             else -> CAPTURE_FAIL
                         }
                     }
+
                     else -> CAPTURE_FAIL
                 }
             )
@@ -200,6 +203,10 @@ class PaymentService(
             delay(getDelay(it))
             requestPayment(it)
         }
+    }
+
+    private suspend fun getPayments(paymentIds: List<Long>): List<Payment> {
+        return paymentRepository.findAllById(paymentIds)
     }
 
     private fun getDelay(payment: Payment): Duration {

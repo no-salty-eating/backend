@@ -19,15 +19,11 @@ class WebClientConfig {
 
     @Bean
     @LoadBalanced
-    fun pointServiceWebClient(): WebClient = createWebClient("http://point-server", "point-server")
+    fun couponServiceWebClient(): WebClient = createWebClient("http://coupon-service", "coupon-service")
 
     @Bean
     @LoadBalanced
-    fun couponServiceWebClient(): WebClient = createWebClient("http://coupon-server", "coupon-server")
-
-    @Bean
-    @LoadBalanced
-    fun productServiceWebClient(): WebClient = createWebClient("http://product-server", "product-server")
+    fun productServiceWebClient(): WebClient = createWebClient("http://product-service", "product-service")
 
     private fun createWebClient(baseUrl: String, name: String): WebClient {
 

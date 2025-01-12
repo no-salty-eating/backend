@@ -11,5 +11,5 @@ data class ProductQuantityRequest (
 fun ProductQuantityRequest.toDto() = ProductQuantityRequestDto(
     productId = this.productId,
     quantity = this.quantity,
-    couponId = this.couponId,
+    userCouponId = this.couponId,
 )

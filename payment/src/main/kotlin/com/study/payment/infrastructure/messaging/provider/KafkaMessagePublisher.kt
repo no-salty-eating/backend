@@ -1,13 +1,13 @@
-package com.study.order.infrastructure.messaging.provider
+package com.study.payment.infrastructure.messaging.provider
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.study.order.application.messaging.MessageService
+import com.study.payment.application.messaging.MessageService
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import org.springframework.stereotype.Service
 
 @Service
-class KafkaMessageProducer(
+class KafkaMessagePublisher(
     private val mapper: ObjectMapper,
     private val template: ReactiveKafkaProducerTemplate<String, String>,
 ) : MessageService {

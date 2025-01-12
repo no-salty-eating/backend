@@ -2,15 +2,17 @@ package com.study.saga.consumer
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.study.saga.event.consumer.CreateOrderEvent
-import com.study.saga.event.provider.OrderSuccessEvent
+import com.study.saga.event.CreateOrderEvent
+import com.study.saga.event.OrderSuccessEvent
 import com.study.saga.orchestrator.Orchestrator
 import jakarta.annotation.PostConstruct
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.springframework.context.annotation.Configuration
 
 private const val CREATE_ORDER = "orchestrator:create-order"
 private const val ORDER_SUCCESS = "orchestrator:order-success"
 
+@Configuration
 class OrderEventListener(
     private val mapper: ObjectMapper,
     private val orchestrator: Orchestrator,
@@ -19,13 +21,13 @@ class OrderEventListener(
 
     @PostConstruct
     fun init() {
-        kafkaEventProcessor.processEvent(CREATE_ORDER, "orchestrator") { record ->
+        kafkaEventProcessor.publish(CREATE_ORDER, "orchestrator") { record ->
             convertAsCreateOrderEvent(record).let {
                 orchestrator.processOrderCreated(it)
             }
         }
 
-        kafkaEventProcessor.processEvent(ORDER_SUCCESS, "orchestrator") { record ->
+        kafkaEventProcessor.publish(ORDER_SUCCESS, "orchestrator") { record ->
             convertAsOrderSuccessEvent(record).let {
                 orchestrator.processOrderSuccess(it)
             }

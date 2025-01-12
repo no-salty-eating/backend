@@ -13,7 +13,7 @@ class KafkaEventProcessor(
     private val properties: KafkaProperties,
 ) {
 
-    fun processEvent(topic: String, groupId: String, handler: suspend (record: ConsumerRecord<String, String>) -> Unit) {
+    fun publish(topic: String, groupId: String, handler: suspend (record: ConsumerRecord<String, String>) -> Unit) {
         properties.buildConsumerProperties().let { prop ->
             prop[ConsumerConfig.GROUP_ID_CONFIG] = groupId
             ReceiverOptions.create<String, String>(prop)

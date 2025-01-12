@@ -1,12 +1,10 @@
 package com.study.saga.orchestrator
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.study.saga.event.consumer.CreateOrderEvent
-import com.study.saga.event.consumer.PaymentProcessingEvent
-import com.study.saga.event.consumer.PaymentResultEvent
-import com.study.saga.event.provider.CreateOrder
-import com.study.saga.event.provider.ProductStockAdjustment
-import com.study.saga.event.provider.OrderSuccessEvent
+import com.study.saga.event.CreateOrderEvent
+import com.study.saga.event.PaymentProcessingEvent
+import com.study.saga.event.PaymentResultEvent
+import com.study.saga.event.OrderSuccessEvent
+import com.study.saga.event.ProductStockAdjustment
 import com.study.saga.provider.KafkaEventPublisher
 import org.springframework.stereotype.Service
 
@@ -18,28 +16,15 @@ private const val PAYMENT_RESULT = "payment-result"
 
 @Service
 class Orchestrator(
-    private val mapper: ObjectMapper,
     private val eventPublisher: KafkaEventPublisher,
 ) {
 
     suspend fun processOrderCreated(event: CreateOrderEvent) {
-        val productStockAdjustmentEvent = event.productStockAdjustmentList.map {
-            ProductStockAdjustment(
-                it.productId,
-                it.quantity,
-                it.isDecrement
-            )
-        }
+        eventPublisher.sendEvent(CREATE_ORDER, event)
+    }
 
-        val paymentEvent = CreateOrder(
-            event.userId,
-            event.description,
-            event.pgOrderId,
-            event.paymentPrice
-        )
-
-        eventPublisher.sendEvent(PRODUCT_STOCK_ADJUSTMENT, productStockAdjustmentEvent)
-        eventPublisher.sendEvent(CREATE_ORDER, paymentEvent)
+    suspend fun processProductStockAdjustment(event: List<ProductStockAdjustment>) {
+        eventPublisher.sendEvent(PRODUCT_STOCK_ADJUSTMENT, event)
     }
 
     suspend fun processPaymentProcessing(event: PaymentProcessingEvent) {

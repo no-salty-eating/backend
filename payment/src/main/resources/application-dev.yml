@@ -38,7 +38,7 @@ eureka:
   instance:
     initial-status: up
     prefer-ip-address: false
-    instance-id: payment-server
+    instance-id: payment-service
   client:
     service-url:
       defaultZone: http://${EUREKA_NAME}:${EUREKA_PORT}/${EUREKA_HOST}/
