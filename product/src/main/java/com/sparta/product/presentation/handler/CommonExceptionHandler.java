@@ -3,7 +3,7 @@ package com.sparta.product.presentation.handler;
 import com.sparta.product.application.exception.productCategory.ProductCategoryException;
 import com.sparta.product.application.exception.timesale.TimeSaleException;
 import com.sparta.product.application.exception.scheduler.ScheduleException;
-import com.sparta.product.application.dtos.Response;
+import com.sparta.product.presentation.Response;
 import com.sparta.product.application.exception.category.CategoryException;
 import com.sparta.product.application.exception.common.Error;
 import com.sparta.product.application.exception.common.ForbiddenException;

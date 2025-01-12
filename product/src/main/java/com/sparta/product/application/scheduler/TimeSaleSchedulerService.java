@@ -1,6 +1,6 @@
 package com.sparta.product.application.scheduler;
 
-import com.sparta.product.application.exception.timesale.NotFoundTimeSaleException;
+import com.sparta.product.application.exception.timesale.NotFoundOnTimeSaleException;
 import com.sparta.product.application.scheduler.redis.TimeSaleRedisManager;
 import com.sparta.product.domain.core.Product;
 import com.sparta.product.domain.core.TimeSaleProduct;
@@ -20,12 +20,11 @@ public class TimeSaleSchedulerService {
 
     @Transactional
     public void startTimeSale(Long productId) {
-        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findById(productId)
-                .orElseThrow(NotFoundTimeSaleException::new);
+        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
+                .orElseThrow(NotFoundOnTimeSaleException::new);
 
         Product product = timeSaleProduct.getProduct();
 
-        // 상품과 타임세일 상품의 공개 여부 업데이트
         product.updateIsPublic(false);
         timeSaleProduct.updateIsPublic(true);
 
@@ -34,17 +33,17 @@ public class TimeSaleSchedulerService {
 
     @Transactional
     public void endTimeSale(Long productId) {
-        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findById(productId)
-                .orElseThrow(NotFoundTimeSaleException::new);
+        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
+                .orElseThrow(NotFoundOnTimeSaleException::new);
 
-        timeSaleRedisManager.removeInventory(productId.toString());
+        timeSaleRedisManager.removeTimeSaleOn(productId.toString());
         timeSaleRedisManager.removeEndSchedule(productId.toString());
 
         Product product = timeSaleProduct.getProduct();
 
-        // 상품과 타임세일 상품의 공개 여부 업데이트
         product.updateIsPublic(true);
         timeSaleProduct.updateIsPublic(false);
+        timeSaleProduct.getProduct().updateIsPublic(true);
 
         log.info("TimeSale ended - productId: {}, timeSaleId: {}", product.getId(), timeSaleProduct.getId());
     }

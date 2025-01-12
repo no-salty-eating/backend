@@ -1,4 +1,4 @@
-package com.study.order.application.dto.event
+package com.study.order.application.dto.event.provider
 
 data class CreateOrderEvent(
     val userId : Long,

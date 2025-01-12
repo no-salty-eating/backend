@@ -14,19 +14,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 @RestControllerAdvice
 class GlobalExceptionHandler {
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(OrderException::class)
     fun handleOrderException(ex: OrderException): Response<Unit> {
         return Response(ex.error.status,ex.error.message)
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ProductException::class)
     fun handleProductException(ex: ProductException): Response<Unit> {
         return Response(ex.error.status,ex.error.message)
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(CouponException::class)
     fun handleCouponException(ex: CouponException): Response<Unit> {
         return Response(ex.error.status,ex.error.message)

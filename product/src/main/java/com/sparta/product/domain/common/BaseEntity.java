@@ -24,10 +24,10 @@ public abstract class BaseEntity {
     private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted")
-    private boolean isDeleted = false;
+    private Boolean isDeleted = false;
 
     @Column(name = "is_public")
-    private boolean isPublic;
+    private Boolean isPublic = true;
 
     public void updateIsDeleted(Boolean isDeleted) {
         this.isDeleted = isDeleted;

@@ -6,6 +6,7 @@ import au.com.console.kassava.kotlinToString
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 
+//TODO: 필드 접근자 재설정
 @Table("TB_PAYMENT")
 class Payment (
     @Id

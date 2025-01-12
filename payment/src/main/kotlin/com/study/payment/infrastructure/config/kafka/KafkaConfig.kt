@@ -5,14 +5,12 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.TopicBuilder
 import org.springframework.kafka.core.KafkaAdmin
 
+private const val TOPIC_PAYMENT = "create-order"
+
 @Configuration
 class KafkaConfig(
     private val admin: KafkaAdmin,
 ) : InitializingBean {
-
-    companion object{
-        const val TOPIC_PAYMENT = "create-order"
-    }
 
     override fun afterPropertiesSet() {
         admin.createOrModifyTopics(
