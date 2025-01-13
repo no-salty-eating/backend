@@ -29,7 +29,6 @@ public enum Error {
     UNAVAILABLE_COUPON(2105, "발급된  쿠폰을 찾을 수 없거나 접근 권한이 없습니다."),
     NOT_VALID_END_TIME(2106, "쿠폰 발급 완료 시간은 쿠폰 발급 시작 시간 이후여야 합니다."),
     ISSUE_COUPON_LATER(2107, "쿠폰 발급 요청이 많아 처리할 수 없습니다. 잠시 후 다시 시도해주세요."),
-    UPDATE_ISSUED_COUPON_ERROR(2108, "발급된 쿠폰 상태 조회 중 오류가 발생했습니다."),
 
     JSON_PROCESSING_ERROR(9996, "JSON 처리에 오류가 있습니다."),
     METHOD_ARGUMENT_NOT_VALID(9997, "유효하지 않은 값입니다."),
@@ -38,7 +37,10 @@ public enum Error {
     CIRCUIT_BREAKER_OPEN(10000, "이용량 증가로 현재 서비스가 불가능합니다."),
     SERVER_TIMEOUT(10001, "응답 시간을 초과하였습니다."),
     NOT_VALID_ROLE_ENUM(10002, "유효하지 않은 권한입니다."),
-    INVALID_UPDATE_REQUEST(10003, "수정할 내용이 없습니다.");
+    INVALID_UPDATE_REQUEST(10003, "수정할 내용이 없습니다."),
+    REQUIRED_HEADER(10004, "헤더에서 X-Id는 필수입니다."),
+    INVALID_HEADER(10005, "잘못된 X-Id 형식입니다."),
+    NOT_FOUND_HEADER(10006, "현재 컨텍스트에서 X-Id를 찾을 수 없습니다.");
 
     Integer code;
     String message;
