@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 public class kafkaConsumer {
 
     private final UserCouponService userCouponService;
-    private final ObjectMapper objectMapper;
 
     private static final String ORDER_SUCCESS = "order-success";
     private static final String ORDER_SERVICE = "order-service";
