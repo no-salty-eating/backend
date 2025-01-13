@@ -11,7 +11,7 @@ class Order (
     @Id
     val id: Long = 0,
     val userId: Long,
-    val pgOrderId: String? = null,
+    val pgOrderId: String,
     val totalPrice: Int = 0,
     val paymentPrice: Int = 0,
     val pointAmount: Int = 0,

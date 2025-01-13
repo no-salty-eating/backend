@@ -6,10 +6,15 @@ interface CacheService {
 
     suspend fun getProductInfo(productId: Long): ProductResponseDto?
 
-    suspend fun increment(productId: Long, quantity: Int)
+    suspend fun decrementStock(productId: Long, amount: Int, isTimeSale: Boolean)
 
-    suspend fun decrement(productId: Long, quantity: Int)
+    suspend fun incrementStock(productId: Long, amount: Int, isTimeSale: Boolean)
 
-    suspend fun getSoldQuantity(productId: Long): Int?
+    suspend fun executeWithLock(productIds: List<Long>, runner: suspend () -> Unit)
 
+    suspend fun saveOrderInfo(productId: Long, isTimeSale: Boolean)
+
+    suspend fun isTimeSaleOrder(productId: Long): Boolean
+
+    suspend fun deleteOrderInfo(productId: Long, isTimeSale: Boolean)
 }

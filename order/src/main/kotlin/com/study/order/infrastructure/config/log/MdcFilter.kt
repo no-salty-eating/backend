@@ -1,6 +1,6 @@
 package com.study.order.infrastructure.config.log
 
-import com.study.order.infrastructure.extension.txid
+import com.study.order.infrastructure.utils.txid
 import io.micrometer.context.ContextRegistry
 import org.slf4j.MDC
 import org.springframework.core.annotation.Order
@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono
 import reactor.util.context.Context
 import java.util.*
 
-const val KEY_TXID = "X-UserId"
+const val KEY_TXID = "X-Id"
 
 @Order(1)
 @Component

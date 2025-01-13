@@ -7,7 +7,6 @@ import com.study.order.application.dto.event.consumer.PaymentProcessingEvent
 import com.study.order.application.dto.event.consumer.PaymentResultEvent
 import com.study.order.application.dto.event.provider.CreateOrderEvent
 import com.study.order.application.dto.event.provider.OrderSuccessEvent
-import com.study.order.application.dto.event.provider.ProductStockAdjustmentEvent
 import com.study.order.application.dto.request.CreateOrderRequestDto
 import com.study.order.application.dto.response.ProductResponseDto
 import com.study.order.application.exception.InvalidCouponException
@@ -28,10 +27,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
-private const val CREATE_ORDER = "orchestrator:create-order"
-private const val PRODUCT_STOCK_ADJUSTMENT = "orchestrator:product-stock-adjustment"
-private const val ORDER_SUCCESS = "orchestrator:order-success"
-
 @Service
 class OrderService(
     private val cacheService: CacheService,
@@ -41,6 +36,11 @@ class OrderService(
     private val orderDetailRepository: OrderDetailRepository,
 ) {
 
+    companion object {
+        private const val CREATE_ORDER = "orchestrator:create-order"
+        private const val ORDER_SUCCESS = "orchestrator:order-success"
+    }
+
     private val logger = LoggerProvider.logger
 
     @Transactional
@@ -48,13 +48,30 @@ class OrderService(
 
         val products = getProductInfo(request)
 
-        validateAndIncrementStock(request, products)
+        // 단일 상품에 대한 락을 모두 획득
+        cacheService.executeWithLock(products.values.map { it.productId }) {
+            validateAndDecrementStock(request, products)
+        }
+
+        // TODO: 쓰기 / 읽기 DB를 분리하지 않으면 DB 부하 시 지연 / 타임아웃 등이 발생할 수 있음
+        //  원본 : 쓰기 / 복제본 : 읽기
+        //  데이터소스를 원본 / 복제본 모두에
+        val order = saveOrder(request, products)
 
         val discountPrice = calculateDiscountPrice(request, products)
 
-        val order = saveOrder(request, products)
-
-        publishEvents(request, order, products, discountPrice)
+        // 여기서 장애가 발생한다면?  또는 kafka 가 종료되었다면? 주문 정보가 생성되고 메시지가 유실된경우?
+        // 이 때, saveOrder 와 publishEvent 를 같은 트랜잭션에 묶는 방법
+        // -> outBox 에 이벤트 정보를 저장
+        messageService.sendEvent(
+            CREATE_ORDER, CreateOrderEvent(
+                //TODO: 여기 아예 loginId 로 바꿔버리면 어떨까?
+                userId = request.userId,
+                description = request.products.joinToString(", ") { "${products[it.productId]!!.name} x ${it.quantity}" },
+                pgOrderId = order.pgOrderId,
+                paymentPrice = discountPrice,
+            )
+        )
 
         return order.id
     }
@@ -84,15 +101,9 @@ class OrderService(
             messageService.sendEvent(ORDER_SUCCESS, event)
             order.updateStatus(ORDER_FINALIZED)
         } else {
-            val event = orderDetails.map {
-                cacheService.decrement(it.productId, it.quantity)
-                ProductStockAdjustmentEvent(
-                    it.productId,
-                    it.quantity,
-                    false
-                )
+            orderDetails.map {
+                cacheService.decrementStock(it.productId, it.quantity, cacheService.isTimeSaleOrder(it.productId))
             }
-            sendProductStockEvent(event)
             order.updateStatus(PAYMENT_FAILED)
         }
 
@@ -105,18 +116,17 @@ class OrderService(
         }.associateBy { it.productId }
     }
 
-    private suspend fun validateAndIncrementStock(
+    private suspend fun validateAndDecrementStock(
         request: CreateOrderRequestDto,
         products: Map<Long, ProductResponseDto>
     ) {
         request.products.forEach {
             val product = products[it.productId]!!
-            cacheService.getSoldQuantity(it.productId)?.let { soldQuantity ->
-                if (soldQuantity + it.quantity > product.stock) {
-                    throw NotEnoughStockException()
-                } else {
-                    cacheService.increment(it.productId, it.quantity)
-                }
+
+            if (it.quantity > product.stock) {
+                throw NotEnoughStockException()
+            } else {
+                cacheService.decrementStock(product.productId, it.quantity, product.isTimeSale)
             }
         }
     }
@@ -176,37 +186,10 @@ class OrderService(
                     quantity = it.quantity,
                 )
             )
+            cacheService.saveOrderInfo(it.productId, products[it.productId]!!.isTimeSale)
         }
 
         return newOrder
-    }
-
-    private suspend fun publishEvents(
-        request: CreateOrderRequestDto,
-        newOrder: Order,
-        products: Map<Long, ProductResponseDto>,
-        discountPrice: Int
-    ) {
-        sendProductStockEvent(request.products.map {
-            ProductStockAdjustmentEvent(
-                it.productId,
-                it.quantity,
-                true
-            )
-        })
-
-        messageService.sendEvent(
-            CREATE_ORDER, CreateOrderEvent(
-                userId = request.userId,
-                description = request.products.joinToString(", ") { "${products[it.productId]!!.name} x ${it.quantity}" },
-                pgOrderId = newOrder.pgOrderId!!,
-                paymentPrice = newOrder.totalPrice - discountPrice,
-            )
-        )
-    }
-
-    private suspend fun sendProductStockEvent(event : List<ProductStockAdjustmentEvent>) {
-        messageService.sendEvent(PRODUCT_STOCK_ADJUSTMENT, event)
     }
 
     private suspend fun getOrderByPgOrderId(pgOrderId: String): Order {
