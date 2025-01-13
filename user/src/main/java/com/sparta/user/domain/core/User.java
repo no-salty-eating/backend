@@ -1,7 +1,6 @@
-package com.sparta.user.domain.model.core;
+package com.sparta.user.domain.core;
 
-import com.sparta.user.domain.model.UserRoleEnum;
-import com.sparta.user.domain.model.common.BaseEntity;
+import com.sparta.user.domain.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

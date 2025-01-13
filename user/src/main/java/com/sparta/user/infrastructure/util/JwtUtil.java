@@ -1,7 +1,7 @@
 package com.sparta.user.infrastructure.util;
 
 
-import com.sparta.user.domain.model.UserRoleEnum;
+import com.sparta.user.domain.core.UserRoleEnum;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;

@@ -1,4 +1,4 @@
-package com.sparta.user.domain.model.common;
+package com.sparta.user.domain.common;
 
 import jakarta.persistence.*;
 import lombok.Getter;
