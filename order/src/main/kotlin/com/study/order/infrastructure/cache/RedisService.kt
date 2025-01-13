@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
 
 @Service
-class CacheService(
+class RedisService(
     private val mapper: ObjectMapper,
     private val transactionHelper: TransactionHelper,
     private val redissonClient: RedissonReactiveClient,
@@ -46,7 +46,16 @@ class CacheService(
     private val opsForHash = redisTemplate.opsForHash<String, String>()
 
     override suspend fun getProductInfo(productId: Long): ProductResponseDto? {
-        return getHash(productId)
+        val keys = listOf(TIME_SALE_KEY + productId, PRODUCT_KEY + productId)
+
+        for (key in keys) {
+            val entries = opsForHash.entries(key).asFlow().toList()
+            if (entries.isNotEmpty()) {
+                val productData = mapper.writeValueAsString(entries.associate { it.key to it.value })
+                return convertDataAsDto(productData, key.startsWith(TIME_SALE_KEY))
+            }
+        }
+        return null
     }
 
     override suspend fun decrementStock(productId: Long, amount: Int, isTimeSale: Boolean) {
@@ -100,19 +109,6 @@ class CacheService(
         val key = ORDER_KEY + if (isTimeSale) TIME_SALE_KEY + productId else PRODUCT_KEY + productId
 
         opsForValue.delete(key).awaitSingle()
-    }
-
-    private suspend fun getHash(productId: Long): ProductResponseDto? {
-        val keys = listOf(TIME_SALE_KEY + productId, PRODUCT_KEY + productId)
-
-        for (key in keys) {
-            val entries = opsForHash.entries(key).asFlow().toList()
-            if (entries.isNotEmpty()) {
-                val productData = mapper.writeValueAsString(entries.associate { it.key to it.value })
-                return convertDataAsDto(productData, key.startsWith(TIME_SALE_KEY))
-            }
-        }
-        return null
     }
 
     private fun convertDataAsDto(record: String, isTimeSale: Boolean): ProductResponseDto {

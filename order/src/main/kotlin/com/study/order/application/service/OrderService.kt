@@ -103,6 +103,7 @@ class OrderService(
         } else {
             orderDetails.map {
                 cacheService.decrementStock(it.productId, it.quantity, cacheService.isTimeSaleOrder(it.productId))
+                cacheService.deleteOrderInfo(it.productId, cacheService.isTimeSaleOrder(it.productId))
             }
             order.updateStatus(PAYMENT_FAILED)
         }
