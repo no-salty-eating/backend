@@ -1,4 +1,4 @@
-package com.sparta.coupon.model.core;
+package com.sparta.coupon.domain.core;
 
 
 import static com.sparta.coupon.application.exception.Error.CANCEL_UNAVAILABLE_COUPON;
@@ -6,8 +6,8 @@ import static com.sparta.coupon.application.exception.Error.EXPIRED_COUPON;
 import static com.sparta.coupon.application.exception.Error.USED_COUPON;
 
 import com.sparta.coupon.application.exception.CouponException;
-import com.sparta.coupon.model.CouponStatusEnum;
-import com.sparta.coupon.model.common.BaseEntity;
+import com.sparta.coupon.domain.common.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -42,7 +42,7 @@ public class UserCoupon extends BaseEntity {
     @Column( nullable = false)
     private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
 
@@ -50,10 +50,11 @@ public class UserCoupon extends BaseEntity {
     @Column(nullable = false)
     private CouponStatusEnum couponStatus;
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime usedAt;
 
     public static UserCoupon issueUserCoupon(Long userId, Coupon coupon) {
+
         return UserCoupon.builder()
                 .userId(userId)
                 .coupon(coupon)

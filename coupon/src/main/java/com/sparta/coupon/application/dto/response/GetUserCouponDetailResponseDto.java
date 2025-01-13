@@ -1,24 +1,22 @@
 package com.sparta.coupon.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sparta.coupon.model.CouponStatusEnum;
-import com.sparta.coupon.model.DiscountTypeEnum;
-import com.sparta.coupon.model.core.Coupon;
-import com.sparta.coupon.model.core.UserCoupon;
+import com.sparta.coupon.domain.core.Coupon;
+import com.sparta.coupon.domain.core.UserCoupon;
 import java.time.LocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record GetUserCouponDetailResponseDto (
-        Long id,
+        Long userCouponId,
         Long couponId,
         Long userId,
-        DiscountTypeEnum discountType,
+        String discountType,
         int discountValue,
         int minOrderAmount,
         int maxDiscountAmount,
         LocalDateTime startTime,
         LocalDateTime endTime,
-        CouponStatusEnum status,
+        String status,
         LocalDateTime usedAt) {
 
     public static GetUserCouponDetailResponseDto from(UserCoupon userCoupon) {
@@ -27,13 +25,13 @@ public record GetUserCouponDetailResponseDto (
                 userCoupon.getId(),
                 coupon.getId(),
                 userCoupon.getUserId(),
-                coupon.getDiscountType(),
+                coupon.getDiscountType().name(),
                 coupon.getDiscountValue(),
                 coupon.getMinOrderAmount(),
                 coupon.getMaxDiscountAmount(),
                 coupon.getStartTime(),
                 coupon.getEndTime(),
-                userCoupon.getCouponStatus(),
+                userCoupon.getCouponStatus().name(),
                 userCoupon.getUsedAt()
         );
     }

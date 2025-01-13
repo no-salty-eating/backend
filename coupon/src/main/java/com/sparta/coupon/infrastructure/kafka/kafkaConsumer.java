@@ -1,6 +1,5 @@
 package com.sparta.coupon.infrastructure.kafka;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.coupon.application.service.UserCouponService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

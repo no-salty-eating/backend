@@ -1,6 +1,6 @@
-package com.sparta.coupon.infrastructure.repository;
+package com.sparta.coupon.domain.repository;
 
-import com.sparta.coupon.model.core.Coupon;
+import com.sparta.coupon.domain.core.Coupon;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -13,10 +13,11 @@ import org.springframework.stereotype.Repository;
 public interface CouponRepository extends JpaRepository<Coupon, Long> {
 
     @Query("SELECT c FROM Coupon c WHERE c.id = :couponId AND c.isDeleted = false AND c.isPublic = true " +
-            "AND c.startTime <= :now AND c.endTime >= :now")
+            "AND c.endTime >= :now")
     Optional<Coupon> findByIdAndIsDeletedFalseAndIsPublicTrueAndTimeValid(@Param("couponId") Long couponId, @Param("now") LocalDateTime now);
 
-    Optional<List<Coupon>> findByIsDeletedFalseAndIsPublicTrue();
+    @Query("SELECT c FROM Coupon c WHERE c.isDeleted = false AND c.isPublic = true AND c.endTime >= :now")
+    Optional<List<Coupon>> findByIsDeletedFalseAndIsPublicTrueTimeValid(@Param("now") LocalDateTime now);
 
 
 }

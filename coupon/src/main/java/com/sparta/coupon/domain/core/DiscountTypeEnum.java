@@ -1,4 +1,4 @@
-package com.sparta.coupon.model;
+package com.sparta.coupon.domain.core;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
