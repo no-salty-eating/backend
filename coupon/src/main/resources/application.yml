@@ -15,6 +15,19 @@ spring:
     redis:
       port: 6379
       host: localhost
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092  # Kafka 브로커의 주소
+      group-id: order-service  # Kafka 소비자 그룹 ID (컨슈머가 속할 그룹 이름)
+      enable-auto-commit: false  # 자동 커밋 여부 설정
+      auto-offset-reset: earliest  # 오프셋 리셋 설정, earliest는 처음부터 읽기
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer  # 메시지 키 디시리얼라이저
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer  # 메시지 값 디시리얼라이저
+
+    producer:
+      bootstrap-servers: localhost:9092  # Kafka 브로커의 주소
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer  # 메시지 키 직렬화 클래스
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer  # 메시지 값 직렬화 클래스
 
 eureka:
   client:
