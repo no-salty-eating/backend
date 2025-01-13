@@ -71,7 +71,11 @@ public class TimeSaleProduct extends BaseEntity {
         this.isSoldOut = isSoldOut;
     }
 
-    public void decreaseQuantity(Integer quantity) {
-        this.stock -= quantity;
+    public void decreaseStock(Integer quantity) {
+        stock -= quantity;
+    }
+
+    public void increaseStock(Integer quantity) {
+        stock += quantity;
     }
 }

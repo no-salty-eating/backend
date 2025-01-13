@@ -40,13 +40,11 @@ public class ProductController {
     }
 
     @PatchMapping("/{productId}")
-    public Response<ProductResponseDto> updateProduct(@PathVariable Long productId,
+    public Response<Void> updateProduct(@PathVariable Long productId,
                                                       @RequestBody @Valid ProductUpdateRequestDto productUpdateRequestDto,
                                                       @RequestHeader(name = "X-UserId", required = false) String userId,
                                                       @RequestHeader(name = "X-Role") String role) {
-        return Response.<ProductResponseDto>builder()
-                .data(productService.updateProduct(productId, role, productUpdateRequestDto))
-                .build();
+        return Response.<Void>builder().build();
     }
 
     @DeleteMapping("/{productId}")
@@ -57,14 +55,9 @@ public class ProductController {
         return Response.<Void>builder().build();
     }
 
-    @PostMapping("/product-stock-decrease-db")
-    public Response<Void> decreaseStockInDb(@RequestBody StockDecreaseMessage stockDecreaseMessage) {
-        productService.decreaseStockInDb(stockDecreaseMessage.productId(), stockDecreaseMessage.stock());
+    @PostMapping("/stock-management")
+    public Response<Void> decreaseStockInDb(@RequestBody String serializedMessage) {
+        productService.stockManagementInDb(serializedMessage);
         return Response.<Void>builder().build();
-    }
-
-    @GetMapping("/internal/{productId}")
-    public ProductInternalResponseDto internalGetProduct(@PathVariable Long productId) {
-        return productService.internalGetProduct(productId);
     }
 }
