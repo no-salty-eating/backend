@@ -7,9 +7,9 @@ import static com.sparta.coupon.application.exception.Error.ISSUE_NOT_VALID_TIME
 
 import com.sparta.coupon.application.dto.request.IssueRequestDto;
 import com.sparta.coupon.application.exception.CouponException;
-import com.sparta.coupon.infrastructure.repository.UserCouponRepository;
-import com.sparta.coupon.model.core.Coupon;
-import com.sparta.coupon.model.core.UserCoupon;
+import com.sparta.coupon.domain.repository.UserCouponRepository;
+import com.sparta.coupon.domain.core.Coupon;
+import com.sparta.coupon.domain.core.UserCoupon;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class UserCouponRedisService {
     private static final long LOCK_LEASE_TIME = 5;
 
     @Transactional
-    public UserCoupon issueUserCoupon(String userId, IssueRequestDto requestDto) {
+    public UserCoupon issueUserCoupon(Long userId, IssueRequestDto requestDto) {
         String quantityKey = COUPON_QUANTITY_KEY + requestDto.couponId();
         String lockKey = COUPON_LOCK_KEY + requestDto.couponId();
         RLock lock = redissonClient.getLock(lockKey);
@@ -63,8 +63,7 @@ public class UserCouponRedisService {
                 throw new CouponException(COUPON_EXHAUSTED, HttpStatus.BAD_REQUEST);
             }
 
-            UserCoupon userCoupon = UserCoupon.issueUserCoupon(Long.parseLong(userId), coupon);
-            userCoupon.getCoupon().issueCoupon();
+            UserCoupon userCoupon = UserCoupon.issueUserCoupon(userId, coupon);
             return userCouponRepository.save(userCoupon);
 
 
