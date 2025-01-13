@@ -8,7 +8,7 @@ import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import reactor.kafka.sender.SenderOptions
 
 @Configuration
-class ReactiveKafkaInitializer {
+class KafkaConfig {
 
     @Bean
     fun reactiveProducer(properties: KafkaProperties): ReactiveKafkaProducerTemplate<String,String> {

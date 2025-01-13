@@ -1,0 +1,43 @@
+server:
+  port: 19097
+  shutdown: graceful
+  error:
+    include-message: always
+    include-exception: true
+    include-stacktrace: always
+spring:
+  application:
+    name: orchestration-server
+  output:
+    ansi:
+      enabled: always
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: earliest
+  config:
+    import: classpath:application-key.yml
+
+---
+
+eureka:
+  instance:
+    initial-status: up
+    prefer-ip-address: false
+    instance-id: orchestration-server
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_NAME}:${EUREKA_PORT}/${EUREKA_HOST}/
+    region: ap-northeast-2
+
+---
+
+logging:
+  level:
+    com.study: debug
+    org.springframework.r2dbc.core: debug
+    org.springframework.r2dbc.connection.init: debug
+    org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler: off
+    org.springframework.web.HttpLogging: off
+  pattern:
+    console: "%d{HH:mm:ss.SSS}|%highlight(%-5level)|%X{txid:-}|%green(%t)|%blue(\\(%F:%L\\))|%msg%n"

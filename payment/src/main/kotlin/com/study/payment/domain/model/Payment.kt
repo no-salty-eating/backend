@@ -6,19 +6,25 @@ import au.com.console.kassava.kotlinToString
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 
-//TODO: 필드 접근자 재설정
 @Table("TB_PAYMENT")
 class Payment (
     @Id
     val id: Long = 0,
-    var userId: Long,
-    var description: String? = null,
-    var paymentPrice: Int = 0,
-    var pgOrderId: String? = null,
-    var pgKey: String? = null,
-    var pgStatus: PgStatus = PgStatus.CREATE,
-    var pgRetryCount: Int = 0,
+    val userId: Long,
+    val description: String? = null,
+    val paymentPrice: Int = 0,
+    val pgOrderId: String? = null,
 ) : BaseEntity(){
+
+    var pgRetryCount: Int = 0
+        private set
+
+    var pgKey: String? = null
+        private set
+
+    var pgStatus: PgStatus = PgStatus.CREATE
+        private set
+
     override fun equals(other: Any?): Boolean = kotlinEquals(
         other, arrayOf(
             Payment::id
@@ -42,6 +48,14 @@ class Payment (
             Payment::pgStatus,
             Payment::pgRetryCount,
         ), superToString = { super.toString() })
+
+    fun injectionPgKey(pgKey: String) {
+        this.pgKey = pgKey
+    }
+
+    fun updateStatus(status: PgStatus) {
+        this.pgStatus = status
+    }
 
     fun increaseRetryCount() {
         if (pgStatus == PgStatus.CAPTURE_RETRY) {

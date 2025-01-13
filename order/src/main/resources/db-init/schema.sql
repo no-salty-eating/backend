@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS TB_ORDER_DETAIL (
    id serial unique,
    order_id bigint,
    product_id bigint,
-   coupon_id bigint,
+   user_coupon_id bigint,
    price bigint,
    quantity int,
    is_deleted boolean,

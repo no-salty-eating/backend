@@ -4,12 +4,12 @@ import com.study.order.application.dto.response.ProductResponseDto
 
 interface CacheService {
 
-    suspend fun get(productId: Long): ProductResponseDto?
+    suspend fun getProductInfo(productId: Long): ProductResponseDto?
 
-    suspend fun increment(productId: Long)
+    suspend fun increment(productId: Long, quantity: Int)
 
-    suspend fun decrement(productId: Long)
+    suspend fun decrement(productId: Long, quantity: Int)
 
-    suspend fun getSize(productId: Long): Int?
+    suspend fun getSoldQuantity(productId: Long): Int?
 
 }

@@ -7,7 +7,7 @@ server:
     include-stacktrace: always
 spring:
   application:
-    name: order-server
+    name: order-service
   profiles:
     active: dev
   jackson:

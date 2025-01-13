@@ -6,18 +6,24 @@ import au.com.console.kassava.kotlinToString
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 
-//TODO: 필드 접근자 재설정
 @Table("TB_ORDER")
 class Order (
     @Id
     val id: Long = 0,
-    var userId: Long,
-    var pgOrderId: String? = null,
-    var totalPrice: Int = 0,
-    var paymentPrice: Int = 0,
-    var pointAmount: Int = 0,
-    var orderStatus: OrderStatus = OrderStatus.ORDER_PROGRESS,
+    val userId: Long,
+    val pgOrderId: String? = null,
+    val totalPrice: Int = 0,
+    val paymentPrice: Int = 0,
+    val pointAmount: Int = 0,
 ) : BaseEntity() {
+
+    var orderStatus: OrderStatus = OrderStatus.ORDER_PROGRESS
+        private set
+
+    fun updateStatus(status: OrderStatus) {
+        this.orderStatus = status
+    }
+
     override fun equals(other: Any?): Boolean = kotlinEquals(
         other, arrayOf(
             Order::id

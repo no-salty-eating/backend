@@ -12,8 +12,8 @@ private const val PAYMENT_PROCESSING = "payment-processing"
 private const val PAYMENT_RESULT = "payment-result"
 
 @Configuration
-class PaymentEventConsumer(
-    private val consumer: Consumer,
+class PaymentEventListener(
+    private val kafkaEventProcessor: KafkaEventProcessor,
     private val mapper: ObjectMapper,
     private val orderService: OrderService,
 ) {
@@ -21,13 +21,13 @@ class PaymentEventConsumer(
     @PostConstruct
     fun init() {
 
-        consumer.consume(PAYMENT_PROCESSING, "order-process") { record ->
+        kafkaEventProcessor.publish(PAYMENT_PROCESSING, "order-process") { record ->
             toPaymentProcessingEvent(record).let {
                 orderService.updateOrderStatus(it)
             }
         }
 
-        consumer.consume(PAYMENT_RESULT, "order-process") {record ->
+        kafkaEventProcessor.publish(PAYMENT_RESULT, "order-process") { record ->
             toPaymentResultEvent(record).let {
                 orderService.updateOrderStatus(it)
             }
