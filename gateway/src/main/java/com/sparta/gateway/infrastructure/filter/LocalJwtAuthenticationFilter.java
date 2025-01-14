@@ -44,7 +44,7 @@ public class LocalJwtAuthenticationFilter implements GlobalFilter {
                         .build())
                 .build();
 
-        if (path.equals("/auth/login") || path.equals("/auth/join")) {
+        if (path.equals("/auth/login") || path.equals("/auth/join") || path.startsWith("/payments")) {
             return chain.filter(exchange);
         }
 
