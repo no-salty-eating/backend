@@ -1,8 +1,6 @@
-package com.sparta.coupon.model.core;
+package com.sparta.coupon.domain.core;
 
-
-import com.sparta.coupon.model.DiscountTypeEnum;
-import com.sparta.coupon.model.common.BaseEntity;
+import com.sparta.coupon.domain.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -41,8 +39,10 @@ public class Coupon extends BaseEntity {
     @Column(nullable = false)
     private Integer totalQuantity;
 
+    /*
     @Column(nullable = false)
     private Integer issueQuantity;
+     */
 
     @Column(nullable = false)
     private LocalDateTime startTime;
@@ -78,15 +78,16 @@ public class Coupon extends BaseEntity {
                 .minOrderAmount(minOrderAmount)
                 .maxDiscountAmount(maxDiscountAmount)
                 .totalQuantity(totalQuantity)
-                .issueQuantity(0)  // 기본적으로 issueQuantity는 0으로 설정
+                //.issueQuantity(0)  // 기본적으로 issueQuantity는 0으로 설정
                 .startTime(startTime)
                 .endTime(endTime)
                 .expireTime(endTime.plusDays(30)) // 만료 시간을 종료 시간 기준으로 30일 후로 설정
                 .build();
     }
 
+    /*
     public void issueCoupon() {
         this.issueQuantity++;
     }
-
+    */
 }

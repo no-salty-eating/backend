@@ -1,6 +1,6 @@
-package com.sparta.coupon.infrastructure.repository;
+package com.sparta.coupon.domain.repository;
 
-import com.sparta.coupon.model.core.UserCoupon;
+import com.sparta.coupon.domain.core.UserCoupon;
 import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;

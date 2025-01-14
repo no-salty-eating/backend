@@ -1,4 +1,5 @@
-package com.sparta.coupon.model.common;
+package com.sparta.coupon.domain.common;
+
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sparta.coupon.application.exception.CouponException;
 import com.sparta.coupon.application.dto.Response;
 import com.sparta.coupon.application.exception.Error;
+import com.sparta.coupon.application.exception.HeaderException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,18 @@ public class CommonExceptionHandler  {
     @ExceptionHandler(CouponException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Response<Void> CouponExceptionHandler(CouponException e) {
+
+        Error error = e.getError();
+
+        return Response.<Void>builder()
+                .code(error.getCode())
+                .message(error.getMessage())
+                .build();
+    }
+
+    @ExceptionHandler(HeaderException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Response<Void> HeaderExceptionHandler(HeaderException e) {
 
         Error error = e.getError();
 

@@ -1,7 +1,6 @@
 package com.sparta.coupon.application.dto.request;
 
-import com.sparta.coupon.model.DiscountTypeEnum;
-import com.sparta.coupon.model.core.Coupon;
+import com.sparta.coupon.domain.core.DiscountTypeEnum;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -40,16 +39,4 @@ public record CreateCouponRequestDto(
         @FutureOrPresent(message = "시작 시간은 현재 시간 이후여야 합니다.")
         LocalDateTime endTime
 ) {
-    public Coupon toEntity() {
-        return Coupon.createCoupon(
-                name,
-                discountType,
-                discountValue,
-                minOrderAmount,
-                maxDiscountAmount,
-                totalQuantity,
-                startTime,
-                endTime
-        );
-    }
 }

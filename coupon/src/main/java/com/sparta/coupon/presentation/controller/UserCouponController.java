@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,30 +24,26 @@ public class UserCouponController {
     private final UserCouponService userCouponService;
 
     @PostMapping()
-    public Response<GetCouponResponseDto> issueUserCoupon(@RequestHeader(value = "X-Id") String requestId,
-                                                                          @RequestBody IssueRequestDto request) {
-        return new Response<>(HttpStatus.CREATED.value(), "쿠폰 발급 완료", userCouponService.issueUserCoupon(requestId, request));
+    public Response<GetCouponResponseDto> issueUserCoupon(@RequestBody IssueRequestDto request) {
+        return new Response<>(HttpStatus.CREATED.value(), "쿠폰 발급 완료", userCouponService.issueUserCoupon(request));
     }
 
     @PostMapping("/use/{userCouponId}")
-    public Response<GetCouponResponseDto> useCoupon(@RequestHeader(value = "X-Id") String requestId,
-            @PathVariable Long userCouponId) {
-        return new Response<>(HttpStatus.OK.value(), "쿠폰 사용 완료", userCouponService.useCoupon(requestId, userCouponId));
+    public Response<GetCouponResponseDto> useCoupon(@PathVariable Long userCouponId) {
+        return new Response<>(HttpStatus.OK.value(), "쿠폰 사용 완료", userCouponService.useCoupon(userCouponId));
     }
 
     @PostMapping("/cancel/{userCouponId}")
-    public Response<GetCouponResponseDto> cancelCoupon(@RequestHeader(value = "X-Id") String requestId,
-                                                    @PathVariable Long userCouponId) {
-        return new Response<>(HttpStatus.OK.value(), "쿠폰 취소 완료", userCouponService.cancelCoupon(requestId, userCouponId));
+    public Response<GetCouponResponseDto> cancelCoupon(@PathVariable Long userCouponId) {
+        return new Response<>(HttpStatus.OK.value(), "쿠폰 취소 완료", userCouponService.cancelCoupon(userCouponId));
     }
 
     @GetMapping
-    public Response<List<GetUserCouponDetailResponseDto>> getCouponList(@RequestHeader(value = "X-Id") String requestId,
-                                                              @RequestParam(required = false) List<Long> userCouponIds) {
+    public Response<List<GetUserCouponDetailResponseDto>> getCouponList(@RequestParam(required = false) List<Long> userCouponIds) {
 
 
 
-        return new Response<>(HttpStatus.OK.value(), "쿠폰 조회 완료", userCouponService.getCouponList(requestId, userCouponIds));
+        return new Response<>(HttpStatus.OK.value(), "쿠폰 조회 완료", userCouponService.getCouponList(userCouponIds));
     }
 
 }
