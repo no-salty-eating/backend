@@ -1,7 +1,7 @@
 package com.sparta.user.application.dto.response;
 
-import com.sparta.user.domain.model.UserRoleEnum;
-import com.sparta.user.domain.model.core.User;
+import com.sparta.user.domain.core.UserRoleEnum;
+import com.sparta.user.domain.core.User;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

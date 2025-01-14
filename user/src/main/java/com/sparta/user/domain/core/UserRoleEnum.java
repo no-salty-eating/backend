@@ -1,4 +1,4 @@
-package com.sparta.user.domain.model;
+package com.sparta.user.domain.core;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
