@@ -59,7 +59,7 @@ public class ReqResLoggingFilter extends OncePerRequestFilter {
             MDC.clear();
 
             return;
-        } else if (responseBody.contains("swagger-ui")) {
+        } else if (cachingRequestWrapper.getRequestURL().toString().contains("swagger-ui")) {
             logger.info("swagger response");
             contentCachingResponseWrapper.copyBodyToResponse();
             MDC.clear();
