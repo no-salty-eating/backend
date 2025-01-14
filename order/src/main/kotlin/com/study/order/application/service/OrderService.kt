@@ -1,11 +1,13 @@
 package com.study.order.application.service
 
 import com.study.order.application.client.CouponService
+import com.study.order.application.client.HistoryApi
 import com.study.order.application.dto.CouponStatus
 import com.study.order.application.dto.DiscountType
 import com.study.order.application.dto.event.consumer.PaymentProcessingEvent
 import com.study.order.application.dto.event.consumer.PaymentResultEvent
 import com.study.order.application.dto.event.provider.CreateOrderEvent
+import com.study.order.application.dto.event.provider.OrderHistoryEvent
 import com.study.order.application.dto.event.provider.OrderSuccessEvent
 import com.study.order.application.dto.request.CreateOrderRequestDto
 import com.study.order.application.dto.response.ProductResponseDto
@@ -29,6 +31,7 @@ import java.util.*
 
 @Service
 class OrderService(
+    private val historyApi: HistoryApi,
     private val cacheService: CacheService,
     private val couponService: CouponService,
     private val messageService: MessageService,
@@ -107,6 +110,8 @@ class OrderService(
             }
             order.updateStatus(PAYMENT_FAILED)
         }
+
+        historyApi.save(OrderHistoryEvent.fromOrder(order, request.description))
 
         orderRepository.save(order)
     }

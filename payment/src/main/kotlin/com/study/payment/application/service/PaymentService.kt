@@ -191,6 +191,7 @@ class PaymentService(
                         payment.pgOrderId!!,
                         payment.paymentPrice,
                         payment.pgStatus.name,
+                        payment.description!!,
                     )
                 )
             }

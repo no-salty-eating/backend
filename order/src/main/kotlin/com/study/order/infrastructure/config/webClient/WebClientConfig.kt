@@ -25,6 +25,10 @@ class WebClientConfig {
     @LoadBalanced
     fun productServiceWebClient(): WebClient = createWebClient("http://product-service", "product-service")
 
+    @Bean
+    @LoadBalanced
+    fun historyServiceWebClient(): WebClient = createWebClient("http://history-service", "history-service")
+
     private fun createWebClient(baseUrl: String, name: String): WebClient {
 
         val insecureSslContext =
