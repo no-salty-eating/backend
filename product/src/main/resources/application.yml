@@ -1,11 +1,15 @@
 server:
   port: 19096
+  error:
+    include-message: always
+    include-exception: true
+    include-stacktrace: always
 
 spring:
   application:
     name: product-service
   profiles:
-    active: dev
+    active: local
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${host.db.mysql.url}:${host.db.mysql.port}/productDB
@@ -16,14 +20,16 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        show_sql: true
-        format_sql: true
+#        show_sql: true
+#        format_sql: true
         default_batch_fetch_size: 500
     open-in-view: false
   data:
     redis:
       host: ${host.db.redis.url}
       port: 6379
+
+
 #  kafka:
 #    bootstrap-servers:
 #    producer:
