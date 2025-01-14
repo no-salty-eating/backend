@@ -6,7 +6,7 @@ import com.sparta.product.application.exception.product.NotFoundProductException
 import com.sparta.product.application.exception.timesale.*;
 import com.sparta.product.application.scheduler.TimeSaleSchedulerService;
 import com.sparta.product.application.scheduler.redis.RedisKeys;
-import com.sparta.product.application.scheduler.redis.TimeSaleRedisManager;
+import com.sparta.product.application.scheduler.redis.RedisManager;
 import com.sparta.product.domain.common.UserRoleEnum;
 import com.sparta.product.domain.core.Product;
 import com.sparta.product.domain.core.TimeSaleProduct;
@@ -17,7 +17,6 @@ import com.sparta.product.domain.repository.TimeSaleSoldOutRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,9 +31,11 @@ public class TimeSaleService {
     private final TimeSaleProductRepository timeSaleProductRepository;
     private final ProductRepository productRepository;
     private final TimeSaleSoldOutRepository timeSaleSoldOutRepository;
-    private final TimeSaleRedisManager redisManager;
+    private final RedisManager redisManager;
     private final TimeSaleSchedulerService timeSaleSchedulerService;
     private final RedisTemplate<String, String> redisTemplate;
+
+    private static final String STOCK = "stock";
 
     @Transactional
     public void createTimeSaleProduct(TimeSaleProductRequestDto timeSaleProductRequestDto, String role) {
@@ -61,44 +62,56 @@ public class TimeSaleService {
         TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
                 .orElseThrow(NotFoundOnTimeSaleException::new);
 
-        // 재고 소진 시 타임세일 종료 처리
+        // 재고 소진
         // TODO : redis와 DB의 수량을 어떻게 일치시킬지? kafka 이용....?
         // TODO : 현재는 redis와 일치하지 않는 문제도 있고, db에는 음수로도 값이 들어감
-        if (isStockEmpty(productId)) {
+        if (isStockEmptyInRedis(productId)) {
             timeSaleProduct.updateIsSoldOut(true);
             timeSaleSoldOutRepository.save(TimeSaleSoldOut.createFrom(timeSaleProduct));
             timeSaleSchedulerService.endTimeSale(productId);
             throw new EmptyStockException();
         }
 
+        String cacheKey = RedisKeys.TIMESALE + productId;
+
         // 감소
-        if (!redisManager.decreaseInventory(productId, stock)) {
+        if (!redisManager.decreaseHashStock(productId, stock, cacheKey)) {
             throw new ExceedTimeSaleQuantityException();
         }
     }
 
-    // TODO : kafka로 메시지 받으면 실행 되도록?
-    @Async
     @Transactional
-    protected void processTimeSalePurchaseAsyncToDB(Long productId, Integer stock) {
-            TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
-                    .orElseThrow(NotFoundOnTimeSaleException::new);
-            Product product = timeSaleProduct.getProduct();
+    public void decreaseTimeSaleStockInDB(Long productId, Integer quantity) {
+        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
+                .orElseThrow(NotFoundOnTimeSaleException::new);
 
-            // 재고 감소
-            timeSaleProduct.decreaseQuantity(stock);
-            product.decreaseStock(stock);
+        if (timeSaleProduct.getStock() <= 0 || timeSaleProduct.getStock() < quantity) {
+            throw new NotEnoughTimeSaleStockInDbException();
+        }
 
-            log.info("Processed TimeSale purchase asynchronously - timeSaleId: {}, stock: {}", timeSaleProduct.getId(), stock);
-            // Redis 재고 복구
-//            redisManager.increaseInventory(productId, stock);
+        timeSaleProduct.decreaseStock(quantity);
     }
 
-    private boolean isStockEmpty(Long productId) {
-        String key = RedisKeys.TIMESALE_ON + productId;
+    @Transactional
+    public void increaseTimeSaleStockInDb(Long productId, Integer quantity) {
+        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
+                .orElseThrow(NotFoundOnTimeSaleException::new);
+
+        timeSaleProduct.increaseStock(quantity);
+    }
+
+    public boolean isEmptyTimeSaleInRedis(Long productId) {
+        String cacheKey = RedisKeys.TIMESALE + productId;
+        Map<Object, Object> timeSaleInfo = redisTemplate.opsForHash().entries(cacheKey);
+
+        return timeSaleInfo.isEmpty();
+    }
+
+    private boolean isStockEmptyInRedis(Long productId) {
+        String key = RedisKeys.TIMESALE + productId;
         Map<Object, Object> productInfo = redisTemplate.opsForHash().entries(key);
 
-        String remainingStock = (String) productInfo.get("stock");
+        String remainingStock = (String) productInfo.get(STOCK);
         return remainingStock == null || Integer.parseInt(remainingStock) <= 0;
     }
 

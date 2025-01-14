@@ -16,7 +16,7 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class TimeSaleScheduler {
-    private final TimeSaleRedisManager redisManager;
+    private final RedisManager redisManager;
     private final TimeSaleSchedulerService timeSaleSchedulerService;
     private final TimeSaleProductRepository timeSaleProductRepository;
 
@@ -39,7 +39,7 @@ public class TimeSaleScheduler {
 
                     TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(Long.valueOf(productId))
                             .orElseThrow(NotFoundOnTimeSaleException::new);
-                    redisManager.createTimeSaleProduct(timeSaleProduct);
+                    redisManager.createHashTimeSale(timeSaleProduct);
                 }
             }
         } catch (Exception e) {
@@ -54,7 +54,7 @@ public class TimeSaleScheduler {
             if (endProducts != null && !endProducts.isEmpty()) {
                 for (String productId : endProducts) {
                     redisManager.removeEndSchedule(productId);
-                    redisManager.removeTimeSaleOn(productId);
+                    redisManager.removeTimeSale(productId);
                     timeSaleSchedulerService.endTimeSale(Long.valueOf(productId));
                 }
             }

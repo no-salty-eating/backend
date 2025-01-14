@@ -7,10 +7,12 @@ import com.sparta.product.application.dtos.product.ProductResponseDto;
 import com.sparta.product.application.dtos.product.ProductUpdateRequestDto;
 import com.sparta.product.application.exception.category.NotFoundCategoryException;
 import com.sparta.product.application.exception.common.ForbiddenRoleException;
+import com.sparta.product.application.exception.product.NotEnoughProductStockException;
 import com.sparta.product.application.exception.product.NotFoundProductException;
+import com.sparta.product.application.exception.product.NotFoundProductInRedisException;
 import com.sparta.product.application.exception.productCategory.NotFoundProductCategoryException;
 import com.sparta.product.application.scheduler.redis.RedisKeys;
-import com.sparta.product.application.scheduler.redis.TimeSaleRedisManager;
+import com.sparta.product.application.scheduler.redis.RedisManager;
 import com.sparta.product.domain.common.UserRoleEnum;
 import com.sparta.product.domain.core.Category;
 import com.sparta.product.domain.core.Product;
@@ -22,9 +24,7 @@ import com.sparta.product.infrastructure.dtos.ProductInternalResponseDto;
 import com.sparta.product.infrastructure.kafka.event.StockDecreaseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,8 +43,9 @@ public class ProductService {
     private final RedisTemplate<String, String> redisTemplate;
     private final TimeSaleService timeSaleService;
     private final ObjectMapper objectMapper;
-    private final TimeSaleRedisManager timeSaleRedisManager;
-    private static final String PRODUCT = "product:";
+    private final RedisManager redisManager;
+
+    private static final int DEFAULT_REDIS_EXPIRE_SECONDS = 60  * 60 * 2;
 
     @Transactional
     public void createProduct(ProductRequestDto productRequestDto, String role) {
@@ -56,13 +57,16 @@ public class ProductService {
 
         List<Long> categories = productRequestDto.productCategoryList();
         saveProductCategory(categories, product);
+
+        String cacheKey = RedisKeys.PRODUCT + product.getId();
+        redisManager.createHashProduct(product);
+        redisManager.setExpireTime(cacheKey, DEFAULT_REDIS_EXPIRE_SECONDS);
     }
 
     @Transactional(readOnly = true)
     public ProductResponseDto getProduct(Long productId, String role) {
         try {
-            String cacheKey = PRODUCT + productId;
-
+            String cacheKey = RedisKeys.PRODUCT_DETAIL + productId;
             String cachedData = redisTemplate.opsForValue().get(cacheKey);
 
             if (cachedData != null) {
@@ -81,8 +85,9 @@ public class ProductService {
                     ? ProductResponseDto.forMasterOf(productCategories)
                     : ProductResponseDto.forUserOrSellerOf(productCategories);
 
-            String jsonData = objectMapper.writeValueAsString(responseDto);
-            redisTemplate.opsForValue().set(cacheKey, jsonData);
+            if (!role.equals(UserRoleEnum.MASTER.toString())) {
+                saveProductIntoRedis(productId, productCategories, cacheKey, responseDto);
+            }
 
             return responseDto;
         } catch (JsonProcessingException e) {
@@ -91,9 +96,8 @@ public class ProductService {
         }
     }
 
-    // TODO : 업데이트 시에도 수정된 값 캐싱으로 넣어주기.
     @Transactional
-    public ProductResponseDto updateProduct(Long productId, String role, ProductUpdateRequestDto productUpdateRequestDto) {
+    public void updateProduct(Long productId, String role, ProductUpdateRequestDto productUpdateRequestDto) {
         checkIsSellerOrMaster(role);
 
         Product product = productRepository.findByIdAndIsDeletedFalse(productId).orElseThrow(NotFoundProductException::new);
@@ -105,12 +109,49 @@ public class ProductService {
         }
         product.updateFrom(productUpdateRequestDto.productName(), productUpdateRequestDto.price(), productUpdateRequestDto.stock(), productUpdateRequestDto.isPublic());
 
-        List<ProductCategory> updatedProductCategories = productCategoryRepository.findByProductIdWithoutConditions(productId);
+        // db에 있는 정보 가져오는건가? 그럼 update된 데이터랑 다르지 않나..?
+        List<ProductCategory> updatedProductCategories = productCategoryRepository.findByProductIdWithConditions(productId);
 
-        return ProductResponseDto.forUserOrSellerOf(updatedProductCategories);
+        // 캐시 정보 업데이트
+        String cacheKey = RedisKeys.PRODUCT_DETAIL + productId;
+
+        ProductResponseDto responseDto = ProductResponseDto.forUserOrSellerOf(updatedProductCategories);
+        try {
+            String jsonData = objectMapper.writeValueAsString(responseDto);
+            if (isEmptyProductInRedis(productId)) {
+                throw new NotFoundProductInRedisException();
+            }
+            redisTemplate.opsForValue().set(cacheKey, jsonData);
+            redisManager.setExpireTime(cacheKey, DEFAULT_REDIS_EXPIRE_SECONDS);
+
+            redisManager.updateProductHash(updatedProductCategories.get(0).getProduct());
+            redisManager.setExpireTime(RedisKeys.PRODUCT + productId, DEFAULT_REDIS_EXPIRE_SECONDS);
+
+        } catch (JsonProcessingException e) {
+            // TODO : 예외 만들기
+            throw new RuntimeException(e);
+        }
+
     }
 
-    @CacheEvict(cacheNames = RedisKeys.PRODUCT, key = "#productId")
+    private void saveProductIntoRedis(Long productId, List<ProductCategory> updatedProductCategories, String cacheKey, ProductResponseDto responseDto) throws JsonProcessingException {
+        String jsonData = objectMapper.writeValueAsString(responseDto);
+        redisTemplate.opsForValue().set(cacheKey, jsonData);
+        redisManager.setExpireTime(cacheKey, DEFAULT_REDIS_EXPIRE_SECONDS);
+
+        if (isEmptyProductInRedis(productId)) {
+            redisManager.createHashProduct(updatedProductCategories.get(0).getProduct());
+        }
+        redisManager.setExpireTime(RedisKeys.PRODUCT + productId, DEFAULT_REDIS_EXPIRE_SECONDS);
+    }
+
+    public boolean isEmptyProductInRedis(Long productId) {
+        String cacheKey = RedisKeys.PRODUCT + productId;
+        Map<Object, Object> productInfo = redisTemplate.opsForHash().entries(cacheKey);
+
+        return productInfo.isEmpty();
+    }
+
     @Transactional
     public void softDeleteProduct(Long productId, String role) {
         checkIsSellerOrMaster(role);
@@ -123,30 +164,34 @@ public class ProductService {
     public void stockManagementInRedis(String serializedMessage) {
         try {
             /**
-             * 1. productId로 timesale:on:{productId}에 해당하는 값이 있는지 확인하기
-             * 2. 있다면 감소/증가 확인 후 적용. 없다면 product:{productId}에서 증가, 감소 적용..
+             * hash에 저장된 timesale, product 재고 감소
+             * product detail의 재고 감소
              */
             StockDecreaseMessage decreaseMessage = objectMapper.readValue(serializedMessage, StockDecreaseMessage.class);
             Long productId = decreaseMessage.productId();
-            Integer stock = decreaseMessage.stock();
+            Integer stock = decreaseMessage.quantity();
             Boolean isDecrease = decreaseMessage.isDecrease();
 
-            String timeSaleKey = RedisKeys.TIMESALE_ON + productId;
-            Map<Object, Object> productInfo = redisTemplate.opsForHash().entries(timeSaleKey);
+            String timeSaleKey = RedisKeys.TIMESALE + productId;
+            Map<Object, Object> timeSaleInfo = redisTemplate.opsForHash().entries(timeSaleKey);
 
-            if (!productInfo.isEmpty()) {
+            String cacheKey = RedisKeys.PRODUCT + productId;
+            String detailCacheKey = RedisKeys.PRODUCT_DETAIL + productId;
+            String getValue = redisTemplate.opsForValue().get(detailCacheKey);
+            ProductResponseDto productResponseDto = objectMapper.readValue(getValue, ProductResponseDto.class);
+
+            if (!timeSaleInfo.isEmpty()) {
                 if (isDecrease) {
                     timeSaleService.decreaseTimeSaleProductInRedis(productId, stock);
+                    decreaseStockProductInRedis(productResponseDto, stock, cacheKey, detailCacheKey);
                 } else {
-                    timeSaleRedisManager.increaseInventory(productId, stock);
+                    redisManager.increaseHashStock(productId, stock, cacheKey);
+                    increaseStockProductInRedis(productResponseDto, stock, cacheKey);
                 }
             } else {
-                String cacheKey = PRODUCT + productId;
-                String getValue = redisTemplate.opsForValue().get(cacheKey);
-                ProductResponseDto productResponseDto = objectMapper.readValue(getValue, ProductResponseDto.class);
                 if (productResponseDto != null) {
                     if (isDecrease) {
-                        decreaseStockProductInRedis(productResponseDto, stock, cacheKey);
+                        decreaseStockProductInRedis(productResponseDto, stock, cacheKey, detailCacheKey);
                     } else {
                         increaseStockProductInRedis(productResponseDto, stock, cacheKey);
                     }
@@ -158,34 +203,54 @@ public class ProductService {
         }
     }
 
+    @Transactional
     public void stockManagementInDb(String serializedMessage) {
         try {
             StockDecreaseMessage decreaseMessage = objectMapper.readValue(serializedMessage, StockDecreaseMessage.class);
             Long productId = decreaseMessage.productId();
-            Integer stock = decreaseMessage.stock();
+            Integer quantity = decreaseMessage.quantity();
             Boolean isDecrease = decreaseMessage.isDecrease();
 
-            String timeSaleKey = RedisKeys.TIMESALE_ON + productId;
-            Map<Object, Object> productInfo = redisTemplate.opsForHash().entries(timeSaleKey);
+            Product product = productRepository.findByIdAndIsDeletedFalse(productId).orElseThrow(NotFoundProductException::new);
 
 
+            if (timeSaleService.isEmptyTimeSaleInRedis(productId)) {
+                if (isDecrease) {
+                    if (product.getStock() <= 0 || product.getStock() < quantity) {
+                        throw new NotEnoughProductStockException();
+                    }
+                    product.decreaseStock(quantity);
+                } else {
+                    product.increaseStock(quantity);
+                }
+            } else {
+                if (isDecrease) {
+                    product.decreaseStock(quantity);
+                    timeSaleService.decreaseTimeSaleStockInDB(productId, quantity);
+                } else {
+                    product.increaseStock(quantity);
+                    timeSaleService.increaseTimeSaleStockInDb(productId, quantity);
+                }
+            }
         } catch (JsonProcessingException e) {
             // TODO : 예외 만들기
             throw new RuntimeException(e);
         }
     }
 
-    public void decreaseStockProductInRedis(ProductResponseDto productResponseDto, Integer stock, String cacheKey) {
+    public void decreaseStockProductInRedis(ProductResponseDto productResponseDto, Integer stock, String cacheKey, String detailCacheKey) {
         try {
             int currentStock = productResponseDto.stock() != null ? productResponseDto.stock() : 0;
 
             if (currentStock >= stock) {
+                // product detail
                 int newStock = currentStock - stock;
-
                 ProductResponseDto updatedProduct = ProductResponseDto.fromDto(productResponseDto, newStock);
 
                 String jsonProduct = objectMapper.writeValueAsString(updatedProduct);
-                redisTemplate.opsForValue().set(cacheKey, jsonProduct);
+                redisTemplate.opsForValue().set(detailCacheKey, jsonProduct);
+
+                // hash product
 
             }
         } catch (JsonProcessingException e) {
@@ -213,26 +278,16 @@ public class ProductService {
     }
 
     public void updateCache(Long productId, ProductResponseDto updatedDto) throws JsonProcessingException {
-        String cacheKey = PRODUCT + productId;
+        String cacheKey = RedisKeys.PRODUCT + productId;
 
         String jsonData = objectMapper.writeValueAsString(updatedDto);
         redisTemplate.opsForValue().set(cacheKey, jsonData);
     }
 
     public void deleteCache(Long productId) {
-        String cacheKey = PRODUCT + productId;
+        String cacheKey = RedisKeys.PRODUCT + productId;
 
         redisTemplate.delete(cacheKey);
-    }
-    // TODO : 예외 발생 시 redis와 동기화 처리가 필요함
-
-    @Async
-    @Transactional
-    public void decreaseStockInDb(Long productId, Integer stock) {
-        Product product = productRepository.findByIdAndIsDeletedFalse(productId)
-                .orElseThrow(NotFoundProductException::new);
-        product.decreaseStock(stock);
-        productRepository.save(product);
     }
 
     public ProductInternalResponseDto internalGetProduct(Long productId) {

@@ -27,6 +27,8 @@ public enum Error {
 
     NOT_FOUND_PRODUCT(5000, "해당 상품을 찾을 수 없습니다."),
     IS_NOT_SALE_PRODUCT(5001, "판매 중인 상품이 아닙니다."),
+    NOT_FOUND_PRODUCT_IN_REDIS(5002, "redis에서 해당 상품을 찾을 수 없습니다. 조회를 먼저 해주시거나 존재하는 id인지 확인하세요"),
+    NOT_ENOUGH_PRODUCT_STOCK_EXCEPTION(5200, "상품의 재고가 부족합니다. 구매수량 또는 재고 확인이 필요합니다."),
 
     NOT_FOUND_PRODUCTCATEGORY(5050, "상품이나 카테고리를 찾을 수 없습니다. 정상적인 상태인지 확인해주세요."),
 
@@ -36,12 +38,14 @@ public enum Error {
 
     NOT_FOUND_TIMESALE_PRODUCT(7000, "해당 타임세일 상품을 찾을 수 없습니다."),
     NOT_FOUND_ON_TIMESALE_PRODUCT(7001, "진행 중인 타임세일 상품이 아닙니다."),
+    NOT_FOUND_TIMESALE_IN_REDIS(7002, "상품이 redis에 등록되어 있지 않습니다."),
     INVALID_TIMESALE_START_TIME(7100, "시작 시간은 현재 시간 이후여야 합니다."),
     INVALID_TIMESALE_END_TIME(7101, "종료 시간은 시작 시간 이후여야 합니다."),
     DUPLICATE_TIMESALE_PRODUCT(7102, "이미 진행 중이거나 예정된 타임세일이 있습니다."),
     EMPTY_STOCK_EXCEPTION(7103, "재고가 없습니다."),
     TIMESALE_QUANTITY_EXCEED_PRODUCT_STOCK(7300, "상품의 보유 수량을 초과하였습니다."),
     EXCEED_TIMESALE_QUANTITY(7301, "남은 타임세일 재고 수량을 초과하였습니다."),
+    NOT_ENOUGH_TIMESALE_STOCK_IN_DB(7302, "남은 timesale 상품이 없습니다."),
     TIMESALE_SCHEDULE_ERROR(7500, "타임세일 스케줄링 중 오류가 발생했습니다."),
 
     INTERNAL_SERVER_ERROR(9999, "서버 오류입니다."),

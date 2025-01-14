@@ -1,8 +1,7 @@
 package com.sparta.product.application.scheduler;
 
 import com.sparta.product.application.exception.timesale.NotFoundOnTimeSaleException;
-import com.sparta.product.application.scheduler.redis.TimeSaleRedisManager;
-import com.sparta.product.domain.core.Product;
+import com.sparta.product.application.scheduler.redis.RedisManager;
 import com.sparta.product.domain.core.TimeSaleProduct;
 import com.sparta.product.domain.repository.TimeSaleProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,19 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class TimeSaleSchedulerService {
 
     private final TimeSaleProductRepository timeSaleProductRepository;
-    private final TimeSaleRedisManager timeSaleRedisManager;
+    private final RedisManager redisManager;
 
     @Transactional
     public void startTimeSale(Long productId) {
         TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
                 .orElseThrow(NotFoundOnTimeSaleException::new);
 
-        Product product = timeSaleProduct.getProduct();
-
-        product.updateIsPublic(false);
         timeSaleProduct.updateIsPublic(true);
-
-        log.info("TimeSale started - productId: {}, timeSaleId: {}", product.getId(), timeSaleProduct.getId());
     }
 
     @Transactional
@@ -36,15 +30,10 @@ public class TimeSaleSchedulerService {
         TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
                 .orElseThrow(NotFoundOnTimeSaleException::new);
 
-        timeSaleRedisManager.removeTimeSaleOn(productId.toString());
-        timeSaleRedisManager.removeEndSchedule(productId.toString());
+//        timeSaleRedisManager.removeTimeSale(productId.toString());
+//        timeSaleRedisManager.removeEndSchedule(productId.toString());
 
-        Product product = timeSaleProduct.getProduct();
-
-        product.updateIsPublic(true);
         timeSaleProduct.updateIsPublic(false);
         timeSaleProduct.getProduct().updateIsPublic(true);
-
-        log.info("TimeSale ended - productId: {}, timeSaleId: {}", product.getId(), timeSaleProduct.getId());
     }
 }

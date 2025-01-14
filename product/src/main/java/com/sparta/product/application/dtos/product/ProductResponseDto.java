@@ -39,7 +39,6 @@ public record ProductResponseDto(
                         .toList())
                 .name(product.getName())
                 .price(product.getPrice())
-                .stock(product.getStock())
                 .build();
     }
 

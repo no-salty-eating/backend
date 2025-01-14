@@ -14,22 +14,21 @@ import org.springframework.stereotype.Component;
 public class kafkaConsumer {
 
     private final ProductService productService;
-    private final TimeSaleService timeSaleService;
-    private final ObjectMapper objectMapper;
-
-    private static final String REDIS_STOCK = "redis_stock";
-    private static final String DB_STOCK = "db_stock";
+    private static final String REDIS_STOCK = "product-stock-adjustment";
+    private static final String DB_STOCK = "order-success";
     private static final String PRODUCT_SERVICE = "product-service";
 
-    @KafkaListener(topics = REDIS_STOCK, groupId = PRODUCT_SERVICE)
-    public void receiveRedisMessage(String serializedMessage) {
-        log.info("receiveRedisMessage : {}", serializedMessage);
-        productService.stockManagementInRedis(serializedMessage);
-    }
+//    @KafkaListener(topics = REDIS_STOCK, groupId = PRODUCT_SERVICE)
+//    public void receiveRedisMessage(String serializedMessage) {
+//        log.info("receiveRedisMessage : {}", serializedMessage);
+//        String replaceMessage = serializedMessage.replace("[", "").replace("]", "");
+//        productService.stockManagementInRedis(replaceMessage);
+//    }
 
     @KafkaListener(topics = DB_STOCK, groupId = PRODUCT_SERVICE)
     public void receiveDbStock(String serializedMessage) {
         log.info("receiveDbStock: {}", serializedMessage);
-        productService.stockManagementInDb(serializedMessage);
+        String replaceMessage = serializedMessage.replace("[", "").replace("]", "");
+        productService.stockManagementInDb(replaceMessage);
     }
 }
