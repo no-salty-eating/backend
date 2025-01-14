@@ -1,10 +1,16 @@
 host:
   url: localhost
   db:
+    mysql:
+      url: localhost
+      port: 3312
+    redis:
+      url: localhost
+  kafka:
     url: localhost
-
-kafka:
-  port: 9092
+    port: 9092
+  zipkin:
+    url: localhost
 
 database:
   username: root
