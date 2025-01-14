@@ -5,10 +5,10 @@ spring:
   application:
     name: product-service
   profiles:
-    active: local
+    active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${host.db.url}:3306/productDB
+    url: jdbc:mysql://${host.db.mysql.url}:${host.db.mysql.port}/productDB
     username: ${database.username}
     password: ${database.password}
   jpa:
@@ -22,8 +22,14 @@ spring:
     open-in-view: false
   data:
     redis:
-      host: localhost
+      host: ${host.db.redis.url}
       port: 6379
+#  kafka:
+#    bootstrap-servers:
+#    producer:
+#      value-serializer:
+#    consumer:
+#      value-deserializer:
 
 #resilience4j:
 #  circuitbreaker:
@@ -57,16 +63,16 @@ spring:
 #      defaultZone: http://${host.url}:9090/eureka/
 
 management:
-#  zipkin:
-#    tracing:
-#      endpoint: "http://${host.url}:9411/api/v2/spans"
-#  tracing:
-#    sampling:
-#      probability: 1.0
-#    prometheus:
-#      metrics:
-#        export:
-#          enabled: true
+  zipkin:
+    tracing:
+      endpoint: "http://${host.zipkin.url}:9411/api/v2/spans"
+  tracing:
+    sampling:
+      probability: 1.0
+    prometheus:
+      metrics:
+        export:
+          enabled: true
   endpoints:
     web:
       exposure:

@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: productDB
+    networks:
+      - final-project_default
+    ports:
+      - "3312:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  product-service:
+    container_name: product-service
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "19096:19096"
+    networks:
+      - final-project_default
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure:5
+
+networks:
+  final-project_default:  # 네트워크에 맞게 변경 필요
+    external: true
+
+
+volumes:
+  mysql-data:
