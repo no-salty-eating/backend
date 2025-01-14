@@ -11,4 +11,17 @@ data class ProductResponseDto(
     val price: Int,
     @JsonProperty("stock")
     val stock: Int,
-)
+    val isTimeSale: Boolean
+) {
+    companion object {
+        fun from(record: ProductData, isTimeSale: Boolean): ProductResponseDto {
+            return ProductResponseDto(
+                record.productId.toLong(),
+                record.name,
+                record.price.toInt(),
+                record.stock.toInt(),
+                isTimeSale
+            )
+        }
+    }
+}

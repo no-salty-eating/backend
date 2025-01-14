@@ -1,6 +1,6 @@
 package com.study.order.infrastructure.config.log
 
-import com.study.order.infrastructure.extension.txid
+import com.study.order.infrastructure.utils.txid
 import org.slf4j.MDC
 import org.springframework.boot.web.error.ErrorAttributeOptions
 import org.springframework.boot.web.reactive.error.DefaultErrorAttributes

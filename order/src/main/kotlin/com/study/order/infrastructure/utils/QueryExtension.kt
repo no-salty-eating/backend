@@ -1,4 +1,4 @@
-package com.study.order.infrastructure.extension
+package com.study.order.infrastructure.utils
 
 fun <T> T?.query(f: (T) -> String): String {
     return when {
