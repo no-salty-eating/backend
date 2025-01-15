@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
 
 @Component
-class RedisConfig(
+class RedissonConfig(
     @Value("\${spring.data.redis.host}")
     private val host: String,
     @Value("\${spring.data.redis.port}")

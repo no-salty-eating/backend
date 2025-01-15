@@ -12,11 +12,9 @@ spring:
     ansi:
       enabled: always
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_SERVER}
     consumer:
       auto-offset-reset: earliest
-  config:
-    import: classpath:application-key.yml
 
 ---
 
@@ -24,7 +22,8 @@ eureka:
   instance:
     initial-status: up
     prefer-ip-address: false
-    instance-id: orchestration-server
+    instance-id: orchestration-service
+    non-secure-port: ${SECURE_PORT}
   client:
     service-url:
       defaultZone: http://${EUREKA_NAME}:${EUREKA_PORT}/${EUREKA_HOST}/

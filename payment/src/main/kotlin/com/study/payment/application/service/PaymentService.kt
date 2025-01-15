@@ -34,9 +34,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import java.time.Duration as JavaDuration
 
-private const val PAYMENT_PROCESSING = "orchestrator:payment-processing"
-private const val PAYMENT_RESULT = "orchestrator:payment-result"
-
 @Service
 class PaymentService(
     private val mapper: ObjectMapper,
@@ -48,7 +45,11 @@ class PaymentService(
     private val paymentApiService: PaymentApiService,
 ) {
 
-    private val logger = LoggerProvider.logger
+    companion object {
+        private const val PAYMENT_PROCESSING = "orchestrator-payment-processing"
+        private const val PAYMENT_RESULT = "orchestrator-payment-result"
+        private val logger = LoggerProvider.logger
+    }
 
     @Transactional(readOnly = true)
     suspend fun getPaymentInfo(pgOrderId: String): Payment {

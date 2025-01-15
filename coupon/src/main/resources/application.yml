@@ -2,7 +2,7 @@ spring:
   application:
     name: coupon-service
   profiles:
-    active: ${ACTIVE}
+    active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
@@ -13,11 +13,11 @@ spring:
         use_sql_comments: true
   data:
     redis:
+      host: ${REDIS_HOST}
       port: 6379
-      host: localhost
   kafka:
     consumer:
-      bootstrap-servers: localhost:9092  # Kafka 브로커의 주소
+      bootstrap-servers: ${KAFKA_SERVER}
       group-id: order-service  # Kafka 소비자 그룹 ID (컨슈머가 속할 그룹 이름)
       enable-auto-commit: false  # 자동 커밋 여부 설정
       auto-offset-reset: earliest  # 오프셋 리셋 설정, earliest는 처음부터 읽기
@@ -25,14 +25,19 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer  # 메시지 값 디시리얼라이저
 
     producer:
-      bootstrap-servers: localhost:9092  # Kafka 브로커의 주소
+      bootstrap-servers: ${KAFKA_SERVER}
       key-serializer: org.apache.kafka.common.serialization.StringSerializer  # 메시지 키 직렬화 클래스
       value-serializer: org.apache.kafka.common.serialization.StringSerializer  # 메시지 값 직렬화 클래스
 
 eureka:
+  instance:
+    initial-status: up
+    prefer-ip-address: true
+    instance-id: coupon-service
+    non-secure-port: ${SECURE_PORT}
   client:
     service-url:
-      defaultZone: http://localhost:9090/eureka/
+      defaultZone: http://${EUREKA_NAME}:${EUREKA_PORT}/${EUREKA_HOST}/
 
 
 
@@ -40,13 +45,10 @@ server:
   port: 19094
 
 management:
-  zipkin:
-    tracing:
-      endpoint: "http://localhost:9411/api/v2/spans"
-  tracing:
-    sampling:
-      probability: 1.0
-
+  endpoints:
+    web:
+      exposure:
+        include: health,info
 
 openapi:
   service:

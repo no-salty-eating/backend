@@ -40,8 +40,8 @@ class OrderService(
 ) {
 
     companion object {
-        private const val CREATE_ORDER = "orchestrator:create-order"
-        private const val ORDER_SUCCESS = "orchestrator:order-success"
+        private const val CREATE_ORDER = "orchestrator-create-order"
+        private const val ORDER_SUCCESS = "orchestrator-order-success"
     }
 
     private val logger = LoggerProvider.logger

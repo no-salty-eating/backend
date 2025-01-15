@@ -10,28 +10,27 @@ import org.springframework.kafka.core.KafkaAdmin
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import reactor.kafka.sender.SenderOptions
 
-private const val ORCHESTRATOR = "orchestrator:"
-private const val CREATE_ORDER = "create-order"
-private const val ORDER_SUCCESS = "order-success"
-private const val PRODUCT_STOCK_ADJUSTMENT = "product-stock-adjustment"
-private const val PAYMENT_PROCESSING = "payment-processing"
-private const val PAYMENT_RESULT = "payment-result"
 
 @Configuration
 class KafkaConfig(
     private val admin: KafkaAdmin,
 ) : InitializingBean {
 
+    companion object {
+        private const val ORCHESTRATOR = "orchestrator-"
+        private const val CREATE_ORDER = "create-order"
+        private const val ORDER_SUCCESS = "order-success"
+        private const val PAYMENT_PROCESSING = "payment-processing"
+        private const val PAYMENT_RESULT = "payment-result"
+    }
     override fun afterPropertiesSet() {
         admin.createOrModifyTopics(
             TopicBuilder.name(CREATE_ORDER).partitions(1).replicas(1).build(),
             TopicBuilder.name(ORDER_SUCCESS).partitions(1).replicas(1).build(),
-            TopicBuilder.name(PRODUCT_STOCK_ADJUSTMENT).partitions(1).replicas(1).build(),
             TopicBuilder.name(PAYMENT_PROCESSING).partitions(1).replicas(1).build(),
             TopicBuilder.name(PAYMENT_RESULT).partitions(1).replicas(1).build(),
             TopicBuilder.name(ORCHESTRATOR + CREATE_ORDER).partitions(1).replicas(1).build(),
             TopicBuilder.name(ORCHESTRATOR + ORDER_SUCCESS).partitions(1).replicas(1).build(),
-            TopicBuilder.name(ORCHESTRATOR + PRODUCT_STOCK_ADJUSTMENT).partitions(1).replicas(1).build(),
             TopicBuilder.name(ORCHESTRATOR + PAYMENT_PROCESSING).partitions(1).replicas(1).build(),
             TopicBuilder.name(ORCHESTRATOR + PAYMENT_RESULT).partitions(1).replicas(1).build(),
         )

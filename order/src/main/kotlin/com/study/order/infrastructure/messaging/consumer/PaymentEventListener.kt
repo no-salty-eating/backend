@@ -8,8 +8,6 @@ import jakarta.annotation.PostConstruct
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Configuration
 
-private const val PAYMENT_PROCESSING = "payment-processing"
-private const val PAYMENT_RESULT = "payment-result"
 
 @Configuration
 class PaymentEventListener(
@@ -17,6 +15,10 @@ class PaymentEventListener(
     private val mapper: ObjectMapper,
     private val orderService: OrderService,
 ) {
+    companion object {
+        private const val PAYMENT_PROCESSING = "payment-processing"
+        private const val PAYMENT_RESULT = "payment-result"
+    }
 
     @PostConstruct
     fun init() {

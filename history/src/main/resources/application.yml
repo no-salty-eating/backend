@@ -1,6 +1,4 @@
 spring:
-  config:
-    import: classpath:application-key.yml
   output:
     ansi:
       enabled: always

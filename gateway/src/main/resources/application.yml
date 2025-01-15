@@ -17,20 +17,41 @@ spring:
           uri: lb://coupon-service
           predicates:
             - Path=/coupons/**, /userCoupons/**
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/payment/**
+        - id: history-service
+          uri: lb://history-service
+          predicates:
+            - Path=/history/order/**
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/products/**
 
 service:
   jwt:
     secret-key: ${JWT_SECRET_KEY}
 
 eureka:
+  instance:
+    initial-status: up
+    prefer-ip-address: true
+    instance-id: gateway
+    non-secure-port: ${SECURE_PORT}
   client:
     service-url:
-      defaultZone: http://localhost:9090/eureka/
+      defaultZone: http://${EUREKA_NAME}:${EUREKA_PORT}/${EUREKA_HOST}/
+    fetch-registry: true
+    register-with-eureka: true
 
 management:
-  zipkin:
-    tracing:
-      endpoint: "http://localhost:9411/api/v2/spans"
-  tracing:
-    sampling:
-      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: health,info
