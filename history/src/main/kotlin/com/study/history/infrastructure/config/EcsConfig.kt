@@ -1,4 +1,4 @@
-package com.study.saga.config
+package com.study.history.infrastructure.config
 
 import org.springframework.cloud.commons.util.InetUtils
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean
@@ -13,6 +13,7 @@ class EcsConfig {
 
     companion object {
         private const val API_URL = "https://api.ipify.org"
+        private val logger = LoggerProvider.logger
     }
 
     @Bean
@@ -23,6 +24,7 @@ class EcsConfig {
             val url = URL(API_URL)
             BufferedReader(InputStreamReader(url.openStream())).readLine()
         } catch (e: Exception) {
+            logger.error { "Failed : ${e.message}" }
             ""
         }
 

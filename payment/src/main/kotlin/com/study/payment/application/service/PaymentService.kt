@@ -46,8 +46,8 @@ class PaymentService(
 ) {
 
     companion object {
-        private const val PAYMENT_PROCESSING = "orchestrator-payment-processing"
-        private const val PAYMENT_RESULT = "orchestrator-payment-result"
+        private const val PAYMENT_PROCESSING = "payment-processing"
+        private const val PAYMENT_RESULT = "payment-result"
         private val logger = LoggerProvider.logger
     }
 

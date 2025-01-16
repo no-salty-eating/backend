@@ -10,17 +10,20 @@ import org.springframework.kafka.core.KafkaAdmin
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import reactor.kafka.sender.SenderOptions
 
-private const val TOPIC_PAYMENT = "create-order"
-
 @Configuration
 class KafkaConfig(
     private val admin: KafkaAdmin,
 ) : InitializingBean {
 
-    //TODO: 오케스트레이터 완성되면 제거
+    companion object {
+        private const val PAYMENT_PROCESSING = "payment-processing"
+        private const val PAYMENT_RESULT = "payment-result"
+    }
+
     override fun afterPropertiesSet() {
         admin.createOrModifyTopics(
-            TopicBuilder.name(TOPIC_PAYMENT).partitions(1).replicas(1).build(),
+            TopicBuilder.name(PAYMENT_PROCESSING).partitions(1).replicas(1).build(),
+            TopicBuilder.name(PAYMENT_RESULT).partitions(1).replicas(1).build(),
         )
     }
 

@@ -8,7 +8,7 @@ spring:
     active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_ENDPOINT}/user
+    url: jdbc:mysql://${DB_ENDPOINT}/product
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:

@@ -25,8 +25,9 @@ logging:
 eureka:
   instance:
     initial-status: up
-    prefer-ip-address: false
+    prefer-ip-address: true
     instance-id: history-service
+    non-secure-port: ${SECURE_PORT}
   client:
     service-url:
       defaultZone: http://${EUREKA_NAME}:${EUREKA_PORT}/${EUREKA_HOST}/

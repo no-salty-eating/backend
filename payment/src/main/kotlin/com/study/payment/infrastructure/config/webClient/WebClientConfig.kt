@@ -17,14 +17,6 @@ import java.time.Duration
 @Configuration
 class WebClientConfig {
 
-    @Bean
-    @LoadBalanced
-    fun couponServiceWebClient(): WebClient = createWebClient("http://coupon-service", "coupon-service")
-
-    @Bean
-    @LoadBalanced
-    fun orderServiceWebClient(): WebClient = createWebClient("http://order-service", "order-service")
-
     fun createWebClient(baseUrl: String, name: String): WebClient {
 
         val insecureSslContext =

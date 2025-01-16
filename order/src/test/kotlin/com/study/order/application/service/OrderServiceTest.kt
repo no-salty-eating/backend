@@ -4,7 +4,6 @@ import com.study.order.application.client.CouponService
 import com.study.order.application.dto.request.CreateOrderRequestDto
 import com.study.order.application.dto.request.ProductQuantityRequestDto
 import com.study.order.application.dto.response.CouponResponse
-import com.study.order.application.dto.response.ProductResponseDto
 import com.study.order.application.messaging.MessageService
 import com.study.order.infrastructure.config.log.LoggerProvider
 import com.study.order.infrastructure.repository.OrderRepository
@@ -13,9 +12,6 @@ import io.kotest.matchers.shouldNotBe
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

@@ -24,7 +24,7 @@ spring:
 eureka:
   instance:
     initial-status: up
-    prefer-ip-address: false
+    prefer-ip-address: true
     instance-id: payment-service
     non-secure-port: ${SECURE_PORT}
   client:
