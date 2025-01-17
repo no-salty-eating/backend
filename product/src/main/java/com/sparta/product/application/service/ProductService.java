@@ -21,7 +21,7 @@ import com.sparta.product.domain.repository.CategoryRepository;
 import com.sparta.product.domain.repository.ProductCategoryRepository;
 import com.sparta.product.domain.repository.ProductRepository;
 import com.sparta.product.infrastructure.dtos.ProductInternalResponseDto;
-import com.sparta.product.infrastructure.kafka.event.StockDecreaseMessage;
+import com.sparta.product.infrastructure.kafka.event.OrderSuccessMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -45,7 +45,7 @@ public class ProductService {
     private final ObjectMapper objectMapper;
     private final RedisManager redisManager;
 
-    private static final int DEFAULT_REDIS_EXPIRE_SECONDS = 60  * 60 * 2;
+    private static final int DEFAULT_REDIS_EXPIRE_SECONDS = 60 * 60 * 2;
 
     @Transactional
     public void createProduct(ProductRequestDto productRequestDto, String role) {
@@ -167,10 +167,9 @@ public class ProductService {
              * hash에 저장된 timesale, product 재고 감소
              * product detail의 재고 감소
              */
-            StockDecreaseMessage decreaseMessage = objectMapper.readValue(serializedMessage, StockDecreaseMessage.class);
+            OrderSuccessMessage decreaseMessage = objectMapper.readValue(serializedMessage, OrderSuccessMessage.class);
             Long productId = decreaseMessage.productId();
             Integer stock = decreaseMessage.quantity();
-            Boolean isDecrease = decreaseMessage.isDecrease();
 
             String timeSaleKey = RedisKeys.TIMESALE + productId;
             Map<Object, Object> timeSaleInfo = redisTemplate.opsForHash().entries(timeSaleKey);
@@ -181,20 +180,14 @@ public class ProductService {
             ProductResponseDto productResponseDto = objectMapper.readValue(getValue, ProductResponseDto.class);
 
             if (!timeSaleInfo.isEmpty()) {
-                if (isDecrease) {
-                    timeSaleService.decreaseTimeSaleProductInRedis(productId, stock);
-                    decreaseStockProductInRedis(productResponseDto, stock, cacheKey, detailCacheKey);
-                } else {
-                    redisManager.increaseHashStock(productId, stock, cacheKey);
-                    increaseStockProductInRedis(productResponseDto, stock, cacheKey);
-                }
+                timeSaleService.decreaseTimeSaleProductInRedis(productId, stock);
+                decreaseStockProductInRedis(productResponseDto, stock, cacheKey, detailCacheKey);
+                redisManager.increaseHashStock(productId, stock, cacheKey);
+                increaseStockProductInRedis(productResponseDto, stock, cacheKey);
             } else {
                 if (productResponseDto != null) {
-                    if (isDecrease) {
-                        decreaseStockProductInRedis(productResponseDto, stock, cacheKey, detailCacheKey);
-                    } else {
-                        increaseStockProductInRedis(productResponseDto, stock, cacheKey);
-                    }
+                    decreaseStockProductInRedis(productResponseDto, stock, cacheKey, detailCacheKey);
+                    increaseStockProductInRedis(productResponseDto, stock, cacheKey);
                 }
             }
         } catch (JsonProcessingException e) {
@@ -206,31 +199,24 @@ public class ProductService {
     @Transactional
     public void stockManagementInDb(String serializedMessage) {
         try {
-            StockDecreaseMessage decreaseMessage = objectMapper.readValue(serializedMessage, StockDecreaseMessage.class);
+            OrderSuccessMessage decreaseMessage = objectMapper.readValue(serializedMessage, OrderSuccessMessage.class);
             Long productId = decreaseMessage.productId();
             Integer quantity = decreaseMessage.quantity();
-            Boolean isDecrease = decreaseMessage.isDecrease();
 
             Product product = productRepository.findByIdAndIsDeletedFalse(productId).orElseThrow(NotFoundProductException::new);
 
 
             if (timeSaleService.isEmptyTimeSaleInRedis(productId)) {
-                if (isDecrease) {
-                    if (product.getStock() <= 0 || product.getStock() < quantity) {
-                        throw new NotEnoughProductStockException();
-                    }
-                    product.decreaseStock(quantity);
-                } else {
-                    product.increaseStock(quantity);
+                if (product.getStock() <= 0 || product.getStock() < quantity) {
+                    throw new NotEnoughProductStockException();
                 }
+                product.decreaseStock(quantity);
+                product.increaseStock(quantity);
             } else {
-                if (isDecrease) {
-                    product.decreaseStock(quantity);
-                    timeSaleService.decreaseTimeSaleStockInDB(productId, quantity);
-                } else {
-                    product.increaseStock(quantity);
-                    timeSaleService.increaseTimeSaleStockInDb(productId, quantity);
-                }
+                product.decreaseStock(quantity);
+                timeSaleService.decreaseTimeSaleStockInDB(productId, quantity);
+                product.increaseStock(quantity);
+                timeSaleService.increaseTimeSaleStockInDb(productId, quantity);
             }
         } catch (JsonProcessingException e) {
             // TODO : 예외 만들기

@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'product-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      #target 주소는 맞게 설정 필요
+      - targets: ['host.docker.internal:19096']
+#      - targets: ['product-service:19096']
