@@ -50,6 +50,7 @@ jobs:
           docker build -t ${{ matrix.service }}:latest .
           docker tag ${{ matrix.service }}:latest ${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}-repo:latest
           docker push ${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}-repo:latest
+          cd ..
       - name: Get ECS task definition
         run: |
           echo "Fetching current task definition"
