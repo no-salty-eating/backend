@@ -24,7 +24,6 @@ import com.study.order.domain.model.OrderStatus.PAYMENT_FAILED
 import com.study.order.domain.model.OrderStatus.PAYMENT_PROGRESS
 import com.study.order.domain.repository.OrderDetailRepository
 import com.study.order.domain.repository.OrderRepository
-import com.study.order.infrastructure.config.log.LoggerProvider
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -44,14 +43,11 @@ class OrderService(
         private const val ORDER_SUCCESS = "order-success"
     }
 
-    private val logger = LoggerProvider.logger
-
     @Transactional
     suspend fun create(request: CreateOrderRequestDto): Long? {
 
         val products = getProductInfo(request)
 
-        // 단일 상품에 대한 락을 모두 획득
         cacheService.executeWithLock(products.values.map { it.productId }) {
             validateAndDecrementStock(request, products)
         }
