@@ -1,18 +1,5 @@
-#management:
-#  endpoints:
-#    web:
-#      exposure:
-#        include: refresh
-#  zipkin:
-#    tracing:
-#      endpoint: ${ZIPKIN_ENDPOINT}
-#  tracing:
-#    sampling:
-#      probability: 1.0
-
 spring:
   config:
-    import: classpath:application-key.yml
     activate:
       on-profile: dev
   output:
@@ -31,27 +18,27 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_SERVER}
     consumer:
       auto-offset-reset: earliest
 eureka:
   instance:
     initial-status: up
-    prefer-ip-address: false
+    prefer-ip-address: true
     instance-id: payment-service
+    non-secure-port: ${SECURE_PORT}
   client:
     service-url:
       defaultZone: http://${EUREKA_NAME}:${EUREKA_PORT}/${EUREKA_HOST}/
     region: ap-northeast-2
 payment:
   self:
-    domain: ${DOMAIN}
+    domain: ${SERVICE_URL}
   toss:
     domain: https://api.tosspayments.com
-#    domain: https://api.tosspayments-test.com
     key:
-      client: ${PAYMENT_CLIENT}
-      secret: ${PAYMENT_SECRET}
+      client: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
+      secret: dGVzdF9nc2tfZG9jc19PYVB6OEw1S2RtUVhrelJ6M3k0N0JNdzY6
 
 ---
 springdoc:
