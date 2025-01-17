@@ -11,11 +11,11 @@ class CouponService(
     private val couponServiceWebClient: WebClient
 ) : CouponService {
 
-    override suspend fun getCouponList(userId : Long, couponIdSet: Set<Long>): List<CouponResponse> {
+    override suspend fun getCouponList(userId: Long, couponIdSet: Set<Long>): List<CouponResponse> {
         return couponServiceWebClient.get()
             .uri { builder ->
-                builder.path("/coupons/list/$userId")
-                    .queryParam("couponIds", couponIdSet.joinToString(","))
+                builder.path("/userCoupons/list/$userId")
+                    .queryParam("userCouponIds", couponIdSet.joinToString(","))
                     .build()
             }
             .retrieve()

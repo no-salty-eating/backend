@@ -55,8 +55,8 @@ public class UserCouponService {
 
 
     @Transactional(readOnly = true)
-    public List<GetUserCouponDetailResponseDto> getCouponList(List<Long> userCouponIds) {
-        List<UserCoupon> userCoupons = userCouponRepository.findByUserIdAndUserCouponIdsAvailable(UserIdInterceptor.getCurrentUserId(), userCouponIds)
+    public List<GetUserCouponDetailResponseDto> getCouponList(List<Long> userCouponIds, Long userId) {
+        List<UserCoupon> userCoupons = userCouponRepository.findByUserIdAndUserCouponIdsAvailable(userId, userCouponIds)
                 .orElseThrow(() -> new CouponException(UNAVAILABLE_COUPON, HttpStatus.NOT_FOUND));
 
         return userCoupons.stream()
