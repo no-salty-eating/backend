@@ -1,9 +1,10 @@
 package com.study.order.infrastructure.config.webClient
 
+import com.study.order.infrastructure.config.log.LoggerProvider
 import io.netty.channel.ChannelOption
 import io.netty.handler.ssl.SslContextBuilder
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
-import org.springframework.cloud.client.loadbalancer.LoadBalanced
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -15,19 +16,37 @@ import reactor.netty.resources.ConnectionProvider
 import java.time.Duration
 
 @Configuration
-class WebClientConfig {
+class WebClientConfig(
+    @Value("\${history.service.url}")
+    private val history: String,
+    @Value("\${product.service.url}")
+    private val product: String,
+    @Value("\${coupon.service.url}")
+    private val coupon: String
+) {
+
+    companion object {
+        private val logger = LoggerProvider.logger
+    }
 
     @Bean
-    @LoadBalanced
-    fun couponServiceWebClient(): WebClient = createWebClient("http://coupon-service", "coupon-service")
+    fun couponServiceWebClient(): WebClient {
+        logger.debug { "serviceUrl : $coupon" }
+        return createWebClient(coupon, "coupon-service")
+    }
 
     @Bean
-    @LoadBalanced
-    fun productServiceWebClient(): WebClient = createWebClient("http://product-service", "product-service")
+    fun productServiceWebClient(): WebClient {
+        logger.debug { "serviceUrl : $product" }
+        return createWebClient(product, "product-service")
+    }
 
     @Bean
-    @LoadBalanced
-    fun historyServiceWebClient(): WebClient = createWebClient("http://history-service", "history-service")
+    fun historyServiceWebClient(): WebClient {
+
+        logger.debug { "serviceUrl : $history" }
+        return createWebClient(history, "history-service")
+    }
 
     private fun createWebClient(baseUrl: String, name: String): WebClient {
 

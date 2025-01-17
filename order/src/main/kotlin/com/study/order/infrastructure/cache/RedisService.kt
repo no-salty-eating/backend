@@ -5,6 +5,7 @@ import com.study.order.application.dto.response.ProductData
 import com.study.order.application.dto.response.ProductResponseDto
 import com.study.order.application.exception.AcquireLockTimeoutException
 import com.study.order.application.exception.InternalServerError
+import com.study.order.application.exception.NotEnoughStockException
 import com.study.order.application.service.CacheService
 import com.study.order.infrastructure.config.log.KEY_TXID
 import com.study.order.infrastructure.config.log.LoggerProvider
@@ -84,6 +85,7 @@ class RedisService(
         } catch (ex: Exception) {
             when (ex) {
                 is TimeoutCancellationException -> throw AcquireLockTimeoutException()
+                is NotEnoughStockException -> throw NotEnoughStockException()
                 else -> throw InternalServerError()
             }
         } finally {
