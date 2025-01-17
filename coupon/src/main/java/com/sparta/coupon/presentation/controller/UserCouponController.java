@@ -40,11 +40,11 @@ public class UserCouponController {
 	}
 
 	@GetMapping("/list/{userId}")
-	public Response<List<GetUserCouponDetailResponseDto>> getCouponList(
+	public List<GetUserCouponDetailResponseDto> getCouponList(
 			@RequestParam(required = false) List<Long> userCouponIds,
 			@PathVariable Long userId
 	) {
-		return new Response<>(HttpStatus.OK.value(), "쿠폰 조회 완료", userCouponService.getCouponList(userCouponIds, userId));
+		return userCouponService.getCouponList(userCouponIds, userId);
 	}
 
 }

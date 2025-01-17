@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KafkaConsumer {
 
-    private final ProductService productService;
-    private static final String ORDER_SUCCESS = "order-success";
-    private static final String PRODUCT_SERVICE = "product-service";
+	private final ProductService productService;
+	private static final String ORDER_SUCCESS = "order-success";
+	private static final String PRODUCT_SERVICE = "product-service";
 
-    @KafkaListener(topics = ORDER_SUCCESS, groupId = PRODUCT_SERVICE)
-    public void receiveDbStock(String serializedMessage) {
-        log.info("receiveDbStock: {}", serializedMessage);
-        String replaceMessage = serializedMessage.replace("[", "").replace("]", "");
-        productService.stockManagementInDb(replaceMessage);
-    }
+	@KafkaListener(topics = ORDER_SUCCESS, groupId = PRODUCT_SERVICE)
+	public void receiveDbStock(String serializedMessage) {
+		log.info("receiveDbStock: {}", serializedMessage);
+		String replaceMessage = serializedMessage.replace("[", "").replace("]", "");
+		productService.stockManagementInDb(replaceMessage);
+	}
 }
