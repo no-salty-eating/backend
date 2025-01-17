@@ -37,6 +37,7 @@ jobs:
 
       - name: Build with Gradle
         run: |
+          cd ${{ matrix.service }}
           ./gradlew build
 
       - name: Check changes for each service
