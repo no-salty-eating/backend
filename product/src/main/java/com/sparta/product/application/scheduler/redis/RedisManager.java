@@ -40,7 +40,7 @@ public class RedisManager {
                     RedisKeys.TIMESALE_END_KEY,
                     timeSaleProduct.getProduct().getId().toString(),
                     timeSaleProduct.getTimeSaleEndTime().atZone(ZoneId.of("Asia/Seoul"))
-                            .plusDays(1)    // 하루 후에 삭제 되도록 설정
+//                            .plusDays(1)    // 하루 후에 삭제 되도록 설정
                             .toInstant()
                             .toEpochMilli()
             );
