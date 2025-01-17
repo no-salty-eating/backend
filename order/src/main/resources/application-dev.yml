@@ -56,3 +56,15 @@ management:
     web:
       exposure:
         include: health,info
+
+---
+
+history:
+  service:
+    url: ${HISTORY_URL}
+coupon:
+  service:
+    url: ${COUPON_URL}
+product:
+  service:
+    url: ${PRODUCT_URL}

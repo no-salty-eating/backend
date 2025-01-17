@@ -25,15 +25,3 @@ logging:
     org.springframework.web.HttpLogging: off
   pattern:
     console: "%d{HH:mm:ss.SSS}|%highlight(%-5level)|%X{txid:-}|%green(%t)|%blue(\\(%F:%L\\))|%msg%n"
-
----
-
-history:
-  service:
-    url: ${HISTORY_URL}
-coupon:
-  service:
-    url: ${COUPON_URL}
-product:
-  service:
-    url: ${PRODUCT_URL}
