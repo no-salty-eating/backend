@@ -29,7 +29,9 @@ eureka:
     service-url:
       defaultZone: http://${EUREKA_NAME}:${EUREKA_PORT}/${EUREKA_HOST}/
     region: ap-northeast-2
+
 ---
+
 springdoc:
   use-fqn: true
   cache:
