@@ -54,8 +54,15 @@ jobs:
 
       - name: Get ECS task definition
         run: |
+          echo "Fetching current task definition"
           aws ecs describe-task-definition --task-definition ${{ matrix.service }}-task --query taskDefinition > task-definition.json
-          echo "TASK_DEF_FILE=task-definition.json" >> $GITHUB_ENV
+
+      - name: Clean up task definition file
+        run: |
+          echo "Cleaning up task definition file"
+          jq 'del(.compatibilities, .taskDefinitionArn, .requiresAttributes, .revision, .status, .registeredAt, .registeredBy, .enableFaultInjection)' \
+             task-definition.json > cleaned-task-definition.json
+          echo "CLEANED_TASK_DEF_FILE=cleaned-task-definition.json" >> $GITHUB_ENV
 
       - name: Injection image ID into ECS task definition
         run: |
