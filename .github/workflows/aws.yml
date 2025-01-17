@@ -78,7 +78,7 @@ jobs:
           cat rendered-task-definition.json
 
       - name: Register new ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ env.RENDERED_TASK_DEF_FILE }}
           service-name: ${{ matrix.service }}-service
