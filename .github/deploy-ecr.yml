@@ -1,0 +1,74 @@
+name: CI/CD for Microservices
+
+on:
+    push:
+        branches:
+            - deploy
+        paths:
+            - 'server/**'
+            - 'gateway/**'
+            - 'user/**'
+            - 'coupon/**'
+            - 'product/**'
+            - 'order/**'
+            - 'payment/**'
+            - 'history/**'
+
+jobs:
+  build-and-deploy:
+    strategy:
+      matrix:
+          service: [server, gateway, user, coupon, product, order, payment, history]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check changes for each service
+        run: |
+          if git diff --name-only origin/deploy | grep -q "^${{ matrix.service }}/"; then
+            echo "changes=true" >> $GITHUB_ENV
+          else
+            echo "changes=false" >> $GITHUB_ENV
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and Deploy ${{ matrix.service }}
+        if: env.changes == 'true'
+        run: |
+          echo "Building and deploying ${{ matrix.service }}"
+          cd ${{ matrix.service }}
+          docker build -t ${{ matrix.service }}:latest .
+          docker tag ${{ matrix.service }}:latest ${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}-repo:latest
+          docker push ${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}-repo:latest
+
+      - name: Get ECS task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ matrix.service }}-task --query taskDefinition > task-definition.json
+          echo "TASK_DEF_FILE=task-definition.json" >> $GITHUB_ENV
+
+      - name: Injection image ID into ECS task definition
+        run: |
+          echo "Injecting image ID into ECS task definition"
+          jq --arg IMAGE "${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}-repo:latest" \
+             '.containerDefinitions[0].image = $IMAGE' task-definition.json > rendered-task-definition.json
+          echo "RENDERED_TASK_DEF_FILE=rendered-task-definition.json" >> $GITHUB_ENV
+
+
+      - name: Register new ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.Inject-image.outputs.rendered-task-definition }}
+          service: ${{ matrix.service }}-service
+          cluster: other-cluster
+          wait-for-service-stability: true
