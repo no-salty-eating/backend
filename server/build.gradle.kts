@@ -21,6 +21,7 @@ repositories {
 extra["springCloudVersion"] = "2024.0.0"
 
 dependencies {
+	implementation("io.github.microutils:kotlin-logging:3.0.5")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-server")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

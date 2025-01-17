@@ -8,6 +8,7 @@ import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -20,7 +21,7 @@ class OrderApplicationTests(
     "order" {
         val prevCount = orderRepository.count()
 
-        orderRepository.save(Order(userId = 1)).also { logger.debug { it } }
+        orderRepository.save(Order(userId = 1, pgOrderId = "${UUID.randomUUID()}".replace("-", ""))).also { logger.debug { it } }
 
         val currCount = orderRepository.count()
 

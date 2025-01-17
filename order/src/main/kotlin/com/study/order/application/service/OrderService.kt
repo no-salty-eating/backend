@@ -40,8 +40,8 @@ class OrderService(
 ) {
 
     companion object {
-        private const val CREATE_ORDER = "orchestrator:create-order"
-        private const val ORDER_SUCCESS = "orchestrator:order-success"
+        private const val CREATE_ORDER = "create-order"
+        private const val ORDER_SUCCESS = "order-success"
     }
 
     private val logger = LoggerProvider.logger
@@ -66,15 +66,14 @@ class OrderService(
         // 여기서 장애가 발생한다면?  또는 kafka 가 종료되었다면? 주문 정보가 생성되고 메시지가 유실된경우?
         // 이 때, saveOrder 와 publishEvent 를 같은 트랜잭션에 묶는 방법
         // -> outBox 에 이벤트 정보를 저장
-        messageService.sendEvent(
-            CREATE_ORDER, CreateOrderEvent(
-                //TODO: 여기 아예 loginId 로 바꿔버리면 어떨까?
-                userId = request.userId,
-                description = request.products.joinToString(", ") { "${products[it.productId]!!.name} x ${it.quantity}" },
-                pgOrderId = order.pgOrderId,
-                paymentPrice = discountPrice,
-            )
+        val event = CreateOrderEvent(
+            userId = request.userId,
+            description = makeDescription(request, products),
+            pgOrderId = order.pgOrderId,
+            paymentPrice = order.totalPrice - discountPrice,
         )
+
+        messageService.sendEvent(CREATE_ORDER, event)
 
         return order.id
     }
@@ -178,7 +177,7 @@ class OrderService(
             Order(
                 userId = request.userId,
                 totalPrice = totalPrice,
-                pgOrderId = "${UUID.randomUUID()}".replace("-", ""),
+                pgOrderId = getPgOrderId(),
             )
         )
 
@@ -197,6 +196,13 @@ class OrderService(
 
         return newOrder
     }
+
+    private suspend fun makeDescription(
+        request: CreateOrderRequestDto,
+        products: Map<Long, ProductResponseDto>
+    ) = request.products.joinToString(", ") { "${products[it.productId]!!.name} x ${it.quantity}" }
+
+    private suspend fun getPgOrderId() = "${UUID.randomUUID()}".replace("-", "")
 
     private suspend fun getOrderByPgOrderId(pgOrderId: String): Order {
         return orderRepository.findByPgOrderId(pgOrderId) ?: throw NotFoundOrderException()
