@@ -31,20 +31,19 @@ class WebClientConfig(
 
     @Bean
     fun couponServiceWebClient(): WebClient {
-        logger.debug { "serviceUrl : $coupon" }
+        logger.debug { ">> coupon service url : $coupon" }
         return createWebClient(coupon, "coupon-service")
     }
 
     @Bean
     fun productServiceWebClient(): WebClient {
-        logger.debug { "serviceUrl : $product" }
+        logger.debug { ">> product service url : $product" }
         return createWebClient(product, "product-service")
     }
 
     @Bean
     fun historyServiceWebClient(): WebClient {
-
-        logger.debug { "serviceUrl : $history" }
+        logger.debug { ">> history service url : $history" }
         return createWebClient(history, "history-service")
     }
 
