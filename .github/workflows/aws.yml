@@ -29,9 +29,9 @@ jobs:
       - name: Check changes for each service
         run: |
           if git diff --name-only origin/deploy | grep -q "^${{ matrix.service }}/"; then
-            echo "changes=true" >> $GITHUB_ENV
+            echo "${{ matrix.service }}.changes=true" >> $GITHUB_ENV
           else
-            echo "changes=false" >> $GITHUB_ENV
+            echo "${{ matrix.service }}.changes=false" >> $GITHUB_ENV
           fi
 
       - name: Configure AWS credentials
@@ -45,7 +45,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build and Deploy ${{ matrix.service }}
-        if: env.changes == 'true'
+        if: ${{ matrix.service }}.env.changes == 'true'
         run: |
           echo "Building and deploying ${{ matrix.service }}"
           cd ${{ matrix.service }}
