@@ -24,6 +24,7 @@ import com.study.order.domain.model.OrderStatus.PAYMENT_FAILED
 import com.study.order.domain.model.OrderStatus.PAYMENT_PROGRESS
 import com.study.order.domain.repository.OrderDetailRepository
 import com.study.order.domain.repository.OrderRepository
+import com.study.order.infrastructure.config.log.LoggerProvider
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -41,6 +42,7 @@ class OrderService(
     companion object {
         private const val CREATE_ORDER = "create-order"
         private const val ORDER_SUCCESS = "order-success"
+        private val logger = LoggerProvider.logger
     }
 
     @Transactional
@@ -59,6 +61,7 @@ class OrderService(
 
         val discountPrice = calculateDiscountPrice(request, products)
 
+        logger.debug { ">> discountPrice : $discountPrice" }
         // 여기서 장애가 발생한다면?  또는 kafka 가 종료되었다면? 주문 정보가 생성되고 메시지가 유실된경우?
         // 이 때, saveOrder 와 publishEvent 를 같은 트랜잭션에 묶는 방법
         // -> outBox 에 이벤트 정보를 저장
