@@ -1,21 +1,19 @@
 package com.sparta.coupon.application.service;
 
 
+import static com.sparta.coupon.application.exception.Error.UNAVAILABLE_COUPON;
+
 import com.sparta.coupon.application.dto.request.IssueRequestDto;
 import com.sparta.coupon.application.dto.response.GetCouponResponseDto;
 import com.sparta.coupon.application.dto.response.GetUserCouponDetailResponseDto;
 import com.sparta.coupon.application.exception.CouponException;
 import com.sparta.coupon.domain.core.UserCoupon;
 import com.sparta.coupon.domain.repository.UserCouponRepository;
-import com.sparta.coupon.infrastructure.config.UserIdInterceptor;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static com.sparta.coupon.application.exception.Error.UNAVAILABLE_COUPON;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +23,8 @@ public class UserCouponService {
 	private final UserCouponRedisService userCouponRedisService;
 
 	@Transactional
-	public GetCouponResponseDto issueUserCoupon(IssueRequestDto requestDto) {
-		UserCoupon userCoupon = userCouponRedisService.issueUserCoupon(UserIdInterceptor.getCurrentUserId(), requestDto);
+	public GetCouponResponseDto issueUserCoupon(Long userId, IssueRequestDto requestDto) {
+		UserCoupon userCoupon = userCouponRedisService.issueUserCoupon(userId, requestDto);
 
 		return GetCouponResponseDto.from(userCoupon.getCoupon());
 
@@ -44,9 +42,9 @@ public class UserCouponService {
 	}
 
 	@Transactional
-	public GetCouponResponseDto cancelCoupon(Long userCouponId) {
+	public GetCouponResponseDto cancelCoupon(Long userId, Long userCouponId) {
 
-		UserCoupon userCoupon = userCouponRepository.findByUserIdAndIdWithLock(UserIdInterceptor.getCurrentUserId(), userCouponId)
+		UserCoupon userCoupon = userCouponRepository.findByUserIdAndIdWithLock(userId, userCouponId)
 				.orElseThrow(() -> new CouponException(UNAVAILABLE_COUPON, HttpStatus.NOT_FOUND));
 
 		userCoupon.cancel();
@@ -56,7 +54,7 @@ public class UserCouponService {
 
 
 	@Transactional(readOnly = true)
-	public List<GetUserCouponDetailResponseDto> getCouponList(List<Long> userCouponIds, Long userId) {
+	public List<GetUserCouponDetailResponseDto> getCouponList(Long userId, List<Long> userCouponIds) {
 		List<UserCoupon> userCoupons = userCouponRepository.findByUserIdAndUserCouponIdsAvailable(userId, userCouponIds)
 				.orElseThrow(() -> new CouponException(UNAVAILABLE_COUPON, HttpStatus.NOT_FOUND));
 

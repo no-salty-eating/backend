@@ -23,29 +23,33 @@ import java.util.List;
 @RequestMapping("userCoupons")
 public class UserCouponController {
 
-	private final UserCouponService userCouponService;
+    private final UserCouponService userCouponService;
 
-	@PostMapping()
-	public Response<GetCouponResponseDto> issueUserCoupon(@RequestBody IssueRequestDto request) {
-		return new Response<>(HttpStatus.CREATED.value(), "쿠폰 발급 완료", userCouponService.issueUserCoupon(request));
-	}
+    @PostMapping()
+    public Response<GetCouponResponseDto> issueUserCoupon(@RequestHeader(name = "X-Id") Long userId, @RequestBody IssueRequestDto request) {
+        return new Response<>(HttpStatus.CREATED.value(), "쿠폰 발급 완료", userCouponService.issueUserCoupon(userId, request));
+    }
 
-	@PostMapping("/use/{userCouponId}")
-	public Response<GetCouponResponseDto> useCoupon(@RequestHeader(name = "X-Id") Long userID, @PathVariable Long userCouponId) {
-		return new Response<>(HttpStatus.OK.value(), "쿠폰 사용 완료", userCouponService.useCoupon(userID, userCouponId));
-	}
+    @PostMapping("/use/{userCouponId}")
+    public Response<GetCouponResponseDto> useCoupon(@RequestHeader(name = "X-Id") Long userId, @PathVariable Long userCouponId) {
+        return new Response<>(HttpStatus.OK.value(), "쿠폰 사용 완료", userCouponService.useCoupon(userId, userCouponId));
+    }
 
-	@PostMapping("/cancel/{userCouponId}")
-	public Response<GetCouponResponseDto> cancelCoupon(@PathVariable Long userCouponId) {
-		return new Response<>(HttpStatus.OK.value(), "쿠폰 취소 완료", userCouponService.cancelCoupon(userCouponId));
-	}
+    @PostMapping("/cancel/{userCouponId}")
+    public Response<GetCouponResponseDto> cancelCoupon(@RequestHeader(name = "X-Id") Long userId, @PathVariable Long userCouponId) {
+        return new Response<>(HttpStatus.OK.value(), "쿠폰 취소 완료", userCouponService.cancelCoupon(userId, userCouponId));
+    }
 
-	@GetMapping("/list/{userId}")
-	public List<GetUserCouponDetailResponseDto> getCouponList(
-			@RequestParam(required = false) List<Long> userCouponIds,
-			@PathVariable Long userId
-	) {
-		return userCouponService.getCouponList(userCouponIds, userId);
-	}
+    @GetMapping
+    public Response<List<GetUserCouponDetailResponseDto>> getUserCoupons(@RequestHeader(name = "X-Id") Long userId, @RequestParam(required = false) List<Long> userCouponIds) {
+
+        return new Response<>(HttpStatus.OK.value(), "사용 가능한 쿠폰 조회 완료", userCouponService.getCouponList(userId, userCouponIds));
+    }
+
+    @GetMapping("/list/{userId}")
+    public List<GetUserCouponDetailResponseDto> getCouponList(@PathVariable Long userId, @RequestParam(required = false) List<Long> userCouponIds) {
+        return userCouponService.getCouponList(userId, userCouponIds);
+    }
 
 }
+
