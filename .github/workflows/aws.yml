@@ -78,9 +78,18 @@ jobs:
           cat rendered-task-definition.json
 
       - name: Register new ECS task definition
+        id: register-task
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ env.RENDERED_TASK_DEF_FILE }}
           service-name: ${{ matrix.service }}-service
           cluster-name: other-cluster
-          wait-for-service-stability: true
+          wait-for-service-stability: false
+
+      - name: Update ECS service to use new task definition
+        run: |
+          echo "Updating ECS service to use new task definition"
+          aws ecs update-service \
+            --cluster other-cluster \
+            --service ${{ matrix.service }}-service \
+            --task-definition ${{ steps.register-task.outputs.task-definition }}
