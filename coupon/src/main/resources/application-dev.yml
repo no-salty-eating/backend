@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://${LOCAL_DB_ENDPOINT}/coupon
-    username: ${LOCAL_DB_USERNAME}
-    password: ${LOCAL_DB_PASSWORD}
+    url: jdbc:mysql://${DB_ENDPOINT}/coupon
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
