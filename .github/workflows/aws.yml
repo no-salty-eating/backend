@@ -35,8 +35,9 @@ jobs:
       - name: Build with Gradle
         run: |
           cd ${{ matrix.service }}
-          chmod +x gradlew
-          ./gradlew build
+          gradle wrapper --gradle-version 8.11.1
+          chmod +x gradlew                      
+          ./gradlew build                       
 
       - name: Check changes for each service
         run: |
