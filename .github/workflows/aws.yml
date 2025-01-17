@@ -32,12 +32,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Add execute permission to Gradle Wrapper
-        run: chmod +x ./gradlew
-
       - name: Build with Gradle
         run: |
           cd ${{ matrix.service }}
+          chmod +x gradlew
           ./gradlew build
 
       - name: Check changes for each service
