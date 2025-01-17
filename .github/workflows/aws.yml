@@ -45,7 +45,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build and Deploy ${{ matrix.service }}
-        if: ${{ matrix.service }}.env.changes == 'true'
+        if: env.${{ matrix.service }}.changes == 'true'
         run: |
           echo "Building and deploying ${{ matrix.service }}"
           cd ${{ matrix.service }}
@@ -54,13 +54,13 @@ jobs:
           docker push ${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}-repo:latest
 
       - name: Get ECS task definition
-        if: ${{ matrix.service }}.env.changes == 'true'      
+        if: env.${{ matrix.service }}.changes == 'true'
         run: |
           echo "Fetching current task definition"
           aws ecs describe-task-definition --task-definition ${{ matrix.service }}-task --query taskDefinition > task-definition.json
 
       - name: Clean up task definition file
-        if: ${{ matrix.service }}.env.changes == 'true'
+        if: env.${{ matrix.service }}.changes == 'true'
         run: |
           echo "Cleaning up task definition file"
           jq 'del(.compatibilities, .taskDefinitionArn, .requiresAttributes, .revision, .status, .registeredAt, .registeredBy, .enableFaultInjection)' \
@@ -68,7 +68,7 @@ jobs:
           echo "CLEANED_TASK_DEF_FILE=cleaned-task-definition.json" >> $GITHUB_ENV
 
       - name: Inject image ID into ECS task definition
-        if: ${{ matrix.service }}.env.changes == 'true'
+        if: env.${{ matrix.service }}.changes == 'true'
         run: |
           echo "Injecting image ID into ECS task definition"
           jq --arg IMAGE "${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}-repo:latest" \
@@ -76,13 +76,13 @@ jobs:
           echo "RENDERED_TASK_DEF_FILE=rendered-task-definition.json" >> $GITHUB_ENV
 
       - name: Debug cleaned task definition file
-        if: ${{ matrix.service }}.env.changes == 'true'
+        if: env.${{ matrix.service }}.changes == 'true'
         run: |
           echo "Debugging cleaned task definition file"
           cat rendered-task-definition.json
 
       - name: Register new ECS task definition
-        if: ${{ matrix.service }}.env.changes == 'true'
+        if: env.${{ matrix.service }}.changes == 'true'
         id: register-task
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
