@@ -302,14 +302,14 @@ public class ProductService {
     }
 
     private void checkIsSellerOrMaster(String role) {
-        if (!(role.equals(UserRoleEnum.MASTER.toString()) || role.equals(UserRoleEnum.SELLER.toString()))) {
+        if (!(role.equals(UserRoleEnum.MASTER.getAuthority()) || role.equals(UserRoleEnum.SELLER.getAuthority()))) {
             log.info("forbidden role in checkIsSellerOrMaster: {}", role);
             throw new ForbiddenRoleException();
         }
     }
 
     private void checkIsMaster(String role) {
-        if (!role.equals(UserRoleEnum.MASTER.toString())) {
+        if (!role.equals(UserRoleEnum.MASTER.getAuthority())) {
             log.info("forbidden role in checkIsMaster: {}", role);
             throw new ForbiddenRoleException();
         }

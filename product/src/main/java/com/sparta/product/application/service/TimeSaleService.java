@@ -137,7 +137,7 @@ public class TimeSaleService {
     }
 
     private void checkIsMaster(String role) {
-        if (!role.equals(UserRoleEnum.MASTER.toString())) {
+        if (!role.equals(UserRoleEnum.MASTER.getAuthority())) {
             log.info("forbidden role in checkIsMaster: {}", role);
             throw new ForbiddenRoleException();
         }
