@@ -33,11 +33,10 @@ jobs:
           java-version: '17'
 
       - name: Add execute permission to Gradle Wrapper
-        run: chmod +x ${{ matrix.service }}/gradlew
+        run: chmod +x ./gradlew
 
       - name: Build with Gradle
         run: |
-          cd ${{ matrix.service }}
           ./gradlew build
 
       - name: Check changes for each service
