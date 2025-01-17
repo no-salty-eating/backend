@@ -4,8 +4,6 @@ import com.sparta.product.application.dtos.product.ProductRequestDto;
 import com.sparta.product.application.dtos.product.ProductResponseDto;
 import com.sparta.product.application.dtos.product.ProductUpdateRequestDto;
 import com.sparta.product.application.service.ProductService;
-import com.sparta.product.infrastructure.dtos.ProductInternalResponseDto;
-import com.sparta.product.infrastructure.kafka.event.StockDecreaseMessage;
 import com.sparta.product.presentation.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +42,7 @@ public class ProductController {
                                                       @RequestBody @Valid ProductUpdateRequestDto productUpdateRequestDto,
                                                       @RequestHeader(name = "X-UserId", required = false) String userId,
                                                       @RequestHeader(name = "X-Role") String role) {
+        productService.updateProduct(productId, role, productUpdateRequestDto);
         return Response.<Void>builder().build();
     }
 
@@ -55,7 +54,7 @@ public class ProductController {
         return Response.<Void>builder().build();
     }
 
-    @PostMapping("/stock-management")
+    @PostMapping("/stock-decrease")
     public Response<Void> decreaseStockInDb(@RequestBody String serializedMessage) {
         productService.stockManagementInDb(serializedMessage);
         return Response.<Void>builder().build();
