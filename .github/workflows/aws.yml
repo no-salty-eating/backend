@@ -68,7 +68,7 @@ jobs:
       - name: Register new ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ steps.Inject-image.outputs.rendered-task-definition }}
+          task-definition: ${{ env.RENDERED_TASK_DEF_FILE }}
           service: ${{ matrix.service }}-service
           cluster: other-cluster
           wait-for-service-stability: true
