@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 public class KafkaConsumer {
 
     private final ProductService productService;
-    private static final String REDIS_STOCK = "product-stock-adjustment";
     private static final String ORDER_SUCCESS = "order-success";
     private static final String PRODUCT_SERVICE = "product-service";
 

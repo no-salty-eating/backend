@@ -42,6 +42,7 @@ public class ProductController {
                                                       @RequestBody @Valid ProductUpdateRequestDto productUpdateRequestDto,
                                                       @RequestHeader(name = "X-UserId", required = false) String userId,
                                                       @RequestHeader(name = "X-Role") String role) {
+        productService.updateProduct(productId, role, productUpdateRequestDto);
         return Response.<Void>builder().build();
     }
 
@@ -53,7 +54,7 @@ public class ProductController {
         return Response.<Void>builder().build();
     }
 
-    @PostMapping("/stock-management")
+    @PostMapping("/stock-decrease")
     public Response<Void> decreaseStockInDb(@RequestBody String serializedMessage) {
         productService.stockManagementInDb(serializedMessage);
         return Response.<Void>builder().build();
