@@ -64,18 +64,22 @@ jobs:
              task-definition.json > cleaned-task-definition.json
           echo "CLEANED_TASK_DEF_FILE=cleaned-task-definition.json" >> $GITHUB_ENV
 
-      - name: Injection image ID into ECS task definition
+      - name: Inject image ID into ECS task definition
         run: |
           echo "Injecting image ID into ECS task definition"
           jq --arg IMAGE "${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}-repo:latest" \
-             '.containerDefinitions[0].image = $IMAGE' task-definition.json > rendered-task-definition.json
+             '.containerDefinitions[0].image = $IMAGE' ${{ env.CLEANED_TASK_DEF_FILE }} > rendered-task-definition.json
           echo "RENDERED_TASK_DEF_FILE=rendered-task-definition.json" >> $GITHUB_ENV
 
+      - name: Debug cleaned task definition file
+        run: |
+          echo "Debugging cleaned task definition file"
+          cat rendered-task-definition.json
 
       - name: Register new ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ env.RENDERED_TASK_DEF_FILE }}
-          service: ${{ matrix.service }}-service
-          cluster: other-cluster
+          service-name: ${{ matrix.service }}-service
+          cluster-name: other-cluster
           wait-for-service-stability: true
