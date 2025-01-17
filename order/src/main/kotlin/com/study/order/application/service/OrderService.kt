@@ -93,7 +93,8 @@ class OrderService(
                 OrderSuccessEvent(
                     it.productId,
                     it.quantity,
-                    it.userCouponId
+                    it.userCouponId,
+                    order.userId,
                 )
             }
             messageService.sendEvent(ORDER_SUCCESS, event)
@@ -142,14 +143,14 @@ class OrderService(
 
         if (productsByUserCouponId.isEmpty()) return 0
 
-        val couponsById = couponService.getCouponList(request.userId, productsByUserCouponId.keys).associateBy { it.id }
+        val couponsById = couponService.getCouponList(request.userId, productsByUserCouponId.keys).associateBy { it.userCouponId }
 
         return couponsById.entries.sumOf { (couponId, coupon) ->
             val productId = productsByUserCouponId[couponId]
             val product = products[productId]!!
 
             if (product.price < coupon.minOrderAmount) throw InvalidCouponPriceException()
-            if (coupon.couponStatus != CouponStatus.AVAILABLE.name) throw InvalidCouponException()
+            if (coupon.status != CouponStatus.AVAILABLE.name) throw InvalidCouponException()
 
             when (coupon.discountType) {
                 DiscountType.AMOUNT.name -> coupon.discountValue

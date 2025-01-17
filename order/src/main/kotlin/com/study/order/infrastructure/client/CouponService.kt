@@ -18,6 +18,7 @@ class CouponService(
                     .queryParam("userCouponIds", couponIdSet.joinToString(","))
                     .build()
             }
+            .header("X-Id", userId.toString())
             .retrieve()
             .awaitBody()
     }

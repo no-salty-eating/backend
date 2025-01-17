@@ -27,7 +27,7 @@ public class kafkaConsumer {
 		String replaceMessage = serializedMessage.replace("[", "").replace("]", "");
 		try {
 			OrderSuccessEvent orderSuccessEvent = objectMapper.readValue(replaceMessage, OrderSuccessEvent.class);
-			userCouponService.useCoupon(orderSuccessEvent.couponId());
+			userCouponService.useCoupon(orderSuccessEvent.userId(), orderSuccessEvent.userCouponId());
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
