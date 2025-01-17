@@ -68,6 +68,8 @@ dependencies {
 	implementation 'net.javacrumbs.shedlock:shedlock-spring:4.42.0'
 	implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:4.42.0'  // DB 사용시
 	implementation 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:4.42.0'	// redis 사용시
+
+	implementation 'com.github.loki4j:loki-logback-appender:1.5.1'
 }
 
 tasks.named('test') {

@@ -9,10 +9,10 @@ spring:
   application:
     name: product-service
   profiles:
-    active: local
+    active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${host.db.mysql.url}:${host.db.mysql.port}/productDB
+    url: jdbc:mysql://${host.db.mysql.url}:${host.db.mysql.port}/${database.name}
     username: ${database.username}
     password: ${database.password}
   jpa:
@@ -69,20 +69,26 @@ spring:
 #      defaultZone: http://${host.url}:9090/eureka/
 
 management:
-  zipkin:
-    tracing:
-      endpoint: "http://${host.zipkin.url}:9411/api/v2/spans"
   tracing:
     sampling:
-      probability: 1.0
+      probability: 1.0 # 트레이싱 샘플링 확률 (1.0: 100%)
     prometheus:
       metrics:
         export:
-          enabled: true
+          enabled: true # Prometheus 메트릭 노출 활성화
   endpoints:
     web:
       exposure:
-        include: health, info
+        include: "*" # 모든 Actuator 엔드포인트 노출
+    health:
+      show-details: always # 헬스 체크 시 세부정보 항상 표시
+    metrics:
+      export:
+        enabled: true # Prometheus 메트릭 노출 활성화
+  zipkin:
+    tracing:
+      endpoint: "http://${host.zipkin.url}:9411/api/v2/spans" # Zipkin 엔드포인트
+#        include: health, info
 #  health:
 #    components:
 #      circuitbreaker:

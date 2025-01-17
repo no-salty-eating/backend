@@ -33,6 +33,18 @@ public class ReqResLoggingFilter extends OncePerRequestFilter {
         final ContentCachingRequestWrapper cachingRequestWrapper = new ContentCachingRequestWrapper(request);
         final ContentCachingResponseWrapper contentCachingResponseWrapper = new ContentCachingResponseWrapper(response);
 
+        String uri = cachingRequestWrapper.getRequestURI();
+
+        if (!uri.startsWith("/products")) {
+            filterChain.doFilter(cachingRequestWrapper, contentCachingResponseWrapper);
+            contentCachingResponseWrapper.copyBodyToResponse();
+            MDC.clear();
+            return;
+        }
+
+        String clientIp = getClientIp(request);
+
+        logger.info("Request IP: {}", clientIp);
         logger.info("Request Method: {}", cachingRequestWrapper.getMethod());
         logger.info("Request URL: {}", cachingRequestWrapper.getRequestURL());
 
@@ -47,33 +59,36 @@ public class ReqResLoggingFilter extends OncePerRequestFilter {
         logger.info("Request Body: \n{}", requestBody);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT); // 줄바꿈 및 들여쓰기 활성화
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
         String responseBody = new String(contentCachingResponseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
-
         logger.info("Response Status: {}", contentCachingResponseWrapper.getStatus());
         logger.info("Response Header - Authorization: {}", contentCachingResponseWrapper.getHeader("Authorization"));
 
-        if (responseBody.isEmpty()) {
+        if (!responseBody.isEmpty()) {
+            Object json = objectMapper.readValue(responseBody, Object.class);
+            String prettyResponseBody = objectMapper.writeValueAsString(json);
+            logger.info("Response Content: \n{}", prettyResponseBody);
+        } else {
             logger.info("Response body is empty");
-            MDC.clear();
-
-            return;
-        } else if (cachingRequestWrapper.getRequestURL().toString().contains("swagger-ui")) {
-            logger.info("swagger response");
-            contentCachingResponseWrapper.copyBodyToResponse();
-            MDC.clear();
-
-            return;
         }
-
-        Object json = objectMapper.readValue(responseBody, Object.class);
-        String prettyResponseBody = objectMapper.writeValueAsString(json);
-
-        logger.info("Response Content: \n{}", prettyResponseBody);
 
         contentCachingResponseWrapper.copyBodyToResponse();
 
         MDC.clear();
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
     }
 }

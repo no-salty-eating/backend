@@ -4,8 +4,6 @@ import com.sparta.product.application.dtos.product.ProductRequestDto;
 import com.sparta.product.application.dtos.product.ProductResponseDto;
 import com.sparta.product.application.dtos.product.ProductUpdateRequestDto;
 import com.sparta.product.application.service.ProductService;
-import com.sparta.product.infrastructure.dtos.ProductInternalResponseDto;
-import com.sparta.product.infrastructure.kafka.event.StockDecreaseMessage;
 import com.sparta.product.presentation.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

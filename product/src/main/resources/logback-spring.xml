@@ -5,6 +5,11 @@
 
     <!-- Pattern -->
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%5level) [%15.15t] [%X{traceId}] %clr(%-40.40logger{39}){cyan} : %m%n%ex"/>
+
+    <!-- Loki URL. 환경에 맞게 설정 필요.... -->
+    <property name="LOKI_URL" value="${LOKI_URL:-http://localhost:3100/loki/api/v1/push}" />
+<!--    <property name="LOKI_URL" value="${LOKI_URL:-http://loki:3100/loki/api/v1/push}" />-->
+
     <!-- 콘솔 앱랜더 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -20,15 +25,30 @@
         </encoder>
     </appender>
 
+    <!-- Loki Appender -->
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <url>${LOKI_URL}</url>
+        </http>
+        <format>
+            <label>
+                <pattern>app=my-app,host=${HOSTNAME}</pattern>
+            </label>
+            <message class="com.github.loki4j.logback.JsonLayout" />
+        </format>
+    </appender>
+
     <springProfile name="local">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
 <!--            <appender-ref ref="FILE"/>-->
+<!--            <appender-ref ref="LOKI"/>-->
         </root>
 
         <logger additivity="false" level="DEBUG" name="com.sparta.product">
             <appender-ref ref="CONSOLE"/>
 <!--            <appender-ref ref="FILE"/>-->
+<!--            <appender-ref ref="LOKI"/>-->
         </logger>
     </springProfile>
 
@@ -36,13 +56,15 @@
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
 <!--            aws 등에서 파일 생성 시 특정 디렉토리 접근 권할 설정 필요-->
-            <appender-ref ref="FILE"/>
+<!--            <appender-ref ref="FILE"/>-->
+<!--            <appender-ref ref="LOKI"/>-->
         </root>
 
         <logger additivity="false" level="INFO" name="com.sparta.product">
             <appender-ref ref="CONSOLE"/>
 <!--            aws 등에서 파일 생성 시 특정 디렉토리 접근 권할 설정 필요-->
-            <appender-ref ref="FILE"/>
+<!--            <appender-ref ref="FILE"/>-->
+<!--            <appender-ref ref="LOKI"/>-->
         </logger>
     </springProfile>
 
