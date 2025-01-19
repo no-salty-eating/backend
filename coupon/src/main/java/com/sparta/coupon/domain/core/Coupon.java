@@ -33,7 +33,6 @@ public class Coupon extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DiscountTypeEnum discountType;
