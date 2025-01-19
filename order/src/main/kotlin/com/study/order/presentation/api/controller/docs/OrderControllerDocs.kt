@@ -1,6 +1,5 @@
 package com.study.order.presentation.api.controller.docs
 
-import com.study.order.presentation.api.request.CreateOrderRequest
 import com.study.order.presentation.api.request.ProductQuantityRequest
 import com.study.order.presentation.api.response.Response
 import io.swagger.v3.oas.annotations.Operation
