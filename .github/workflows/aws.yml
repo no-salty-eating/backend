@@ -34,7 +34,7 @@ jobs:
 
       - name: Check changes for each service
         run: |
-          if git diff --name-only origin/deploy | grep -q "^${{ matrix.service }}/"; then
+          if git diff --name-only origin/develop | grep -q "^${{ matrix.service }}/"; then
             echo "${{ matrix.service }}.changes=true" >> $GITHUB_ENV
           else
             echo "${{ matrix.service }}.changes=false" >> $GITHUB_ENV
