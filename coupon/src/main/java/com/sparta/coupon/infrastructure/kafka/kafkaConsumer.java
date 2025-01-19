@@ -1,5 +1,7 @@
 package com.sparta.coupon.infrastructure.kafka;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.coupon.application.service.UserCouponService;
 import com.sparta.coupon.infrastructure.kafka.event.UseCouponMessage;
 import lombok.RequiredArgsConstructor;
