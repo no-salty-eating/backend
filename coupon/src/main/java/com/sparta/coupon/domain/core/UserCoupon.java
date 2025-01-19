@@ -7,7 +7,6 @@ import static com.sparta.coupon.application.exception.Error.USED_COUPON;
 
 import com.sparta.coupon.application.exception.CouponException;
 import com.sparta.coupon.domain.common.BaseEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -42,7 +41,7 @@ public class UserCoupon extends BaseEntity {
     @Column( nullable = false)
     private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
 

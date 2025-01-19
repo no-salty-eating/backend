@@ -1,5 +1,6 @@
 package com.sparta.coupon.domain.core;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sparta.coupon.domain.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,11 +27,11 @@ public class Coupon extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("couponId") // JSON의 couponId 필드를 매핑
     private Long id;
 
     @Column(nullable = false)
     private String name;
-
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
