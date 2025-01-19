@@ -134,6 +134,15 @@ public class ProductService {
 
     }
 
+    @Transactional
+    public void softDeleteProduct(Long productId, String role) {
+        checkIsSellerOrMaster(role);
+
+        Product product = productRepository.findByIdAndIsDeletedFalse(productId).orElseThrow(NotFoundProductException::new);
+
+        product.updateIsDeleted(true);
+    }
+
     private void saveProductIntoRedis(Long productId, List<ProductCategory> updatedProductCategories, String cacheKey, ProductResponseDto responseDto) throws JsonProcessingException {
         String jsonData = objectMapper.writeValueAsString(responseDto);
         redisTemplate.opsForValue().set(cacheKey, jsonData);
@@ -145,20 +154,11 @@ public class ProductService {
         redisManager.setExpireTime(RedisKeys.PRODUCT + productId, DEFAULT_REDIS_EXPIRE_SECONDS);
     }
 
-    public boolean isEmptyProductInRedis(Long productId) {
+    private boolean isEmptyProductInRedis(Long productId) {
         String cacheKey = RedisKeys.PRODUCT + productId;
         Map<Object, Object> productInfo = redisTemplate.opsForHash().entries(cacheKey);
 
         return productInfo.isEmpty();
-    }
-
-    @Transactional
-    public void softDeleteProduct(Long productId, String role) {
-        checkIsSellerOrMaster(role);
-
-        Product product = productRepository.findByIdAndIsDeletedFalse(productId).orElseThrow(NotFoundProductException::new);
-
-        product.updateIsDeleted(true);
     }
 
     public void stockManagementInRedis(String serializedMessage) {
@@ -211,12 +211,9 @@ public class ProductService {
                     throw new NotEnoughProductStockException();
                 }
                 product.decreaseStock(quantity);
-                product.increaseStock(quantity);
             } else {
                 product.decreaseStock(quantity);
                 timeSaleService.decreaseTimeSaleStockInDB(productId, quantity);
-                product.increaseStock(quantity);
-                timeSaleService.increaseTimeSaleStockInDb(productId, quantity);
             }
         } catch (JsonProcessingException e) {
             // TODO : 예외 만들기
@@ -224,7 +221,7 @@ public class ProductService {
         }
     }
 
-    public void decreaseStockProductInRedis(ProductResponseDto productResponseDto, Integer stock, String cacheKey, String detailCacheKey) {
+    private void decreaseStockProductInRedis(ProductResponseDto productResponseDto, Integer stock, String cacheKey, String detailCacheKey) {
         try {
             int currentStock = productResponseDto.stock() != null ? productResponseDto.stock() : 0;
 
@@ -245,7 +242,7 @@ public class ProductService {
         }
     }
 
-    public void increaseStockProductInRedis(ProductResponseDto productResponseDto, Integer stock, String cacheKey) {
+    private void increaseStockProductInRedis(ProductResponseDto productResponseDto, Integer stock, String cacheKey) {
         try {
             if (productResponseDto != null) {
                 int currentStock = productResponseDto.stock() != null ? productResponseDto.stock() : 0;
@@ -263,14 +260,14 @@ public class ProductService {
         }
     }
 
-    public void updateCache(Long productId, ProductResponseDto updatedDto) throws JsonProcessingException {
+    private void updateCache(Long productId, ProductResponseDto updatedDto) throws JsonProcessingException {
         String cacheKey = RedisKeys.PRODUCT + productId;
 
         String jsonData = objectMapper.writeValueAsString(updatedDto);
         redisTemplate.opsForValue().set(cacheKey, jsonData);
     }
 
-    public void deleteCache(Long productId) {
+    private void deleteCache(Long productId) {
         String cacheKey = RedisKeys.PRODUCT + productId;
 
         redisTemplate.delete(cacheKey);
