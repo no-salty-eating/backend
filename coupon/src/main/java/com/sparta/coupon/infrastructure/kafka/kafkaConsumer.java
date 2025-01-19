@@ -1,6 +1,9 @@
 package com.sparta.coupon.infrastructure.kafka;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.coupon.application.service.UserCouponService;
+import com.sparta.coupon.infrastructure.kafka.event.UseCouponMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class kafkaConsumer {
 
     private final UserCouponService userCouponService;
+    private final ObjectMapper objectMapper;
 
     private static final String ORDER_SUCCESS = "order-success";
     private static final String ORDER_SERVICE = "order-service";
@@ -20,7 +24,13 @@ public class kafkaConsumer {
     @KafkaListener(topics = ORDER_SUCCESS, groupId = ORDER_SERVICE)
     public void receiveRedisMessage(String serializedMessage) {
         log.info("receiveRedisMessage : {}", serializedMessage);
-        userCouponService.useCoupon(Long.parseLong(serializedMessage));
+        String replaceMessage = serializedMessage.replace("[", "").replace("]", "");
+        try {
+            UseCouponMessage useCoupon = objectMapper.readValue(replaceMessage, UseCouponMessage.class);
+            userCouponService.useCoupon(useCoupon.userId(), useCoupon.userCouponId());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
