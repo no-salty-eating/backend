@@ -7,17 +7,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum UserRoleEnum {
 
-    CUSTOMER(Authority.CUSTOMER),
+    USER(Authority.USER),
     SELLER(Authority.SELLER),
-    ADMIN(Authority.ADMIN);
+    MASTER(Authority.MASTER);
 
 
     private final String authority;
 
     public static class Authority {
 
-        private static final String CUSTOMER = "ROLE_CUSTOMER";
+        private static final String USER = "ROLE_USER";
         private static final String SELLER = "ROLE_SELLER";
-        private static final String ADMIN = "ROLE_ADMIN";
+        private static final String MASTER = "ROLE_MASTER";
     }
 }

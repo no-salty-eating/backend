@@ -1,7 +1,5 @@
 package com.sparta.coupon.infrastructure.kafka;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.coupon.application.service.UserCouponService;
 import com.sparta.coupon.infrastructure.kafka.event.UseCouponMessage;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +12,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class kafkaConsumer {
 
-    private final UserCouponService userCouponService;
-    private final ObjectMapper objectMapper;
+	private final UserCouponService userCouponService;
+	private final ObjectMapper objectMapper;
 
     private static final String ORDER_SUCCESS = "order-success";
     private static final String ORDER_SERVICE = "order-service";
