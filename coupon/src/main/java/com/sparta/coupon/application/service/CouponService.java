@@ -49,9 +49,9 @@ public class CouponService {
         // Redis에 쿠폰 정보 저장
         try {
             String couponKey = COUPON_INFO_KEY + coupon.getId();
-            String CouponJson = objectMapper.writeValueAsString(GetCouponDetailResponseDto.from(coupon));
+            String couponJson = objectMapper.writeValueAsString(GetCouponDetailResponseDto.from(coupon));
             RBucket<String> bucket = redissonClient.getBucket(couponKey);
-            bucket.set(CouponJson);
+            bucket.set(couponJson);
             bucket.expire(expirationTime, TimeUnit.SECONDS);
         } catch (JsonProcessingException e) {
             throw new CouponException(JSON_PROCESSING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);

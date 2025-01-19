@@ -19,47 +19,47 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserCouponService {
 
-	private final UserCouponRepository userCouponRepository;
-	private final UserCouponRedisService userCouponRedisService;
+    private final UserCouponRepository userCouponRepository;
+    private final UserCouponRedisService userCouponRedisService;
 
-	@Transactional
-	public GetCouponResponseDto issueUserCoupon(Long userId, IssueRequestDto requestDto) {
-		UserCoupon userCoupon = userCouponRedisService.issueUserCoupon(userId, requestDto);
+    @Transactional
+    public GetCouponResponseDto issueUserCoupon(Long userId, IssueRequestDto requestDto) {
+        UserCoupon userCoupon = userCouponRedisService.issueUserCoupon(userId, requestDto);
 
-		return GetCouponResponseDto.from(userCoupon.getCoupon());
+        return GetCouponResponseDto.from(userCoupon.getCoupon());
 
-	}
+    }
 
-	@Transactional
-	public GetCouponResponseDto useCoupon(Long userId, Long userCouponId) {
+    @Transactional
+    public GetCouponResponseDto useCoupon(Long userId, Long userCouponId) {
 
-		UserCoupon userCoupon = userCouponRepository.findByUserIdAndIdWithLock(userId, userCouponId)
-				.orElseThrow(() -> new CouponException(UNAVAILABLE_COUPON, HttpStatus.NOT_FOUND));
+        UserCoupon userCoupon = userCouponRepository.findByUserIdAndIdWithLock(userId, userCouponId)
+                .orElseThrow(() -> new CouponException(UNAVAILABLE_COUPON, HttpStatus.NOT_FOUND));
 
-		userCoupon.use();
+        userCoupon.use();
 
-		return GetCouponResponseDto.from(userCoupon.getCoupon());
-	}
+        return GetCouponResponseDto.from(userCoupon.getCoupon());
+    }
 
-	@Transactional
-	public GetCouponResponseDto cancelCoupon(Long userId, Long userCouponId) {
+    @Transactional
+    public GetCouponResponseDto cancelCoupon(Long userId, Long userCouponId) {
 
-		UserCoupon userCoupon = userCouponRepository.findByUserIdAndIdWithLock(userId, userCouponId)
-				.orElseThrow(() -> new CouponException(UNAVAILABLE_COUPON, HttpStatus.NOT_FOUND));
+        UserCoupon userCoupon = userCouponRepository.findByUserIdAndIdWithLock(userId, userCouponId)
+                .orElseThrow(() -> new CouponException(UNAVAILABLE_COUPON, HttpStatus.NOT_FOUND));
 
-		userCoupon.cancel();
+        userCoupon.cancel();
 
-		return GetCouponResponseDto.from(userCoupon.getCoupon());
-	}
+        return GetCouponResponseDto.from(userCoupon.getCoupon());
+    }
 
 
-	@Transactional(readOnly = true)
-	public List<GetUserCouponDetailResponseDto> getCouponList(Long userId, List<Long> userCouponIds) {
-		List<UserCoupon> userCoupons = userCouponRepository.findByUserIdAndUserCouponIdsAvailable(userId, userCouponIds)
-				.orElseThrow(() -> new CouponException(UNAVAILABLE_COUPON, HttpStatus.NOT_FOUND));
+    @Transactional(readOnly = true)
+    public List<GetUserCouponDetailResponseDto> getCouponList(Long userId, List<Long> userCouponIds) {
+        List<UserCoupon> userCoupons = userCouponRepository.findByUserIdAndUserCouponIdsAvailable(userId, userCouponIds)
+                .orElseThrow(() -> new CouponException(UNAVAILABLE_COUPON, HttpStatus.NOT_FOUND));
 
-		return userCoupons.stream()
-				.map(GetUserCouponDetailResponseDto::from).toList();
-	}
+        return userCoupons.stream()
+                .map(GetUserCouponDetailResponseDto::from).toList();
+    }
 
 }
