@@ -53,7 +53,12 @@ class RedisService(
             val entries = opsForHash.entries(key).asFlow().toList()
             if (entries.isNotEmpty()) {
                 val productData = mapper.writeValueAsString(entries.associate { it.key to it.value })
-                return convertDataAsDto(productData, key.startsWith(TIME_SALE_KEY))
+                val convertDataAsDto = convertDataAsDto(productData, key.startsWith(TIME_SALE_KEY))
+
+                if (convertDataAsDto.stock <= 0) {
+                    throw NotEnoughStockException()
+                }
+                return convertDataAsDto
             }
         }
         return null
@@ -91,7 +96,9 @@ class RedisService(
         } finally {
             withContext(NonCancellable) {
                 locks.forEach {
-                    it.unlock(txid).awaitSingleOrNull()
+                    if (it.isHeldByThread(txid).awaitSingle()) {
+                        it.unlock(txid).awaitSingleOrNull()
+                    }
                 }
             }
         }
