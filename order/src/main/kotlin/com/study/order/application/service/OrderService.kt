@@ -41,7 +41,9 @@ class OrderService(
 
     companion object {
         private const val CREATE_ORDER = "create-order"
+        private const val CREATE_ORDER_TEST = "create-order-test"
         private const val ORDER_SUCCESS = "order-success"
+        private const val ORDER_SUCCESS_TEST = "order-success-test"
         private val logger = LoggerProvider.logger
     }
 
@@ -50,9 +52,7 @@ class OrderService(
 
         val products = getProductInfo(request)
 
-        cacheService.executeWithLock(products.values.map { it.productId }) {
-            validateAndDecrementStock(request, products)
-        }
+        validateAndDecrementStock(request, products)
 
         // TODO: 쓰기 / 읽기 DB를 분리하지 않으면 DB 부하 시 지연 / 타임아웃 등이 발생할 수 있음
         //  원본 : 쓰기 / 복제본 : 읽기
@@ -71,7 +71,7 @@ class OrderService(
             paymentPrice = order.totalPrice - discountPrice,
         )
 
-        messageService.sendEvent(CREATE_ORDER, event)
+        messageService.sendEvent(CREATE_ORDER_TEST, event)
 
         return order.id
     }
@@ -99,11 +99,11 @@ class OrderService(
                     order.userId,
                 )
             }
-            messageService.sendEvent(ORDER_SUCCESS, event)
+            messageService.sendEvent(ORDER_SUCCESS_TEST, event)
             order.updateStatus(ORDER_FINALIZED)
         } else {
             orderDetails.map {
-                cacheService.decrementStock(it.productId, it.quantity, cacheService.isTimeSaleOrder(it.productId))
+                cacheService.incrementStock(it.productId, it.quantity, cacheService.isTimeSaleOrder(it.productId))
                 cacheService.deleteOrderInfo(it.productId, cacheService.isTimeSaleOrder(it.productId))
             }
             order.updateStatus(PAYMENT_FAILED)

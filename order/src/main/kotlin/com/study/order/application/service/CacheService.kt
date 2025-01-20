@@ -10,7 +10,7 @@ interface CacheService {
 
     suspend fun incrementStock(productId: Long, amount: Int, isTimeSale: Boolean)
 
-    suspend fun executeWithLock(productIds: List<Long>, runner: suspend () -> Unit)
+//    suspend fun executeWithLock(productIds: List<Long>, runner: suspend () -> Unit)
 
     suspend fun saveOrderInfo(productId: Long, isTimeSale: Boolean)
 

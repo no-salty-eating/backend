@@ -22,7 +22,9 @@ class WebClientConfig(
     @Value("\${product.service.url}")
     private val product: String,
     @Value("\${coupon.service.url}")
-    private val coupon: String
+    private val coupon: String,
+    @Value("\${payment.service.url}")
+    private val payment: String,
 ) {
 
     companion object {
@@ -47,6 +49,12 @@ class WebClientConfig(
         return createWebClient(history, "history-service")
     }
 
+    @Bean
+    fun paymentServiceWebClient(): WebClient {
+        logger.debug { ">> payment service url : $payment" }
+        return createWebClient(payment, "payment-service")
+    }
+
     private fun createWebClient(baseUrl: String, name: String): WebClient {
 
         val insecureSslContext =
@@ -54,6 +62,7 @@ class WebClientConfig(
 
         val provider = ConnectionProvider.builder(name)
             .maxConnections(10)
+            .pendingAcquireMaxCount(-1) // default 20
             .pendingAcquireTimeout(Duration.ofSeconds(10))
             .build()
 
