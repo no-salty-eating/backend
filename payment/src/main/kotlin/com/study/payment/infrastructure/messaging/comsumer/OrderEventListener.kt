@@ -24,6 +24,12 @@ class OrderEventListener(
                 paymentService.createPaymentInfo(it)
             }
         }
+
+        kafkaEventProcessor.publish(TOPIC_PAYMENT, "payment-test") {record ->
+            toPayment(record).let {
+                paymentService.createPaymentInfoTest(it)
+            }
+        }
     }
 
     private fun toPayment(record: ConsumerRecord<String, String>): CreateOrderEvent {
