@@ -6,4 +6,5 @@ public record UseCouponMessage(
 		Long userCouponId,
 		Long userId
 ) {
+
 }

@@ -97,6 +97,18 @@ class PaymentService(
     }
 
     @Transactional
+    suspend fun createPaymentInfoTest(createOrderEvent: CreateOrderEvent) {
+        paymentRepository.save(
+            Payment(
+                userId = createOrderEvent.userId,
+                description = createOrderEvent.description,
+                paymentPrice = createOrderEvent.paymentPrice,
+                pgOrderId = createOrderEvent.pgOrderId,
+            )
+        )
+    }
+
+    @Transactional
     suspend fun paymentKeyInjection(request: PaySucceedRequestDto): Boolean {
         val payment = getOrderByPgOrderId(request.orderId).apply {
             this.injectionPgKey(request.paymentKey)
