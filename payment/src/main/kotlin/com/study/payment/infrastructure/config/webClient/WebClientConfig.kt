@@ -24,6 +24,7 @@ class WebClientConfig {
 
         val provider = ConnectionProvider.builder(name)
             .maxConnections(10)
+            .pendingAcquireMaxCount(-1) // default 20
             .pendingAcquireTimeout(Duration.ofSeconds(10))
             .build()
 

@@ -85,9 +85,9 @@ class PaymentTestService(
             throw InvalidPaymentPriceException()
         }
 
-        payment.updateStatus(CAPTURE_REQUEST)
         payment.increaseRetryCount()
         cacheService.put(payment.id)
+        payment.updateStatus(CAPTURE_REQUEST)
 
         capture(payment)
 

@@ -99,14 +99,16 @@ class OrderService(
                     order.userId,
                 )
             }
-            messageService.sendEvent(ORDER_SUCCESS_TEST, event)
+            messageService.sendEvent(ORDER_SUCCESS, event)
             order.updateStatus(ORDER_FINALIZED)
         } else {
-            orderDetails.map {
-                cacheService.incrementStock(it.productId, it.quantity, cacheService.isTimeSaleOrder(it.productId))
-                cacheService.deleteOrderInfo(it.productId, cacheService.isTimeSaleOrder(it.productId))
-            }
             order.updateStatus(PAYMENT_FAILED)
+        }
+
+        orderDetails.map {
+            cacheService.deleteOrderInfo(it.productId, cacheService.isTimeSaleOrder(it.productId))
+            if (order.orderStatus == PAYMENT_FAILED)
+                cacheService.incrementStock(it.productId, it.quantity, cacheService.isTimeSaleOrder(it.productId))
         }
 
         historyApi.save(OrderHistoryEvent.fromOrder(order, request.description))
