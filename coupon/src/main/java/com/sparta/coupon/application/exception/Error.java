@@ -27,8 +27,9 @@ public enum Error {
     EXPIRED_COUPON(2103, "만료된 쿠폰입니다."),
     CANCEL_UNAVAILABLE_COUPON(2104, "사용 취소가 불가능한 쿠폰입니다."),
     UNAVAILABLE_COUPON(2105, "발급된  쿠폰을 찾을 수 없거나 접근 권한이 없습니다."),
-    NOT_VALID_END_TIME(2106, "쿠폰 발급 완료 시간은 쿠폰 발급 시작 시간 이후여야 합니다."),
+    NOT_VALID_END_TIME(2106, "쿠폰 발급 종료 시간은 쿠폰 발급 시작 시간 이후여야 합니다."),
     ISSUE_COUPON_LATER(2107, "쿠폰 발급 요청이 많아 처리할 수 없습니다. 잠시 후 다시 시도해주세요."),
+    NOT_VALID_EXPIRE_TIME(2108, "쿠폰 만료 시간은 쿠폰 발급 종료 시간 이후여야 합니다."),
 
     JSON_PROCESSING_ERROR(9996, "JSON 처리에 오류가 있습니다."),
     METHOD_ARGUMENT_NOT_VALID(9997, "유효하지 않은 값입니다."),
