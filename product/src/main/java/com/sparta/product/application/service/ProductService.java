@@ -73,7 +73,7 @@ public class ProductService {
                 return objectMapper.readValue(cachedData, ProductResponseDto.class);
             }
 
-            List<ProductCategory> productCategories = role.equals(UserRoleEnum.MASTER.toString())
+            List<ProductCategory> productCategories = role.equals(UserRoleEnum.MASTER.getAuthority())
                     ? productCategoryRepository.findByProductIdWithoutConditions(productId)
                     : productCategoryRepository.findByProductIdWithConditions(productId);
 
@@ -81,11 +81,11 @@ public class ProductService {
                 throw new NotFoundProductCategoryException();
             }
 
-            ProductResponseDto responseDto = role.equals(UserRoleEnum.MASTER.toString())
+            ProductResponseDto responseDto = role.equals(UserRoleEnum.MASTER.getAuthority())
                     ? ProductResponseDto.forMasterOf(productCategories)
                     : ProductResponseDto.forUserOrSellerOf(productCategories);
 
-            if (!role.equals(UserRoleEnum.MASTER.toString())) {
+            if (!role.equals(UserRoleEnum.MASTER.getAuthority())) {
                 saveProductIntoRedis(productId, productCategories, cacheKey, responseDto);
             }
 

@@ -70,6 +70,12 @@ dependencies {
 	implementation 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:4.42.0'	// redis 사용시
 
 	implementation 'com.github.loki4j:loki-logback-appender:1.5.1'
+
+	// Spring Data Elasticsearch
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+	// Optional: JSON 처리용 라이브러리
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 tasks.named('test') {
