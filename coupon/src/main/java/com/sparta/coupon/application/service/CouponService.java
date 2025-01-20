@@ -3,6 +3,8 @@ package com.sparta.coupon.application.service;
 
 import static com.sparta.coupon.application.exception.Error.JSON_PROCESSING_ERROR;
 import static com.sparta.coupon.application.exception.Error.NOT_FOUND_COUPON;
+import static com.sparta.coupon.application.exception.Error.NOT_VALID_END_TIME;
+import static com.sparta.coupon.application.exception.Error.NOT_VALID_EXPIRE_TIME;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +41,16 @@ public class CouponService {
     public GetCouponResponseDto createCoupon(CreateCouponRequestDto requestDto) {
 
 
-        Coupon coupon = Coupon.createCoupon(requestDto.name(), requestDto.discountType(), requestDto.discountValue(), requestDto.minOrderAmount(), requestDto.maxDiscountAmount(), requestDto.totalQuantity(), requestDto.startTime(), requestDto.endTime());
+        Coupon coupon = Coupon.createCoupon(requestDto.name(), requestDto.discountType(), requestDto.discountValue(), requestDto.minOrderAmount(), requestDto.maxDiscountAmount(), requestDto.totalQuantity(), requestDto.startTime(), requestDto.endTime(), requestDto.expireTime());
+
+        if(coupon.getEndTime().isBefore(coupon.getStartTime())) {
+            throw new CouponException(NOT_VALID_END_TIME, HttpStatus.BAD_REQUEST);
+        }
+
+        if(coupon.getExpireTime().isBefore(coupon.getEndTime())) {
+            throw new CouponException(NOT_VALID_EXPIRE_TIME, HttpStatus.BAD_REQUEST);
+        }
+
         couponRepository.save(coupon);
 
         // Redis에 정책 정보 저장
