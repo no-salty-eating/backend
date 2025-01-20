@@ -23,6 +23,7 @@ class MdcFilter : WebFilter {
         propagateMdcThroughReactor()
     }
 
+    // 마스터 - 슬레이브 구조로 변경 -> 락 제거 후 슬레이브를 (대기열)큐로 전환해서 redis batch 를 이용해 쓰기작업을 마스터에서 작업하도록 변경?
     private fun propagateMdcThroughReactor() {
         Hooks.enableAutomaticContextPropagation()
         ContextRegistry.getInstance().registerThreadLocalAccessor(

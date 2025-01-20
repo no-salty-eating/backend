@@ -71,7 +71,8 @@ public class Coupon extends BaseEntity {
                                       Integer maxDiscountAmount,
                                       Integer totalQuantity,
                                       LocalDateTime startTime,
-                                      LocalDateTime endTime) {
+                                      LocalDateTime endTime,
+                                      LocalDateTime expireTime) {
         return Coupon.builder()
                 .name(name)
                 .discountType(discountType)
@@ -82,7 +83,7 @@ public class Coupon extends BaseEntity {
                 //.issueQuantity(0)  // 기본적으로 issueQuantity는 0으로 설정
                 .startTime(startTime)
                 .endTime(endTime)
-                .expireTime(endTime.plusDays(30)) // 만료 시간을 종료 시간 기준으로 30일 후로 설정
+                .expireTime(expireTime) // 만료 시간을 종료 시간 기준으로 30일 후로 설정
                 .build();
     }
 

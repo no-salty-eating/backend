@@ -199,22 +199,8 @@ class PaymentService(
         }
     }
 
-    @Transactional
-    suspend fun retryRequestPayment(paymentId: Long) {
-        getPayment(paymentId).let {
-            delay(getDelay(it))
-            requestPayment(it)
-        }
-    }
-
     private suspend fun getPayments(paymentIds: List<Long>): List<Payment> {
         return paymentRepository.findAllById(paymentIds)
-    }
-
-    private fun getDelay(payment: Payment): Duration {
-        val temp = (2.0).pow(payment.pgRetryCount).toInt() * 1000
-        val delay = temp + (0..temp).random()
-        return delay.milliseconds
     }
 
     private fun WebClientResponseException.toTossPayApiError(): TossApiError {

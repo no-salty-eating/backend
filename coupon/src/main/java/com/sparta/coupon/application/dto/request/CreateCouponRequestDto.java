@@ -1,6 +1,7 @@
 package com.sparta.coupon.application.dto.request;
 
 import com.sparta.coupon.domain.core.DiscountTypeEnum;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -36,7 +37,11 @@ public record CreateCouponRequestDto(
         LocalDateTime startTime,
 
         @NotNull(message = "종료 시간은 필수입니다.")
-        @FutureOrPresent(message = "시작 시간은 현재 시간 이후여야 합니다.")
-        LocalDateTime endTime
+        @Future(message = "종료 시간은 현재 시간 이후여야 합니다.")
+        LocalDateTime endTime,
+
+        @NotNull(message = "쿠폰 만료 시간은 필수입니다.")
+        @Future(message = "쿠폰 만료 시간은 현재 시간 이후여야 합니다.")
+        LocalDateTime expireTime
 ) {
 }

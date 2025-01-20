@@ -5,6 +5,7 @@ import com.sparta.coupon.application.dto.request.CreateCouponRequestDto;
 import com.sparta.coupon.application.dto.response.GetCouponDetailResponseDto;
 import com.sparta.coupon.application.dto.response.GetCouponResponseDto;
 import com.sparta.coupon.application.service.CouponService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class CouponController {
     private final CouponService couponService;
 
     @PostMapping
-    public Response<GetCouponResponseDto> createCoupon(@RequestBody CreateCouponRequestDto request) {
+    public Response<GetCouponResponseDto> createCoupon(@Valid @RequestBody CreateCouponRequestDto request) {
 
         return new Response<>(HttpStatus.CREATED.value(), "쿠폰 생성 완료", couponService.createCoupon(request));
     }

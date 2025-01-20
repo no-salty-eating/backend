@@ -15,7 +15,7 @@ enum class Error(val status: Int, val message: String) {
     NOT_FOUND_PRODUCT(5000, "상품을 찾을 수 없습니다."),
     NOT_ENOUGH_STOCK(5200, "재고가 부족합니다."),
 
+    TIMEOUT_CANCELLATION(99998, "시간 초과"),
     ACQUIRE_LOCK_TIMEOUT(99999, "락 획득에 실패했습니다."),
-
     INTERNAL_SERVER_ERROR(100000, "서버 에러입니다.")
 }

@@ -70,3 +70,6 @@ coupon:
 product:
   service:
     url: ${PRODUCT_URL}
+payment:
+  service:
+    url: ${PAYMENT_URL}
