@@ -39,3 +39,4 @@ out/
 /saga/src/main/resources/application-key.yml
 /history/src/main/resources/application-key.yml
 /history/data/
+/gateway/src/main/resources/application-key.yml

@@ -39,13 +39,13 @@ class PaymentEventListener(
             }
         }
 
-        kafkaEventProcessor.publish(PAYMENT_PROCESSING_TEST, "order-process-test") {record ->
+        kafkaEventProcessor.publish(PAYMENT_PROCESSING_TEST, "order-process") {record ->
             toPaymentProcessingEvent(record).let {
                 orderTest.updateOrderStatus(it)
             }
         }
 
-        kafkaEventProcessor.publish(PAYMENT_RESULT_TEST, "order-process-test") { record ->
+        kafkaEventProcessor.publish(PAYMENT_RESULT_TEST, "order-process") { record ->
             toPaymentResultEvent(record).let {
                 orderService.updateOrderStatus(it)
             }

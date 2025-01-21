@@ -4,9 +4,7 @@ import com.study.payment.application.client.PaymentApiService
 import com.study.payment.application.dto.event.consumer.CreateOrderEvent
 import com.study.payment.application.dto.event.provider.PaymentProcessingEvent
 import com.study.payment.application.dto.event.provider.PaymentResultEvent
-import com.study.payment.application.exception.InvalidPaymentPriceException
 import com.study.payment.application.exception.NotFoundPaymentException
-import com.study.payment.application.exception.TooManyPaymentRequestException
 import com.study.payment.domain.model.Payment
 import com.study.payment.domain.model.PgStatus.AUTH_INVALID
 import com.study.payment.domain.model.PgStatus.AUTH_SUCCESS
@@ -70,42 +68,42 @@ class PaymentTestService(
         }
     }
 
-    @Transactional
-    suspend fun keyInjection(paymentId: Long) {
+    suspend fun keyInjection2(paymentId: Long) {
+
+        logger.debug { ">> keyInjection 실행" }
         val payment = getPayment(paymentId).apply {
             this.injectionPgKey(makePgKey())
             this.updateStatus(AUTH_SUCCESS)
         }
 
+        logger.debug { ">> 인증 성공 : $payment" }
         capture(payment)
 
         if (makeRandom()) {
+            logger.debug { ">> AUTH INVALID : $payment" }
             payment.updateStatus(AUTH_INVALID)
             capture(payment)
-            throw InvalidPaymentPriceException()
+            return
         }
 
         payment.increaseRetryCount()
         cacheService.put(payment.id)
         payment.updateStatus(CAPTURE_REQUEST)
 
+        logger.debug { ">> 캡쳐 시작 : $payment" }
         capture(payment)
 
         if (makeRandom()) {
 
-            if (payment.pgRetryCount >= 3) {
-                payment.updateStatus(CAPTURE_FAIL)
-                capture(payment)
-                throw TooManyPaymentRequestException()
-            }
-
             payment.updateStatus(CAPTURE_RETRY)
 
             capture(payment)
+            logger.debug { ">> RETRY : $payment" }
             paymentApiService.retry(payment.id)
-
-            return
         }
+
+        // 모든 환경을 전부 한군데로 바꿨을 때 실제 tps 가 낮게나오는지?
+        // order 는 메모리를 올리고 / gateway 는 cpu 를 올리고
 
         if (makeRandom()) {
             payment.updateStatus(CAPTURE_FAIL)
@@ -113,6 +111,47 @@ class PaymentTestService(
             payment.updateStatus(CAPTURE_SUCCESS)
         }
 
+        if (payment.pgRetryCount >= 3) {
+            logger.debug { ">> RETRY_CAPTURE_FAIL : $payment" }
+            payment.updateStatus(CAPTURE_FAIL)
+            logger.debug { ">> 세번째 캡쳐 : $payment" }
+            capture(payment)
+        }
+
+        logger.debug { ">> CAPTURE_RESULT : $payment" }
+        capture(payment)
+        cacheService.remove(payment.id)
+//        paymentRepository.save(payment)
+        kafkaProducer.sendEvent(
+            PAYMENT_RESULT_TEST, PaymentResultEvent(
+                payment.pgOrderId!!,
+                payment.paymentPrice,
+                payment.pgStatus.name,
+                payment.description!!,
+            )
+        )
+    }
+
+    // Order 에서 성공 80% -> 실패 10 % -> 재시도로 10%
+    // payment 성공 테스트는 무조건 성공만 / 실패는 무조건 실패만 / 재시도는 무조건 재시도만
+    // 확률에 따라 테스트 결과가 달라지면 안됨 -> 입력값과 출력값이 고정되어야 함
+    suspend fun keyInjection(paymentId: Long) {
+
+        logger.debug { ">> keyInjection 실행" }
+        val payment = getPayment(paymentId).apply {
+            this.injectionPgKey(makePgKey())
+            this.updateStatus(AUTH_SUCCESS)
+        }
+
+        cacheService.put(payment.id)
+        payment.updateStatus(CAPTURE_REQUEST)
+
+        logger.debug { ">> 캡쳐 시작 : $payment" }
+        capture(payment)
+
+        payment.updateStatus(CAPTURE_SUCCESS)
+
+        logger.debug { ">> CAPTURE_RESULT : $payment" }
         capture(payment)
         cacheService.remove(payment.id)
         kafkaProducer.sendEvent(
@@ -142,7 +181,7 @@ class PaymentTestService(
         return Random.nextInt(100) < 10
     }
 
-    private suspend fun capture(payment: Payment) {
+    suspend fun capture(payment: Payment) {
         transactionHelper.executeInNewTransaction {
             paymentRepository.save(payment)
         }

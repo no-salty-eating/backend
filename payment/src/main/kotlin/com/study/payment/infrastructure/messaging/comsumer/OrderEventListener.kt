@@ -19,6 +19,7 @@ class OrderEventListener(
     companion object {
         private const val CREATE_ORDER = "create-order"
         private const val CREATE_ORDER_TEST = "create-order-test"
+        private const val KEY_INJECTION = "key-injection"
     }
 
     @PostConstruct
@@ -30,10 +31,14 @@ class OrderEventListener(
             }
         }
 
-        kafkaEventProcessor.publish(CREATE_ORDER_TEST, "payment-test") { record ->
+        kafkaEventProcessor.publish(CREATE_ORDER_TEST, "payment-process") { record ->
             toPayment(record).let {
                 paymentTest.createPaymentInfoTest(it)
             }
+        }
+
+        kafkaEventProcessor.publish(KEY_INJECTION, "payment-process") {record ->
+            paymentTest.keyInjection(record.value().toLong())
         }
     }
 

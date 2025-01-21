@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class CacheService(
-    redisTemplate: ReactiveRedisTemplate<Any, Any>,
+    redisTemplate: ReactiveRedisTemplate<String, String>,
     @Value("\${spring.profiles.active:local}")
     profile: String,
 ) : CacheService {
@@ -20,15 +20,15 @@ class CacheService(
     private val key = "$profile/status-capture"
 
     override suspend fun put(paymentId: Long) {
-        template.add(key, paymentId).awaitSingleOrNull()
+        template.add(key, paymentId.toString()).awaitSingleOrNull()
     }
 
     override suspend fun remove(paymentId: Long) {
-        template.remove(key, paymentId).awaitSingleOrNull()
+        template.remove(key, paymentId.toString()).awaitSingleOrNull()
     }
 
     override suspend fun getAll(): List<Long> {
-        return template.members(key).asFlow().map { it as Long }.toList()
+        return template.members(key).asFlow().map { it.toLong() }.toList()
     }
 
 }

@@ -16,6 +16,7 @@ import org.redisson.api.RedissonReactiveClient
 import org.redisson.client.codec.StringCodec
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
+import java.time.Duration
 
 
 @Service
@@ -35,6 +36,7 @@ class RedisService(
         private const val TRY_LOCK_TIME_OUT = 5L
         private const val LEASE_TIME = 4L
         private const val TARGET_METHOD_TIME_OUT = 3L
+        private const val TTL = 60L
     }
 
     private val logger = LoggerProvider.logger
@@ -70,7 +72,7 @@ class RedisService(
     override suspend fun saveOrderInfo(productId: Long, isTimeSale: Boolean) {
         val key = ORDER_KEY + if (isTimeSale) TIME_SALE_KEY + productId else PRODUCT_KEY + productId
 
-        opsForValue.set(key, isTimeSale.toString().uppercase()).awaitSingle()
+        opsForValue.set(key, isTimeSale.toString().uppercase(), Duration.ofSeconds(TTL)).awaitSingle()
     }
 
     override suspend fun isTimeSaleOrder(productId: Long): Boolean {
@@ -80,7 +82,6 @@ class RedisService(
     override suspend fun deleteOrderInfo(productId: Long, isTimeSale: Boolean) {
         val key = ORDER_KEY + if (isTimeSale) TIME_SALE_KEY + productId else PRODUCT_KEY + productId
 
-        logger.debug { "key : $key" }
         opsForValue.delete(key).awaitSingle()
     }
 
@@ -101,12 +102,21 @@ class RedisService(
             local amount = tonumber(ARGV[2])
             local isIncrement = ARGV[3]
 
-            local stock = tonumber(redis.call('hget', key, productStockKey))
+            local stock = redis.call('hget', key, productStockKey)
+
+            if stock == nil then
+                stock = tonumber(0)
+            else
+                stock = tonumber(stock)
+            end
 
             local newStock
             if isIncrement == "true" then
                 newStock = stock + amount
             else
+                if stock < amount then
+                    return redis.error_reply("재고 부족")
+                end
                 newStock = stock - amount
             end
 
@@ -126,40 +136,4 @@ class RedisService(
             isIncrement.toString()
         ).awaitSingle()
     }
-
-//    override suspend fun executeWithLock(productIds: List<Long>, runner: suspend () -> Unit) {
-//
-//        val txid = MDC.get(KEY_TXID).toLong()
-//        logger.debug { ">> input  : $txid" }
-//        val locks = productIds.sorted().map { redissonClient.getLock(REDISSON_KEY_PREFIX + PRODUCT_KEY + it) }
-//
-//        try {
-//            locks.forEach {
-//                check(it.tryLock(TRY_LOCK_TIME_OUT, LEASE_TIME, TimeUnit.SECONDS, txid).awaitSingle()) {
-//                    throw AcquireLockTimeoutException()
-//                }
-//            }
-//
-//            transactionHelper.executeInNewTransaction(TARGET_METHOD_TIME_OUT) {
-//                runner()
-//            }
-//        } catch (ex: Exception) {
-//            when (ex) {
-//                is TimeoutCancellationError -> throw TimeoutCancellationError()
-//                is AcquireLockTimeoutException -> throw AcquireLockTimeoutException()
-//                is NotEnoughStockException -> throw NotEnoughStockException()
-//                else -> throw InternalServerError()
-//            }
-//        } finally {
-//            withContext(NonCancellable) {
-//                locks.forEach {
-//                    logger.debug { ">> output  : $txid" }
-//                    if (it.isHeldByThread(txid).awaitSingle()) {
-//                        it.unlock(txid).awaitSingleOrNull()
-//                    }
-//                }
-//            }
-//        }
-//    }
-
 }

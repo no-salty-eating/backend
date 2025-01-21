@@ -23,8 +23,6 @@ class WebClientConfig(
     private val product: String,
     @Value("\${coupon.service.url}")
     private val coupon: String,
-    @Value("\${payment.service.url}")
-    private val payment: String,
 ) {
 
     companion object {
@@ -49,12 +47,6 @@ class WebClientConfig(
         return createWebClient(history, "history-service")
     }
 
-    @Bean
-    fun paymentServiceWebClient(): WebClient {
-        logger.debug { ">> payment service url : $payment" }
-        return createWebClient(payment, "payment-service")
-    }
-
     private fun createWebClient(baseUrl: String, name: String): WebClient {
 
         val insecureSslContext =
@@ -68,6 +60,7 @@ class WebClientConfig(
 
         val connector = ReactorClientHttpConnector(
             HttpClient.create(provider)
+                .responseTimeout(Duration.ofSeconds(10))
                 .secure { it.sslContext(insecureSslContext) }
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000)
         )

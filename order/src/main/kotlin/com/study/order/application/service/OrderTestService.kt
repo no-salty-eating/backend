@@ -1,51 +1,34 @@
 package com.study.order.application.service
 
-import com.study.order.application.client.PaymentService
 import com.study.order.application.dto.event.consumer.PaymentProcessingEvent
 import com.study.order.application.exception.NotFoundOrderException
+import com.study.order.application.messaging.MessageService
 import com.study.order.domain.model.Order
 import com.study.order.domain.model.OrderStatus.PAYMENT_PROGRESS
 import com.study.order.domain.repository.OrderRepository
-import com.study.order.infrastructure.config.log.LoggerProvider
-import io.netty.handler.timeout.TimeoutException
-import kotlinx.coroutines.delay
+import com.study.order.infrastructure.utils.TransactionHelper
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import kotlin.math.pow
-import kotlin.random.Random
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 
 @Service
 class OrderTestService(
-    private val paymentService: PaymentService,
+    private val messageService: MessageService,
     private val orderRepository: OrderRepository,
+    private val transactionHelper: TransactionHelper,
 ) {
 
     companion object {
-        private val logger = LoggerProvider.logger
+        private const val KEY_INJECTION = "key-injection"
     }
 
-    @Transactional
     suspend fun updateOrderStatus(request: PaymentProcessingEvent) {
         val order = getOrderByPgOrderId(request.pgOrderId)
         order.updateStatus(PAYMENT_PROGRESS)
 
-        orderRepository.save(order)
-
-        try {
-            paymentService.keyInjection(request.id)
-        } catch (exception: TimeoutException) {
-            logger.debug { ">> 오류 : ${exception.message}" }
-            delay(getDelay())
-            paymentService.keyInjection(request.id)
+        transactionHelper.executeInNewTransaction {
+            orderRepository.save(order)
         }
-    }
 
-    private fun getDelay(): Duration {
-        val temp = (2.0).pow(Random(3).nextInt()).toInt() * 1000
-        val delay = temp + (0..temp).random()
-        return delay.milliseconds
+        messageService.sendEvent(KEY_INJECTION, request.id)
     }
 
     private suspend fun getOrderByPgOrderId(pgOrderId: String): Order {

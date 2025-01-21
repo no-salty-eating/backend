@@ -1,5 +1,7 @@
 package com.study.order.infrastructure.utils
 
+import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.withTimeout
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
@@ -22,5 +24,10 @@ class TransactionHelper {
         } catch (ex: Exception) {
             throw ex
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    suspend fun executeInNewTransaction(runner: suspend () -> Unit) {
+        runner()
     }
 }

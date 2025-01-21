@@ -1,4 +1,4 @@
-package com.study.payment.infrastructure.config.log
+package com.study.order.infrastructure.config
 
 import kotlinx.coroutines.slf4j.MDCContext
 import org.aspectj.lang.ProceedingJoinPoint

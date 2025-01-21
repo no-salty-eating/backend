@@ -3,7 +3,7 @@ package com.study.order.presentation.api.handler
 import com.study.order.application.exception.CouponException
 import com.study.order.application.exception.OrderException
 import com.study.order.application.exception.ProductException
-import com.study.order.application.exception.RedisException
+import com.study.order.application.exception.ServerException
 import com.study.order.presentation.api.response.Response
 import io.swagger.v3.oas.annotations.Hidden
 import org.springframework.http.HttpStatus
@@ -33,9 +33,9 @@ class GlobalExceptionHandler {
         return Response(ex.error.status, ex.error.message)
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(RedisException::class)
-    fun handleRedisException(ex: RedisException): Response<Unit> {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ServerException::class)
+    fun handleRedisException(ex: ServerException): Response<Unit> {
         return Response(ex.error.status, ex.error.message)
     }
 
