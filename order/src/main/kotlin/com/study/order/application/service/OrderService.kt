@@ -50,23 +50,16 @@ class OrderService(
     @Transactional
     suspend fun create(request: CreateOrderRequestDto): Long? {
 
-        val now = Date()
-
-        logger.debug { ">> 시작시간 : $now" }
         val products = getProductInfo(request)
 
-        logger.debug { ">> 하나 넘어감 : ${Date().time - now.time}" }
         validateAndDecrementStock(request, products)
-        logger.debug { ">> 두개 넘어감 : ${Date().time - now.time}" }
 
         // TODO: 쓰기 / 읽기 DB를 분리하지 않으면 DB 부하 시 지연 / 타임아웃 등이 발생할 수 있음
         //  원본 : 쓰기 / 복제본 : 읽기
         //  데이터소스를 원본 / 복제본 모두에
         val order = saveOrder(request, products)
-        logger.debug { ">> 세개 넘어감 : ${Date().time - now.time}" }
 
         val discountPrice = calculateDiscountPrice(request, products)
-        logger.debug { ">> 네개 넘어감 : ${Date().time - now.time}" }
 
         // 여기서 장애가 발생한다면?  또는 kafka 가 종료되었다면? 주문 정보가 생성되고 메시지가 유실된경우?
         // 이 때, saveOrder 와 publishEvent 를 같은 트랜잭션에 묶는 방법
@@ -79,7 +72,6 @@ class OrderService(
         )
 
         messageService.sendEvent(CREATE_ORDER_TEST, event)
-        logger.debug { ">> 다섯개 넘어감 : ${Date().time - now.time}" }
 
         return order.id
     }

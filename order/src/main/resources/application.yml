@@ -19,7 +19,7 @@ spring:
 logging:
   level:
     com.study: debug
-    org.springframework.r2dbc.core: debug
+    org.springframework.r2dbc.core: info
     org.springframework.r2dbc.connection.init: debug
     org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler: off
     org.springframework.web.HttpLogging: off
