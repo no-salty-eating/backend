@@ -23,7 +23,6 @@
 - **Build Tool :** Gradle
 - **Framework :** Spring boot 3.3.7, Spring Cloud 2023.0.4, Hibernate 6.x, Kotlin
 - **Repository :** MySQL, MariaDB, r2dbc, Redis
-- **VCS :** GitHub(Forking Workflow 전략)
 - **Infra :** Github, Github Action, Github Pacakges, AWS ECR, AWS ECS, AWS RDS, Docker
 - **Library :** Spring Scheduler, Spring Webflux, ElasticSearch, Kibana
 ----
