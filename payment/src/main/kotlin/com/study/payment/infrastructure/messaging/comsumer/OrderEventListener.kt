@@ -25,12 +25,7 @@ class OrderEventListener(
 
         kafkaEventProcessor.publish(CREATE_ORDER, "payment-process") { record ->
             toPayment(record).let {
-                paymentService.createPaymentInfo(it)
-            }
-        }
-
-        kafkaEventProcessor.publish(CREATE_ORDER, "payment-process-test") { record ->
-            toPayment(record).let {
+//                paymentService.createPaymentInfo(it)
                 paymentTest.createPaymentInfoTest(it)
             }
         }
