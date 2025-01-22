@@ -9,6 +9,10 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
+    pool:
+      initial-size: 10
+      min-idle: 10
+      max-size: 25
   sql:
     init:
       mode: always
@@ -67,6 +71,3 @@ history:
 coupon:
   service:
     url: ${COUPON_URL}
-product:
-  service:
-    url: ${PRODUCT_URL}

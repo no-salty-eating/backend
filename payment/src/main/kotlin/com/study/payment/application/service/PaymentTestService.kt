@@ -9,7 +9,6 @@ import com.study.payment.domain.model.PgStatus.CAPTURE_REQUEST
 import com.study.payment.domain.model.PgStatus.CAPTURE_SUCCESS
 import com.study.payment.domain.repository.PaymentRepository
 import com.study.payment.infrastructure.messaging.provider.KafkaMessagePublisher
-import com.study.payment.infrastructure.utils.TransactionHelper
 import kotlinx.coroutines.delay
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,7 +23,6 @@ class PaymentTestService(
     private val cacheService: CacheService,
     private val kafkaProducer: KafkaMessagePublisher,
     private val paymentRepository: PaymentRepository,
-    private val transactionHelper: TransactionHelper,
 ) {
 
     companion object {
@@ -56,10 +54,8 @@ class PaymentTestService(
         cacheService.put(payment.id)
         payment.updateStatus(CAPTURE_REQUEST)
 
-        delay(getDelay(payment))
-
         payment.updateStatus(CAPTURE_SUCCESS)
-        capture(payment)
+        paymentRepository.save(payment)
         cacheService.remove(payment.id)
 
         kafkaProducer.sendEvent(
@@ -91,12 +87,6 @@ class PaymentTestService(
             .joinToString("")
 
         return "tgen_${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))}$randomString"
-    }
-
-    suspend fun capture(payment: Payment) {
-        transactionHelper.executeInNewTransaction {
-            paymentRepository.save(payment)
-        }
     }
 
     private fun getDelay(payment: Payment): Duration {
