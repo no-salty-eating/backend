@@ -31,9 +31,9 @@ class DataSourceConfig(
         )
 
         val poolConfig = ConnectionPoolConfiguration.builder(connectionFactory)
-            .initialSize(50)
+            .initialSize(25)
             .minIdle(25)
-            .maxSize(100)
+            .maxSize(30)
             .build()
 
         val pool = ConnectionPool(poolConfig)
