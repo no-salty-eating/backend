@@ -17,17 +17,13 @@ class KafkaConfig(
 
     companion object {
         private const val CREATE_ORDER = "create-order"
-        private const val CREATE_ORDER_TEST = "create-order-test"
         private const val ORDER_SUCCESS = "order-success"
-        private const val KEY_INJECTION = "key-injection"
     }
 
     override fun afterPropertiesSet() {
         admin.createOrModifyTopics(
             TopicBuilder.name(CREATE_ORDER).partitions(1).replicas(1).build(),
             TopicBuilder.name(ORDER_SUCCESS).partitions(1).replicas(1).build(),
-            TopicBuilder.name(CREATE_ORDER_TEST).partitions(1).replicas(1).build(),
-            TopicBuilder.name(KEY_INJECTION).partitions(1).replicas(1).build(),
         )
     }
 

@@ -41,9 +41,7 @@ class OrderService(
 
     companion object {
         private const val CREATE_ORDER = "create-order"
-        private const val CREATE_ORDER_TEST = "create-order-test"
         private const val ORDER_SUCCESS = "order-success"
-        private const val ORDER_SUCCESS_TEST = "order-success-test"
         private val logger = LoggerProvider.logger
     }
 
@@ -61,7 +59,7 @@ class OrderService(
 
         val discountPrice = calculateDiscountPrice(request, products)
 
-        // 여기서 장애가 발생한다면?  또는 kafka 가 종료되었다면? 주문 정보가 생성되고 메시지가 유실된경우?
+        // 여기서 장애가 발생한다면? 또는 kafka 가 종료되었다면? 주문 정보가 생성되고 메시지가 유실된경우?
         // 이 때, saveOrder 와 publishEvent 를 같은 트랜잭션에 묶는 방법
         // -> outBox 에 이벤트 정보를 저장
         val event = CreateOrderEvent(
@@ -71,7 +69,7 @@ class OrderService(
             paymentPrice = order.totalPrice - discountPrice,
         )
 
-        messageService.sendEvent(CREATE_ORDER_TEST, event)
+        messageService.sendEvent(CREATE_ORDER, event)
 
         return order.id
     }

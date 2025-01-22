@@ -1,4 +1,4 @@
-package com.study.payment.infrastructure.config
+package com.study.payment.infrastructure.utils
 
 import com.study.payment.application.service.PaymentService
 import org.springframework.context.ApplicationContext

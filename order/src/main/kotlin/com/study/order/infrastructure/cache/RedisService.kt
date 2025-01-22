@@ -6,7 +6,6 @@ import com.study.order.application.dto.response.ProductResponseDto
 import com.study.order.application.exception.NotEnoughStockException
 import com.study.order.application.service.CacheService
 import com.study.order.infrastructure.config.log.LoggerProvider
-import com.study.order.infrastructure.utils.TransactionHelper
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingle
@@ -22,7 +21,6 @@ import java.time.Duration
 @Service
 class RedisService(
     private val mapper: ObjectMapper,
-    private val transactionHelper: TransactionHelper,
     private val redissonClient: RedissonReactiveClient,
     redisTemplate: ReactiveRedisTemplate<String, String>,
 ) : CacheService {
@@ -123,7 +121,6 @@ class RedisService(
             redis.call('hset', key, productStockKey, tostring(newStock))
 
             return newStock
-        
         """.trimIndent()
 
         redissonClient.getScript(StringCodec.INSTANCE).eval<Any>(

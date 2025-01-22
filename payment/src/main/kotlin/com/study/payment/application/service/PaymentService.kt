@@ -23,15 +23,11 @@ import com.study.payment.domain.repository.PaymentRepository
 import com.study.payment.infrastructure.config.log.LoggerProvider
 import com.study.payment.infrastructure.messaging.provider.KafkaMessagePublisher
 import com.study.payment.infrastructure.utils.TransactionHelper
-import kotlinx.coroutines.delay
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.time.LocalDateTime
-import kotlin.math.pow
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 import java.time.Duration as JavaDuration
 
 @Service
@@ -140,6 +136,7 @@ class PaymentService(
 
         try {
             // TODO: 이걸 사용할 일이 있을까? / userId 가 2자 이상이어야 실행가능함
+            //  elastic search 도입하기
             tossPayApi.confirm(PaySucceedRequestDto.from(payment))
                 .let { logger.debug { " >> 결제정보 : $it" } } // 이거 몽고디비로 던지면 될까
             payment.updateStatus(CAPTURE_SUCCESS)

@@ -17,17 +17,13 @@ class KafkaConfig(
 
     companion object {
         private const val PAYMENT_PROCESSING = "payment-processing"
-        private const val PAYMENT_PROCESSING_TEST = "payment-processing-test"
         private const val PAYMENT_RESULT = "payment-result"
-        private const val PAYMENT_RESULT_TEST = "payment-result-test"
     }
 
     override fun afterPropertiesSet() {
         admin.createOrModifyTopics(
             TopicBuilder.name(PAYMENT_PROCESSING).partitions(1).replicas(1).build(),
             TopicBuilder.name(PAYMENT_RESULT).partitions(1).replicas(1).build(),
-            TopicBuilder.name(PAYMENT_PROCESSING_TEST).partitions(1).replicas(1).build(),
-            TopicBuilder.name(PAYMENT_RESULT_TEST).partitions(1).replicas(1).build(),
         )
     }
 

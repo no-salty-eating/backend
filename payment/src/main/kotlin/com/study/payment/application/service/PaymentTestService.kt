@@ -1,19 +1,13 @@
 package com.study.payment.application.service
 
-import com.study.payment.application.client.PaymentApiService
 import com.study.payment.application.dto.event.consumer.CreateOrderEvent
-import com.study.payment.application.dto.event.provider.PaymentProcessingEvent
 import com.study.payment.application.dto.event.provider.PaymentResultEvent
 import com.study.payment.application.exception.NotFoundPaymentException
 import com.study.payment.domain.model.Payment
-import com.study.payment.domain.model.PgStatus.AUTH_INVALID
 import com.study.payment.domain.model.PgStatus.AUTH_SUCCESS
-import com.study.payment.domain.model.PgStatus.CAPTURE_FAIL
 import com.study.payment.domain.model.PgStatus.CAPTURE_REQUEST
-import com.study.payment.domain.model.PgStatus.CAPTURE_RETRY
 import com.study.payment.domain.model.PgStatus.CAPTURE_SUCCESS
 import com.study.payment.domain.repository.PaymentRepository
-import com.study.payment.infrastructure.config.log.LoggerProvider
 import com.study.payment.infrastructure.messaging.provider.KafkaMessagePublisher
 import com.study.payment.infrastructure.utils.TransactionHelper
 import kotlinx.coroutines.delay
@@ -22,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.pow
-import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -32,13 +25,10 @@ class PaymentTestService(
     private val kafkaProducer: KafkaMessagePublisher,
     private val paymentRepository: PaymentRepository,
     private val transactionHelper: TransactionHelper,
-    private val paymentApiService: PaymentApiService,
 ) {
 
     companion object {
-        private const val PAYMENT_PROCESSING_TEST = "payment-processing-test"
-        private const val PAYMENT_RESULT_TEST = "payment-result-test"
-        private val logger = LoggerProvider.logger
+        private const val PAYMENT_RESULT = "payment-result"
     }
 
     @Transactional
@@ -52,12 +42,34 @@ class PaymentTestService(
             )
         )
 
-        kafkaProducer.sendEvent(PAYMENT_PROCESSING_TEST, payment.pgOrderId?.let {
-            PaymentProcessingEvent(
-                payment.id,
-                it
+        keyInjection(payment.id)
+    }
+
+    suspend fun keyInjection(paymentId: Long) {
+
+        val payment = getPayment(paymentId).apply {
+            this.injectionPgKey(makePgKey())
+            this.updateStatus(AUTH_SUCCESS)
+            this.increaseRetryCount()
+        }
+
+        cacheService.put(payment.id)
+        payment.updateStatus(CAPTURE_REQUEST)
+
+        delay(getDelay(payment))
+
+        payment.updateStatus(CAPTURE_SUCCESS)
+        capture(payment)
+        cacheService.remove(payment.id)
+
+        kafkaProducer.sendEvent(
+            PAYMENT_RESULT, PaymentResultEvent(
+                payment.pgOrderId!!,
+                payment.paymentPrice,
+                payment.pgStatus.name,
+                payment.description!!,
             )
-        })
+        )
     }
 
     @Transactional
@@ -66,102 +78,6 @@ class PaymentTestService(
             delay(getDelay(it))
             keyInjection(paymentId)
         }
-    }
-
-    suspend fun keyInjection2(paymentId: Long) {
-
-        logger.debug { ">> keyInjection 실행" }
-        val payment = getPayment(paymentId).apply {
-            this.injectionPgKey(makePgKey())
-            this.updateStatus(AUTH_SUCCESS)
-        }
-
-        logger.debug { ">> 인증 성공 : $payment" }
-        capture(payment)
-
-        if (makeRandom()) {
-            logger.debug { ">> AUTH INVALID : $payment" }
-            payment.updateStatus(AUTH_INVALID)
-            capture(payment)
-            return
-        }
-
-        payment.increaseRetryCount()
-        cacheService.put(payment.id)
-        payment.updateStatus(CAPTURE_REQUEST)
-
-        logger.debug { ">> 캡쳐 시작 : $payment" }
-        capture(payment)
-
-        if (makeRandom()) {
-
-            payment.updateStatus(CAPTURE_RETRY)
-
-            capture(payment)
-            logger.debug { ">> RETRY : $payment" }
-            paymentApiService.retry(payment.id)
-        }
-
-        // 모든 환경을 전부 한군데로 바꿨을 때 실제 tps 가 낮게나오는지?
-        // order 는 메모리를 올리고 / gateway 는 cpu 를 올리고
-
-        if (makeRandom()) {
-            payment.updateStatus(CAPTURE_FAIL)
-        } else {
-            payment.updateStatus(CAPTURE_SUCCESS)
-        }
-
-        if (payment.pgRetryCount >= 3) {
-            logger.debug { ">> RETRY_CAPTURE_FAIL : $payment" }
-            payment.updateStatus(CAPTURE_FAIL)
-            logger.debug { ">> 세번째 캡쳐 : $payment" }
-            capture(payment)
-        }
-
-        logger.debug { ">> CAPTURE_RESULT : $payment" }
-        capture(payment)
-        cacheService.remove(payment.id)
-//        paymentRepository.save(payment)
-        kafkaProducer.sendEvent(
-            PAYMENT_RESULT_TEST, PaymentResultEvent(
-                payment.pgOrderId!!,
-                payment.paymentPrice,
-                payment.pgStatus.name,
-                payment.description!!,
-            )
-        )
-    }
-
-    // Order 에서 성공 80% -> 실패 10 % -> 재시도로 10%
-    // payment 성공 테스트는 무조건 성공만 / 실패는 무조건 실패만 / 재시도는 무조건 재시도만
-    // 확률에 따라 테스트 결과가 달라지면 안됨 -> 입력값과 출력값이 고정되어야 함
-    suspend fun keyInjection(paymentId: Long) {
-
-        logger.debug { ">> keyInjection 실행" }
-        val payment = getPayment(paymentId).apply {
-            this.injectionPgKey(makePgKey())
-            this.updateStatus(AUTH_SUCCESS)
-        }
-
-        cacheService.put(payment.id)
-        payment.updateStatus(CAPTURE_REQUEST)
-
-        logger.debug { ">> 캡쳐 시작 : $payment" }
-        capture(payment)
-
-        payment.updateStatus(CAPTURE_SUCCESS)
-
-        logger.debug { ">> CAPTURE_RESULT : $payment" }
-        capture(payment)
-        cacheService.remove(payment.id)
-        kafkaProducer.sendEvent(
-            PAYMENT_RESULT_TEST, PaymentResultEvent(
-                payment.pgOrderId!!,
-                payment.paymentPrice,
-                payment.pgStatus.name,
-                payment.description!!,
-            )
-        )
     }
 
     private suspend fun getPayment(paymentId: Long): Payment {
@@ -175,10 +91,6 @@ class PaymentTestService(
             .joinToString("")
 
         return "tgen_${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))}$randomString"
-    }
-
-    private fun makeRandom(): Boolean {
-        return Random.nextInt(100) < 10
     }
 
     suspend fun capture(payment: Payment) {
