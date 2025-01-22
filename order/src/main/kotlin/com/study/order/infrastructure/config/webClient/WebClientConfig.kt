@@ -19,8 +19,6 @@ import java.time.Duration
 class WebClientConfig(
     @Value("\${history.service.url}")
     private val history: String,
-    @Value("\${product.service.url}")
-    private val product: String,
     @Value("\${coupon.service.url}")
     private val coupon: String,
 ) {
@@ -33,12 +31,6 @@ class WebClientConfig(
     fun couponServiceWebClient(): WebClient {
         logger.debug { ">> coupon service url : $coupon" }
         return createWebClient(coupon, "coupon-service")
-    }
-
-    @Bean
-    fun productServiceWebClient(): WebClient {
-        logger.debug { ">> product service url : $product" }
-        return createWebClient(product, "product-service")
     }
 
     @Bean
