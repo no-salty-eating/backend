@@ -1,0 +1,34 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+  application:
+    name: history-service
+  elasticsearch:
+    uris: ${ELASTIC_SEARCH_URL}
+server:
+  shutdown: graceful
+  port: 8888
+  error:
+    include-message: always
+    include-exception: true
+    include-stacktrace: always
+logging:
+  level:
+    com.study: debug
+    org.springframework.r2dbc.core: debug
+    org.springframework.r2dbc.connection.init: debug
+    org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler: off
+    org.springframework.web.HttpLogging: off
+  pattern:
+    console: "%d{HH:mm:ss.SSS}|%highlight(%-5level)|%X{txid:-}|%green(%t)|%blue(\\(%F:%L\\))|%msg%n"
+eureka:
+  instance:
+    initial-status: up
+    prefer-ip-address: true
+    instance-id: history-service
+    non-secure-port: ${SECURE_PORT}
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_NAME}:${EUREKA_PORT}/${EUREKA_HOST}/
+    region: ap-northeast-2

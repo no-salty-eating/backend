@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  db:
+    image: mysql:latest
+    container_name: mysql-user
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    ports:
+      - "3307:3306" # 외부 포트를 3307로 변경
+    volumes:
+      - mysql-data-user:/var/lib/mysql # 볼륨 이름 변경
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+volumes:
+  mysql-data-user: # 볼륨 이름 변경
+
+networks:
+  default:
+    driver: bridge

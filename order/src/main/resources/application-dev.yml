@@ -1,0 +1,69 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  output:
+    ansi:
+      enabled: always
+  r2dbc:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db-init/schema.sql
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER}
+eureka:
+  instance:
+    initial-status: up
+    prefer-ip-address: true
+    instance-id: order-service
+    non-secure-port: ${SECURE_PORT}
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_NAME}:${EUREKA_PORT}/${EUREKA_HOST}/
+    region: ap-northeast-2
+
+---
+
+springdoc:
+  use-fqn: true
+  cache:
+    disabled: true
+  api-docs:
+    path: /api-docs
+    groups:
+      enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    groups-order: asc
+    display-request-duration: true
+    doc-expansion: none
+    disable-swagger-default-url: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+---
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+---
+
+history:
+  service:
+    url: ${HISTORY_URL}
+coupon:
+  service:
+    url: ${COUPON_URL}

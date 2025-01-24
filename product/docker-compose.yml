@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: productDB
+    networks:
+      - final-project_default
+    ports:
+      - "3312:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus-container
+    ports:
+      - "3090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - final-project_default
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9090/-/healthy" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: on-failure:5
+
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: loki-container
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/mnt/config/loki-config.yml
+    networks:
+      - final-project_default
+    command: -config.file=/mnt/config/loki-config.yml
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3100/ready" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: on-failure:5
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana-container
+    ports:
+      - "3000:3000"
+    networks:
+      - final-project_default
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    restart: on-failure:5
+
+  product-service:
+    container_name: product-service
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "19096:19096"
+    networks:
+      - final-project_default
+    depends_on:
+      mysql:
+        condition: service_healthy
+      grafana:
+        condition: service_healthy
+    restart: on-failure:5
+
+networks:
+  final-project_default:  # 네트워크에 맞게 변경 필요
+    external: true  # 외부 네트워크 사용시 필요
+
+
+volumes:
+  mysql-data:

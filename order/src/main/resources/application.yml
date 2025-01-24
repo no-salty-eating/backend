@@ -1,0 +1,27 @@
+server:
+  port: 19094
+  shutdown: graceful
+  error:
+    include-message: always
+    include-exception: true
+    include-stacktrace: always
+spring:
+  application:
+    name: order-service
+  profiles:
+    active: dev
+  jackson:
+    date-format: 'yyyy-MM-dd'
+    time-zone: "Asia/Seoul"
+
+---
+
+logging:
+  level:
+    com.study: debug
+    org.springframework.r2dbc.core: info
+    org.springframework.r2dbc.connection.init: debug
+    org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler: off
+    org.springframework.web.HttpLogging: off
+  pattern:
+    console: "%d{HH:mm:ss.SSS}|%highlight(%-5level)|%X{txid:-}|%green(%t)|%blue(\\(%F:%L\\))|%msg%n"

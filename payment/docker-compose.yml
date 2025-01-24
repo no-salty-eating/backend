@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  db:
+    image: mariadb:latest
+    container_name: mariadb-payment
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    ports:
+      - "3311:3306"
+    volumes:
+      - maria-data-payment:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+volumes:
+    maria-data-payment:
+
+networks:
+  default:
+    driver: bridge
