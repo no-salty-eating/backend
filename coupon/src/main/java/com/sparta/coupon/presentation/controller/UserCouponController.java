@@ -5,6 +5,7 @@ import com.sparta.coupon.application.dto.request.IssueRequestDto;
 import com.sparta.coupon.application.dto.response.GetCouponResponseDto;
 import com.sparta.coupon.application.dto.response.GetUserCouponDetailResponseDto;
 import com.sparta.coupon.application.service.UserCouponService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,18 +17,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("userCoupons")
+@RequestMapping("/userCoupons")
 public class UserCouponController {
 
     private final UserCouponService userCouponService;
 
     @PostMapping()
     public Response<GetCouponResponseDto> issueUserCoupon(@RequestHeader(name = "X-Id") Long userId, @RequestBody IssueRequestDto request) {
-        return new Response<>(HttpStatus.CREATED.value(), "쿠폰 발급 완료", userCouponService.issueUserCoupon(userId, request));
+        return new Response<>(HttpStatus.CREATED.value(), "쿠폰 발급 완료", userCouponService.requestIssueUserCoupon(userId, request));
     }
 
     @PostMapping("/use/{userCouponId}")

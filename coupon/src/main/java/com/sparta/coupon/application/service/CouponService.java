@@ -12,8 +12,8 @@ import com.sparta.coupon.application.dto.request.CreateCouponRequestDto;
 import com.sparta.coupon.application.dto.response.GetCouponDetailResponseDto;
 import com.sparta.coupon.application.dto.response.GetCouponResponseDto;
 import com.sparta.coupon.application.exception.CouponException;
-import com.sparta.coupon.domain.repository.CouponRepository;
 import com.sparta.coupon.domain.core.Coupon;
+import com.sparta.coupon.domain.repository.CouponRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -86,10 +86,24 @@ public class CouponService {
             }
         }
 
+
         LocalDateTime now = LocalDateTime.now();
 
-        return couponRepository.findByIdAndIsDeletedFalseAndIsPublicTrueAndTimeValid(id, now)
+        Coupon coupon = couponRepository.findByIdAndIsDeletedFalseAndIsPublicTrueAndTimeValid(id, now)
                 .orElseThrow(() -> new CouponException(NOT_FOUND_COUPON, HttpStatus.NOT_FOUND));
+
+        long expirationTime = Duration.between(now, coupon.getEndTime()).getSeconds();
+        // Redis에 쿠폰 정보 저장
+        try {
+            couponKey = COUPON_INFO_KEY + coupon.getId();
+            String couponJson = objectMapper.writeValueAsString(GetCouponDetailResponseDto.from(coupon));
+            bucket = redissonClient.getBucket(couponKey);
+            bucket.set(couponJson);
+            bucket.expire(expirationTime, TimeUnit.SECONDS);
+        } catch (JsonProcessingException e) {
+            throw new CouponException(JSON_PROCESSING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return coupon;
     }
 
     @Transactional(readOnly = true)
