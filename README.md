@@ -2,8 +2,10 @@
 ![퀵커머스로고](https://github.com/user-attachments/assets/b1fd75bb-3038-4337-a9e8-3c8445d15e70)
 
 
-📃상세내용 : https://www.notion.so/teamsparta/3-Quick-Commerce-fa5f015f37c04514a04695c1ee8833f2
+📃상세내용 : https://www.notion.so/teamsparta/3-Quick-Commerce-fa5f015f37c04514a04695c1ee8833f2 
+
 📃배포 URL : http://43.200.183.151:9090/eureka/apps
+
 ----
 ### 대규모의 트래픽이 발생하는 요청에 대해 원활한 처리를 가능하게 하는 B2C 이커머스 서비스 ###
  개발기간 : 2024.12.26 ~ 2024.01.27
