@@ -9,13 +9,34 @@
   - 흔히 접하던 모놀리식 구조가 아닌 MSA기반의 시스템을 설계하고 구현하면서, 다양한 기술과 방법론을 적용
   - 데이터 일관성을 유지하기 위한 트랜잭션 도입
 - #### 프로젝트 상세 ####
-  - 
+  - 주문, 결제
+    - Webflux, Coroutine 기반의 Reactive 서비스 구축
+    - 서버 셧다운으로 인한 데이터 유실을 방어하기 위해 Redis 를 이용하여 주문,결제 데이터 관리
+    - Toss Payment 결제 실패 시 지수 Backoff 와 Jitter 를 이용한 무작위 재시도
+    - Idempotence Config 를 이용한 결제 중복 처리 방지
+    - Elastic Search 를 사용하여 조회 성능 개선 및 서비스 안정성 개선  
+  - 인프라 구축
+    - GitHub Actions를 활용한 CI/CD 구성
+    - AWS ECR 과 ECS 를 활용한 서비스 배포
+    - Amazon RDS DB 구현
+  - 상품 도메인 관리
+    - redis에 상품 상세 정보 캐싱
+    - redis hash를 활용 상품 재고 정보 등록
+    - kafka를 사용한 재고 DB재고 차감 관리
+  - Spring Scheduler를 이용한 타임세일 상품 관리
+    - timesale 시작/종료를 redis + scheduler로 관리
+  - 사용자 
+    - JWT를 사용한 인증/인가 처리
+  - 쿠폰
+    - Redisson 분산 락을 도입하여 동시성 처리
+    - Kafka를 사용한 메시지 큐 도입으로 안정성 향상
+    - Redis 캐시를 사용하여 선착순 쿠폰의 재고 관리 속도 개선
 
 ----
 ### 👩‍💻 팀원 역할 분담 ###
- - **윤홍찬 :** 
- - **이준석 :** 
- - **임지은 :**
+ - **윤홍찬 :** 상품 / 타임세일 상품
+ - **이준석 :** 주문 / 결제, CI / CD 및 배포
+ - **임지은 :** 사용자 / 쿠폰
 ----
 ### 🔧 개발환경 ###
 - **IDE :** Intellij
@@ -27,14 +48,12 @@
 - **Library :** Spring Scheduler, Spring Webflux, ElasticSearch, Kibana
 ----
 ### 📝 ERD ###
+![image](https://github.com/user-attachments/assets/eb0acf7c-e84d-4cf2-8dec-0b59c80c8bea)
 
 
 ----
 ### 📚 인프라 구성도 ###
+![image](https://github.com/user-attachments/assets/93666103-6e5b-4db6-b483-ffb4e2cc9954)
 
 
-----
-### 🖥️ API Docs ###
-- [API 명세서]
-- [Swagger]
 
