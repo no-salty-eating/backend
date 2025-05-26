@@ -82,7 +82,7 @@ public class TimeSaleService {
 
     @Transactional
     public void decreaseTimeSaleStockInDB(Long productId, Integer quantity) {
-        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
+        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrueWithLock(productId)
                 .orElseThrow(NotFoundOnTimeSaleException::new);
 
         if (timeSaleProduct.getStock() <= 0 || timeSaleProduct.getStock() < quantity) {
@@ -94,7 +94,7 @@ public class TimeSaleService {
 
     @Transactional
     public void increaseTimeSaleStockInDb(Long productId, Integer quantity) {
-        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrue(productId)
+        TimeSaleProduct timeSaleProduct = timeSaleProductRepository.findByProductIdAndIsDeletedFalseAndIsPublicTrueWithLock(productId)
                 .orElseThrow(NotFoundOnTimeSaleException::new);
 
         timeSaleProduct.increaseStock(quantity);

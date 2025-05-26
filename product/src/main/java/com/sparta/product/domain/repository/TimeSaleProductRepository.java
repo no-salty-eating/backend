@@ -3,7 +3,9 @@ package com.sparta.product.domain.repository;
 import com.sparta.product.domain.core.TimeSaleProduct;
 import com.sparta.product.infrastructure.repository.CustomTimeSaleProductRepository;
 import io.lettuce.core.dynamic.annotation.Param;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
@@ -16,4 +18,8 @@ public interface TimeSaleProductRepository extends JpaRepository<TimeSaleProduct
 
     @Query("SELECT ts FROM TimeSaleProduct ts JOIN FETCH ts.product WHERE ts.product.id = :productId AND ts.isDeleted = false AND ts.isPublic = true AND ts.product.isDeleted = false")
     Optional<TimeSaleProduct> findByProductIdAndIsDeletedFalseAndIsPublicTrue(@Param("productId") Long productId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT ts FROM TimeSaleProduct ts JOIN FETCH ts.product WHERE ts.product.id = :productId AND ts.isDeleted = false AND ts.isPublic = true AND ts.product.isDeleted = false")
+    Optional<TimeSaleProduct> findByProductIdAndIsDeletedFalseAndIsPublicTrueWithLock(@Param("productId") Long productId);
 }

@@ -203,7 +203,7 @@ public class ProductService {
             Long productId = decreaseMessage.productId();
             Integer quantity = decreaseMessage.quantity();
 
-            Product product = productRepository.findByIdAndIsDeletedFalse(productId).orElseThrow(NotFoundProductException::new);
+            Product product = productRepository.findByIdAndIsDeletedFalseWithLock(productId).orElseThrow(NotFoundProductException::new);
 
 
             if (timeSaleService.isEmptyTimeSaleInRedis(productId)) {
